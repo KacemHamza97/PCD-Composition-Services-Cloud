@@ -9,7 +9,7 @@ def prod(List):
     return result
 
 
-													#### class product ####
+						#### class product ####
 
 class Product:
 
@@ -33,7 +33,7 @@ class Product:
 
 													
 													
-													#### class Service ####
+						#### class Service ####
 
 class Service:
 
@@ -85,7 +85,7 @@ class Service:
 
 													
 													
-													##### class workflow #####
+						##### class workflow #####
 
 class WorkFlow:
 
