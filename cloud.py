@@ -1,7 +1,7 @@
 import numpy 
 import math
 
-# product of giving list elements
+# product of given list elements
 
 def prod(List):
     result = 1
