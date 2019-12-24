@@ -41,9 +41,11 @@ cette classe possède un attribut qui génère aléatoirement un service de ce f
 Le module cloud comporte aussi une fonction randomWorkFlow qui à partir d'
 -un rootAct ( indice de la première activité ) 
 -actGraph( liste des arcs sous la forme [ A1 , A2  , type ]
-services (liste des listes) : chaque indice de sous liste correspond à une activité , et cette sous liste comporte les services candidats pour cette activité
+-services (liste des listes) : chaque indice de sous liste correspond à une activité , et cette sous liste comporte les services candidats pour cette activité.
 
+génère un flux de contrôle aléatoire en substituant les activités par des services correspondants.
 
+#########################################
 Le module cloud comporte aussi une fonction crossover qui à partir de deux flux parents crée un flux fils en faisant une copie du premier parent et des mutations de probabilité 0.5 sur toutes les services qui le composent par les services correspondants dans le deuxième parent. ( uniforme )
 
 #########################################
