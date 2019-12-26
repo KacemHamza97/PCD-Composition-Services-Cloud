@@ -16,9 +16,9 @@ s9 = cloud.Service(9,15,15,15,[p1,p2],0.4)
 
 s11 = cloud.Service(1,6,10,1,[p1,p2],0.8)
 s21 = cloud.Service(2,26,1,13,[p1],1)
-s31 = cloud.Service(3,4,1,1,[p1,p2],0.6)
+s31 = cloud.Service(3,4,6,1,[p1,p2],0.6)
 s41 = cloud.Service(4,11,15,1,[p1],0.5)
-s51 = cloud.Service(5,15,1,1,[p1],0.7)
+s51 = cloud.Service(5,15,6,1,[p1],0.7)
 s61 = cloud.Service(6,3,19,7,[p1,p2],1)
 s71 = cloud.Service(7,6,16,1,[p1],0.1)
 s81 = cloud.Service(8,4,12,10,[p1],0.3)
@@ -60,7 +60,6 @@ services = [[s1,s11,s12,s13,s14],[s2,s21,s22,s23,s24],[s3,s31,s32,s33,s34],[s4,s
 actGraph = [[1, 2, 0], [2, 3, 1], [2, 4, 1], [4, 5, -1], [4, 6, -1], [5, 7, 1],[5, 8, 1], [6, 9, 0]]
 
 rootAct = 1
-
-print("Best solution is ",hybrid.ABCgenetic(rootAct,actGraph,services,5,200,200,0.3).QoS())
+print("Best solution is ",hybrid.ABCgenetic(rootAct,actGraph,services,5,50,50,0.3).QoS())
 
 
