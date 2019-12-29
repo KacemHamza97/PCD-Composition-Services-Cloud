@@ -29,7 +29,7 @@ class Product:
         else:
             raise Exception("unitPrice must be of type : int or float ")
 
-    # price of a product 
+    # price of a product
 
     def getPrice(self):
         return self.__unitPrice * self.__unitNumber
@@ -39,7 +39,7 @@ class Product:
 
 class Service:
 
-    # constructor  
+    # constructor
 
     def __init__(self, activity, responseTime, reliability, availability, productList, matching=1):
 
@@ -108,7 +108,7 @@ class Service:
 
 
 class CompositionPlan:
-    # a fin de calculer le QOS de chaque Plan de composition
+
     # constructor
 
     # argument serviceArcs is a list of lists each list represents an arc [S1 , S2 , 0 or 1 or -1]
@@ -234,9 +234,9 @@ class CompositionPlan:
 
     # Quality of Service
 
-    def QoS(self, qosMin, qosMax,weightList=[1, 1, 1, 1]):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
+    def globalQos(self, qosMin, qosMax,weightList=[1, 1, 1, 1]):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
         rt = (qosMax['responseTime'] - self.evaluateResponseTime()) / (qosMax['responseTime'] - qosMin['responseTime'])
-        pr = (qosMax['price'] - self.evaluatePrice()) / (qosMax['price'] - qosMin['price'] +1)
+        pr = (qosMax['price'] - self.evaluatePrice()) / (qosMax['price'] - qosMin['price'])
         av = (self.evaluateAvailability() - qosMin['availability']) / (qosMax['availability'] - qosMin['availability'])
         rel = (self.evaluateReliability() - qosMin['reliability']) / (qosMax['reliability'] - qosMin['reliability'])
         vect1 = numpy.array([rt, pr, av, rel])
@@ -283,6 +283,8 @@ class CompositionPlan:
         else:
             raise Exception("Activity mismatch !")
 
+
+
     # choose randomly return a service
     def randomServ(self):
         return random.sample(self.servSet, 1)[0]
@@ -290,13 +292,13 @@ class CompositionPlan:
 
 # Random workflow generating function
 
-def randomCompositionPlan(rootAct, actGraph, services):
+def randomCompositionPlan(rootAct, actGraph, candidates):
     # actGraph : Activity graph is like serviceArcs but S1 and S2 are replaced with activities indexes
     # this function generates random services to fill the serviceArcs
     serviceArcs = copy.deepcopy(actGraph)
-    for act in range(1, len(services) + 1):
+    for act in range(1, len(candidates) + 1):
         # random service for activity act
-        s = random.sample(services[act - 1], 1)[0]
+        s = random.sample(candidates[act - 1], 1)[0]
         if act == rootAct:
             rootservice = s
         for arc in serviceArcs:
@@ -305,11 +307,10 @@ def randomCompositionPlan(rootAct, actGraph, services):
                 arc[0] = s
             elif arc[1] == act:
                 arc[1] = s
-    w = CompositionPlan(rootservice, serviceArcs)
-    return (w)
+    return(CompositionPlan(rootservice, serviceArcs))
 
 
-# Modifying workflow by workflow-CROSSOVER 
+# Modifying workflow by workflow-CROSSOVER
 
 def crossover(w1, w2):  # w1 and w2 two parents
     # child is a copy of w1
