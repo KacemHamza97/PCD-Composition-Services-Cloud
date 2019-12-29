@@ -108,9 +108,7 @@ class Service:
 
 
 class CompositionPlan:
-
-    qos_Composition_Plan= [] # attribut de classe utilisé pour mémoriser les attributs QOS de chaque plan de composition créé dans la fonction randomCompositionPlan
-                             # a fin de calculer le QOS de chaque Plan de composition
+    # a fin de calculer le QOS de chaque Plan de composition
     # constructor
 
     # argument serviceArcs is a list of lists each list represents an arc [S1 , S2 , 0 or 1 or -1]
@@ -236,21 +234,15 @@ class CompositionPlan:
 
     # Quality of Service
 
-    def QoS(self, weightList=[1, 1, 1, 1]):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
-        # criteria
-        qosMax = []
-        qosMin = []
-        qrt , qp, qav , qrel = zip(*CompositionPlan.qos_Composition_Plan) # qrt , qp , qav, qrel chacune est une liste qui contient toutes les valeurs des QOS correspondantes
-        qosMax.extend([max(qrt),max(qp),max(qav),max(qrel)])
-        qosMin.extend([min(qrt),min(qp),min(qav),min(qrel)])
-        rt = (qosMax[0] - self.evaluateResponseTime()) / (qosMax[0] - qosMin[0])
-        pr = (qosMax[1] - self.evaluatePrice()) / (qosMax[1] - qosMin[1] +1 )
-        av = ( self.evaluateAvailability() - qosMin[2]) / (qosMax[2] - qosMin[2] )
-        rel = (self.evaluateReliability() - qosMin[3]) / (qosMax[3] - qosMin[3] )
-        vect1 = numpy.array([rt , pr , av, rel])
-        #weights
+    def QoS(self, qosMin, qosMax,weightList=[1, 1, 1, 1]):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
+        rt = (qosMax['responseTime'] - self.evaluateResponseTime()) / (qosMax['responseTime'] - qosMin['responseTime'])
+        pr = (qosMax['price'] - self.evaluatePrice()) / (qosMax['price'] - qosMin['price'] +1)
+        av = (self.evaluateAvailability() - qosMin['availability']) / (qosMax['availability'] - qosMin['availability'])
+        rel = (self.evaluateReliability() - qosMin['reliability']) / (qosMax['reliability'] - qosMin['reliability'])
+        vect1 = numpy.array([rt, pr, av, rel])
+        # weights
         vect2 = numpy.array(weightList)
-        #vectorial product
+        # vectorial product
         return numpy.dot(vect1, vect2)
 
     # Matching degree
@@ -314,7 +306,6 @@ def randomCompositionPlan(rootAct, actGraph, services):
             elif arc[1] == act:
                 arc[1] = s
     w = CompositionPlan(rootservice, serviceArcs)
-    CompositionPlan.qos_Composition_Plan.extend([[w.evaluateResponseTime(rootservice), w.evaluatePrice(rootservice), w.evaluateAvailability(rootservice), w.evaluateReliability(rootservice)]])
     return (w)
 
 

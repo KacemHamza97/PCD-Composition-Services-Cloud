@@ -60,6 +60,6 @@ services = [[s1,s11,s12,s13,s14],[s2,s21,s22,s23,s24],[s3,s31,s32,s33,s34],[s4,s
 actGraph = [[1, 2, 0], [2, 3, 1], [2, 4, 1], [4, 5, -1], [4, 6, -1], [5, 7, 1],[5, 8, 1], [6, 9, 0]]
 
 rootAct = 1
-print("Best solution is ",hybrid.ABCgenetic(rootAct,actGraph,services,5,50,50,0.3).QoS())
+print("Best solution is ", hybrid.ABCgenetic(rootAct,actGraph,services,5,60,50,0.3).QoS(hybrid.minQos, hybrid.maxQos))
 
 
