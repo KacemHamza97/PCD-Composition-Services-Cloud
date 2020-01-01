@@ -63,10 +63,12 @@ class Service:
         else:
             raise Exception("availability must be of type : int or float ")
 
-        if isinstance(productList, (list, tuple)):
-            self.__price = sum([p.getPrice() for p in productList])
-        else:
-            raise Exception("productsList must be of type : list or tuple ")
+        # if isinstance(productList, (list, tuple)):
+        #     self.__price = sum([p.getPrice() for p in productList])
+        # else:
+        #     raise Exception("productsList must be of type : list or tuple ")
+
+        self.__price = productList
 
         if isinstance(matching, (int, float)) and 0 < matching <= 1:
             self.__matching = matching
@@ -234,7 +236,7 @@ class CompositionPlan:
 
     # Quality of Service
 
-    def globalQos(self, qosMin, qosMax,weightList=[1, 1, 1, 1]):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
+    def globalQos(self, qosMin, qosMax,weightList=[0.25, 0.25, 0.25, 0.25]):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
         rt = (qosMax['responseTime'] - self.evaluateResponseTime()) / (qosMax['responseTime'] - qosMin['responseTime'])
         pr = (qosMax['price'] - self.evaluatePrice()) / (qosMax['price'] - qosMin['price'])
         av = (self.evaluateAvailability() - qosMin['availability']) / (qosMax['availability'] - qosMin['availability'])
@@ -325,7 +327,7 @@ def crossover(w1, w2):  # w1 and w2 two parents
 
     for serv in w2.servSet:  # Selecting services from 2nd workflow (parameter)
         if random.randint(0, 1):  # 50 % chance of mutation
-            for target in child.servSet:
+            for target in child.servSet.copy():
                 if target.getActivity() == serv.getActivity():  # Searching for matching targets
                     child.mutate(target, serv)  # Mutate
 

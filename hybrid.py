@@ -20,7 +20,6 @@ def updateListQos(compositionPlan , listQos , minQos , maxQos):
     L = ['responseTime', 'price', 'availability', 'reliability']
     d = {i: j for i, j in zip(L, k)}
     listQos.append(d)
-    minMaxQos(listQos , minQos , maxQos)
 
 
 def getNeighbors(s, candidates):  # s is a service
@@ -30,7 +29,7 @@ def getNeighbors(s, candidates):  # s is a service
 
 # Fitness function
 def f(compositionplan , minQos, maxQos):
-    return ( compositionplan.globalQos(minQos, maxQos) + compositionplan.evaluateMatching() + 1 )
+    return ( compositionplan.globalQos(minQos, maxQos) + compositionplan.evaluateMatching())
 
 
 # SQ : condition for scouts , MCN : termination condition , SN : number of compositionPlans , p :probability
@@ -68,7 +67,7 @@ def ABCgenetic(rootAct, actGraph, services, SQ, MCN, SN, p):
             index = (N - 1) // itera
             # mutation
             s.mutate(service, neighbors[index])
-            updateListQos(s , listQos , minQos , maxQos)
+            #updateListQos(s , listQos , minQos , maxQos)
             Q = f(s,minQos , maxQos)
             if Q > fitnessList[i]:
                 fitnessList[i] = Q
@@ -114,13 +113,13 @@ def ABCgenetic(rootAct, actGraph, services, SQ, MCN, SN, p):
                     best2 = aux.index(max(aux, key=lambda x: f(x,minQos , maxQos)))
                     # Crossover
                     child = cloud.crossover(solutions[best1], solutions[best2])
-                    updateListQos(child, listQos , minQos , maxQos)
+                    #updateListQos(child, listQos , minQos , maxQos)
                     solutions[minIndex] = child
                 else:
                     # Scouting
                     w = cloud.randomCompositionPlan(rootAct, actGraph, services)
                     solutions[minIndex] = w
-                    updateListQos(w , listQos , minQos , maxQos)
+                    #updateListQos(w , listQos , minQos , maxQos)
                     fitnessList[minIndex] = f(solutions[minIndex],minQos , maxQos)
 
                 limit[minIndex] = 0
