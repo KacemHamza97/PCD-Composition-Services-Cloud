@@ -12,28 +12,7 @@ def prod(List):
         result *= i
     return result
 
-
-#### class product ####
-
-class Product:
-
-    # constructor
-
-    def __init__(self, unitNumber, unitPrice):
-        if isinstance(unitNumber, (int, float)):
-            self.__unitNumber = unitNumber
-        else:
-            raise Exception("unitNumber must be of type : int or float ")
-        if isinstance(unitNumber, (int, float)):
-            self.__unitPrice = unitPrice
-        else:
-            raise Exception("unitPrice must be of type : int or float ")
-
-    # price of a product
-
-    def getPrice(self):
-        return self.__unitPrice * self.__unitNumber
-
+    
     #### class Service ####
 
 
@@ -41,7 +20,7 @@ class Service:
 
     # constructor
 
-    def __init__(self, activity, responseTime, reliability, availability, productList, matching=1):
+    def __init__(self, activity, responseTime, reliability, availability, price, matching=1):
 
         if isinstance(activity, (int)):
             self.__activity = activity
@@ -63,12 +42,10 @@ class Service:
         else:
             raise Exception("availability must be of type : int or float ")
 
-        # if isinstance(productList, (list, tuple)):
-        #     self.__price = sum([p.getPrice() for p in productList])
-        # else:
-        #     raise Exception("productsList must be of type : list or tuple ")
-
-        self.__price = productList
+        if isinstance(price, (int, float)):
+             self.__price = price
+        else:
+             raise Exception("price must be of type : int or float ")
 
         if isinstance(matching, (int, float)) and 0 < matching <= 1:
             self.__matching = matching
@@ -236,11 +213,11 @@ class CompositionPlan:
 
     # Quality of Service
 
-    def globalQos(self, qosMin, qosMax,weightList=[0.25, 0.25, 0.25, 0.25]):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
-        rt = (qosMax['responseTime'] - self.evaluateResponseTime()) / (qosMax['responseTime'] - qosMin['responseTime'])
-        pr = (qosMax['price'] - self.evaluatePrice()) / (qosMax['price'] - qosMin['price'])
-        av = (self.evaluateAvailability() - qosMin['availability']) / (qosMax['availability'] - qosMin['availability'])
-        rel = (self.evaluateReliability() - qosMin['reliability']) / (qosMax['reliability'] - qosMin['reliability'])
+    def globalQos(self, minQos, maxQos ,weightList=[0.25, 0.25, 0.25, 0.25]):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
+        rt = (maxQos ['responseTime'] - self.evaluateResponseTime()) / (maxQos ['responseTime'] - minQos['responseTime'])
+        pr = (maxQos ['price'] - self.evaluatePrice()) / (maxQos ['price'] - minQos['price'])
+        av = (self.evaluateAvailability() - minQos['availability']) / (maxQos ['availability'] - minQos['availability'])
+        rel = (self.evaluateReliability() - minQos['reliability']) / (maxQos ['reliability'] - minQos['reliability'])
         vect1 = numpy.array([rt, pr, av, rel])
         # weights
         vect2 = numpy.array(weightList)

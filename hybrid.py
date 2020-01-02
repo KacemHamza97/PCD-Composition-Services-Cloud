@@ -1,26 +1,12 @@
 import cloud
 import copy
+import random
 
-# services is a list made of list of services that perform a common activity , each list of services represents an activity
-# services is indexed based on the attribut activity of each service (cloud.py)
+# candidates is a list made of list of services that perform a common activity , each list of services represents an activity
+# candidates is indexed based on the attribut activity of each service (cloud.py)
 # actGraph is a graph with only activities indexes linked to each other by arcs
 # rootAct is the first activity
 # sort neighbors of service based on euclidean distance from the nearest to the furthest
-
-
-def minMaxQos(listQos , minQos , maxQos):
-    for j in ['responseTime', 'price', 'availability', 'reliability']:
-        minQos[j] = min(i[j] for i in listQos)
-        maxQos[j] = max(i[j] for i in listQos)
-
-
-def updateListQos(compositionPlan , listQos , minQos , maxQos):
-    k = [compositionPlan.evaluateResponseTime(), compositionPlan.evaluatePrice(),
-         compositionPlan.evaluateAvailability(), compositionPlan.evaluateReliability()]
-    L = ['responseTime', 'price', 'availability', 'reliability']
-    d = {i: j for i, j in zip(L, k)}
-    listQos.append(d)
-
 
 def getNeighbors(s, candidates):  # s is a service
     L = candidates[s.getActivity() - 1]
@@ -33,12 +19,9 @@ def f(compositionplan , minQos, maxQos):
 
 
 # SQ : condition for scouts , MCN : termination condition , SN : number of compositionPlans , p :probability
-def ABCgenetic(rootAct, actGraph, services, SQ, MCN, SN, p):
+def ABCgenetic(rootAct, actGraph, candidates, SQ, MCN, SN, p , minQos , maxQos):
     # initializing
     solutions = list()
-    listQos = list()
-    minQos = {}
-    maxQos = {}
     fitnessList = list()
     probabilityList = list(0 for i in range(SN))
     limit = list(0 for i in range(SN))
@@ -46,10 +29,8 @@ def ABCgenetic(rootAct, actGraph, services, SQ, MCN, SN, p):
     # solutions and fitness initializing
 
     for i in range(SN):
-        solutions.append(cloud.randomCompositionPlan(rootAct, actGraph, services))
-        updateListQos(solutions[i] , listQos , minQos , maxQos)
+        solutions.append(cloud.randomCompositionPlan(rootAct, actGraph, candidates))
 
-    minMaxQos(listQos , minQos , maxQos)
     for i in range(SN):
         fitnessList.append(f(solutions[i],minQos , maxQos))
 
@@ -57,17 +38,17 @@ def ABCgenetic(rootAct, actGraph, services, SQ, MCN, SN, p):
     for itera in range(1, MCN + 1):
 
         # working bees phase
-        for i in range(SN):
+        for bee_num in range(SN // 2):
+            i = random.randint(0,SN-1)
             s = solutions[i]  # s is a workflow
             # choose randomly a service to mutate
             service = s.randomServ()
             # new service index
-            neighbors = getNeighbors(service, services)
+            neighbors = getNeighbors(service, candidates)
             N = len(neighbors)
             index = (N - 1) // itera
             # mutation
             s.mutate(service, neighbors[index])
-            #updateListQos(s , listQos , minQos , maxQos)
             Q = f(s,minQos , maxQos)
             if Q > fitnessList[i]:
                 fitnessList[i] = Q
@@ -82,13 +63,14 @@ def ABCgenetic(rootAct, actGraph, services, SQ, MCN, SN, p):
             probabilityList[i] = f(s,minQos , maxQos) / sum(fitnessList)
 
         # onlooker bees phase
-        for i in range(SN):
+        for bee_num in range(SN // 2):
+            i = random.randint(0,SN-1)
             if probabilityList[i] > p:
                 s = solutions[i]  # s is a workflow
                 # choose randomly a service to mutate
                 service = s.randomServ()
                 # new service index
-                neighbors = getNeighbors(service, services)
+                neighbors = getNeighbors(service, candidates)
                 N = len(neighbors)
                 index = (N - 1) // itera
                 # mutation
@@ -113,11 +95,10 @@ def ABCgenetic(rootAct, actGraph, services, SQ, MCN, SN, p):
                     best2 = aux.index(max(aux, key=lambda x: f(x,minQos , maxQos)))
                     # Crossover
                     child = cloud.crossover(solutions[best1], solutions[best2])
-                    #updateListQos(child, listQos , minQos , maxQos)
                     solutions[minIndex] = child
                 else:
                     # Scouting
-                    w = cloud.randomCompositionPlan(rootAct, actGraph, services)
+                    w = cloud.randomCompositionPlan(rootAct, actGraph, candidates)
                     solutions[minIndex] = w
                     #updateListQos(w , listQos , minQos , maxQos)
                     fitnessList[minIndex] = f(solutions[minIndex],minQos , maxQos)
