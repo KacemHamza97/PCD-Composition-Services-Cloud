@@ -2,16 +2,15 @@ import cloud
 import hybrid
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 
-def minMaxQos():
-    global listQos , minQos , maxQos
+def minMaxQos(listQos , minQos , maxQos):
     for j in ['responseTime', 'price', 'availability', 'reliability']:
         minQos[j] = min(i[j] for i in listQos)
         maxQos[j] = max(i[j] for i in listQos)
 
 
-def updateListQos(compositionPlan):
-    global listQos , minQos , maxQos
+def updateListQos(compositionPlan , listQos , minQos , maxQos):
     k = [compositionPlan.evaluateResponseTime(), compositionPlan.evaluatePrice(),
          compositionPlan.evaluateAvailability(), compositionPlan.evaluateReliability()]
     L = ['responseTime', 'price', 'availability', 'reliability']
@@ -19,46 +18,133 @@ def updateListQos(compositionPlan):
     listQos.append(d)
 
 
-actGraph = [[1, 2, 0], [2, 3, 0], [3 ,4 , 0], [4, 5, 0]]
+def generateActGraph(num_act) :
+    return([[i , i+1 , 0] for i in range(1,num_act)])
 
-rootAct = 1
+def generateCandidates(num_act , num_candidates) :
+    candidates = []
+    for i in range(1,num_act+1) :
+        s = []
+        for j in range(num_candidates) :
+            price = np.random.uniform(0.2,0.95,1)[0]
+            responseTime = np.random.normal(0.5, 0.4 ,1)[0]
+            availability = np.random.uniform(0.9,0.99,1)[0]
+            reliability = np.random.uniform(0.7,0.95,1)[0]
+            s.append(cloud.Service(i, responseTime, reliability, availability, price, matching=1))
+        candidates.append(s)
+    return(candidates)
 
-candidates = []
+def test(num_act , num_candidates , weightList) :
 
-minQos = {}
+    rootAct = 1
+    x = str((num_act , num_candidates))
+    y = []
+    z = []
 
-maxQos = {}
+    actGraph = generateActGraph(num_act)
 
-for i in range(1,6) :
-    s = []
-    for j in range(100) :
-        price = np.random.uniform(0.2,0.95,1)[0]
-        responseTime = np.random.normal(0.5, 0.4 ,1)[0]
-        availability = np.random.uniform(0.9,0.99,1)[0]
-        reliability = np.random.uniform(0.7,0.95,1)[0]
-        s.append(cloud.Service(i, responseTime, reliability, availability, price, matching=1))
-    candidates.append(s)
+    print("Generating random candidates for {} ...".format(x))
 
-# minQos and maxQos definition
+    candidates = generateCandidates(num_act , num_candidates)
 
-listQos = []
-for i in range(10) :
-    x = cloud.randomCompositionPlan(rootAct, actGraph, candidates)
-    updateListQos(x)
-minMaxQos()
+    print("Done !")
 
-# optimal fitness
-l = []
-print("Finding Optimal solution takes a few minutes ...")
-for i in range(100) :
-    x = hybrid.ABCgenetic(rootAct, actGraph, candidates, SQ = 3, MCN = 100, SN = 100, p = 0.5 , minQos = minQos , maxQos = maxQos )
-    l.append(x)
+    # minQos and maxQos definition
 
-opt = max(l)
+    minQos = {}
 
-# algorithm efficiency
-print("          Execution          |           Fitness           |        ExecutionTime        |           Optimal           |        Deviation        ")
-for i in range(10) :
-    start_time = time.time()
-    X = hybrid.ABCgenetic(rootAct, actGraph, candidates, SQ = 3, MCN = 100, SN = 50, p = 0.5 , minQos = minQos , maxQos = maxQos )
-    print("             ",i,"             |      %.16f     |    %.17f      |    %.16f       |  %.16f  " % (X / opt ,time.time() - start_time ,opt,opt-X))
+    maxQos = {}
+
+    print("Generating global minQos and global maxQos ...")
+    listQos = []
+    for i in range(10) :
+        c = cloud.randomCompositionPlan(rootAct, actGraph, candidates)
+        updateListQos(c , listQos , minQos , maxQos)
+    minMaxQos(listQos , minQos , maxQos)
+
+    print("Done !")
+
+    # optimal fitness
+    l = []
+    print("Finding Optimal solution takes a moment ...")
+    for i in range(1,10) :
+        s = hybrid.ABCgenetic(rootAct, actGraph, candidates, SQ = 5 * i, MCN = 100 * i, SN = 100, p = 0.5 , minQos = minQos , maxQos = maxQos , weightList = weightList )
+        l.append(s)
+
+    opt = max(l)
+
+    print("Done !")
+
+    print("Executing Algorithm ...")
+
+    for i in range(30) :
+        start_time = time.time()
+        fit = hybrid.ABCgenetic(rootAct, actGraph, candidates, SQ = 3, MCN = 100, SN = 50, p = 0.5 , minQos = minQos , maxQos = maxQos , weightList = weightList )
+        z.append(time.time() - start_time)
+        y.append(fit)
+    y = sum(y) / 30
+    z = sum(z) / 30
+
+    print("Done !")
+
+    return (x,y / opt , z)
+
+
+# main
+
+weightList = [0.25 , 0.25 , 0.25 , 0.25]
+X , Y , Z = [] , [] , []                        # Y for optimality , Z for scalability
+res = test(5 , 50 , weightList)
+X.append(res[0])
+Y.append(res[1])
+Z.append(res[2])
+res = test(10 , 100 , weightList)
+X.append(res[0])
+Y.append(res[1])
+Z.append(res[2])
+res = test(10 , 100 , weightList)
+X.append(res[0])
+Y.append(res[1])
+Z.append(res[2])
+res = test(20 , 150 , weightList)
+X.append(res[0])
+Y.append(res[1])
+Z.append(res[2])
+res = test(20 , 150 , weightList)
+X.append(res[0])
+Y.append(res[1])
+Z.append(res[2])
+res = test(30 , 200 , weightList)
+X.append(res[0])
+Y.append(res[1])
+Z.append(res[2])
+res = test(30 , 200 , weightList)
+X.append(res[0])
+Y.append(res[1])
+Z.append(res[2])
+
+
+fig , sub = plt.subplots(1,2)
+
+# optimality figure
+
+sub[0].set(xlabel = "Test variables" , ylabel = "Normalized fitness values")
+sub[0].set_xlim([0, 3])
+sub[0].set_ylim([0, 1])
+sub[0].set_title("Optimality plot")
+sub[0].plot(X,Y,"ro-")
+
+# Scalability figure
+
+sub[1].set(xlabel = "Test variables" , ylabel = "Response Time" )
+sub[1].set_xlim([0, 3])
+sub[1].set_ylim([0, 5])
+sub[1].set_title("Scalability plot")
+sub[1].plot(X,Z,"bo-")
+
+for ax in fig.axes:
+    plt.sca(ax)
+    plt.xticks(rotation=90)
+
+fig.tight_layout()
+plt.show()

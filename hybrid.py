@@ -14,12 +14,12 @@ def getNeighbors(s, candidates):  # s is a service
 
 
 # Fitness function
-def f(compositionplan , minQos, maxQos):
-    return ( compositionplan.globalQos(minQos, maxQos) + compositionplan.evaluateMatching())
+def f(compositionplan , minQos, maxQos , weightList):
+    return ( compositionplan.globalQos(minQos, maxQos, weightList) + compositionplan.evaluateMatching())
 
 
 # SQ : condition for scouts , MCN : termination condition , SN : number of compositionPlans , p :probability
-def ABCgenetic(rootAct, actGraph, candidates, SQ, MCN, SN, p , minQos , maxQos):
+def ABCgenetic(rootAct, actGraph, candidates, SQ, MCN, SN, p , minQos , maxQos , weightList):
     # initializing
     solutions = list()
     fitnessList = list()
@@ -32,7 +32,7 @@ def ABCgenetic(rootAct, actGraph, candidates, SQ, MCN, SN, p , minQos , maxQos):
         solutions.append(cloud.randomCompositionPlan(rootAct, actGraph, candidates))
 
     for i in range(SN):
-        fitnessList.append(f(solutions[i],minQos , maxQos))
+        fitnessList.append(f(solutions[i],minQos , maxQos, weightList))
 
     # Algorithm
     for itera in range(1, MCN + 1):
@@ -49,7 +49,7 @@ def ABCgenetic(rootAct, actGraph, candidates, SQ, MCN, SN, p , minQos , maxQos):
             index = (N - 1) // itera
             # mutation
             s.mutate(service, neighbors[index])
-            Q = f(s,minQos , maxQos)
+            Q = f(s,minQos , maxQos, weightList)
             if Q > fitnessList[i]:
                 fitnessList[i] = Q
                 limit[i] = 0
@@ -60,7 +60,7 @@ def ABCgenetic(rootAct, actGraph, candidates, SQ, MCN, SN, p , minQos , maxQos):
         # Probability update
         for i in range(SN):
             s = solutions[i]
-            probabilityList[i] = f(s,minQos , maxQos) / sum(fitnessList)
+            probabilityList[i] = f(s,minQos , maxQos, weightList) / sum(fitnessList)
 
         # onlooker bees phase
         for bee_num in range(SN // 2):
@@ -76,7 +76,7 @@ def ABCgenetic(rootAct, actGraph, candidates, SQ, MCN, SN, p , minQos , maxQos):
                 # mutation
                 s.mutate(service, neighbors[index])
 
-                Q = f(s,minQos , maxQos)
+                Q = f(s,minQos , maxQos, weightList)
                 if Q > fitnessList[i]:
                     fitnessList[i] = Q
                     limit[i] = 0
@@ -86,13 +86,13 @@ def ABCgenetic(rootAct, actGraph, candidates, SQ, MCN, SN, p , minQos , maxQos):
         # scout bees phase
         for i in range(SN):
             if limit[i] == SQ:  # scouts bee condition verified
-                minIndex = solutions.index(min(solutions, key=lambda x: f(x,minQos , maxQos)))  # lowest fitness
+                minIndex = solutions.index(min(solutions, key=lambda x: f(x,minQos , maxQos, weightList)))  # lowest fitness
                 if itera >= CP:
                     # Best two solutions so far
-                    best1 = solutions.index(max(solutions, key=lambda x: f(x,minQos , maxQos)))
+                    best1 = solutions.index(max(solutions, key=lambda x: f(x,minQos , maxQos, weightList)))
                     aux = copy.deepcopy(solutions)
                     aux.remove(aux[best1])
-                    best2 = aux.index(max(aux, key=lambda x: f(x,minQos , maxQos)))
+                    best2 = aux.index(max(aux, key=lambda x: f(x,minQos , maxQos, weightList)))
                     # Crossover
                     child = cloud.crossover(solutions[best1], solutions[best2])
                     solutions[minIndex] = child
@@ -101,9 +101,9 @@ def ABCgenetic(rootAct, actGraph, candidates, SQ, MCN, SN, p , minQos , maxQos):
                     w = cloud.randomCompositionPlan(rootAct, actGraph, candidates)
                     solutions[minIndex] = w
                     #updateListQos(w , listQos , minQos , maxQos)
-                    fitnessList[minIndex] = f(solutions[minIndex],minQos , maxQos)
+                    fitnessList[minIndex] = f(solutions[minIndex],minQos , maxQos, weightList)
 
                 limit[minIndex] = 0
 
-    sol = max(solutions, key=lambda x: f(x, minQos , maxQos))
-    return(sol.globalQos(minQos,maxQos))
+    sol = max(solutions, key=lambda x: f(x, minQos , maxQos, weightList))
+    return(sol.globalQos(minQos,maxQos, weightList))

@@ -12,7 +12,7 @@ def prod(List):
         result *= i
     return result
 
-    
+
     #### class Service ####
 
 
@@ -213,7 +213,7 @@ class CompositionPlan:
 
     # Quality of Service
 
-    def globalQos(self, minQos, maxQos ,weightList=[0.25, 0.25, 0.25, 0.25]):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
+    def globalQos(self, minQos, maxQos ,weightList):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
         rt = (maxQos ['responseTime'] - self.evaluateResponseTime()) / (maxQos ['responseTime'] - minQos['responseTime'])
         pr = (maxQos ['price'] - self.evaluatePrice()) / (maxQos ['price'] - minQos['price'])
         av = (self.evaluateAvailability() - minQos['availability']) / (maxQos ['availability'] - minQos['availability'])
