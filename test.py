@@ -74,7 +74,7 @@ def test(num_act , num_candidates , weightList) :
 
     opt = max(l)
 
-    print("Done !")
+    print("\nDone !")
 
     # Algorithm execution
 
@@ -87,7 +87,7 @@ def test(num_act , num_candidates , weightList) :
     y = sum(y) / 30
     z = sum(z) / 30
 
-    print("Done !")
+    print("\nDone !")
 
     return (x,y / opt , z)
 
