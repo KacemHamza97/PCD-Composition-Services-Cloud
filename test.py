@@ -66,8 +66,9 @@ def test(num_act , num_candidates , weightList) :
 
     # optimal fitness
     l = []
-    print("Finding Optimal solution takes a moment ...")
+
     for i in range(1,10) :
+        print("Finding Optimal solution takes a moment ({} %)".format(i*10), end = "\r")
         s = hybrid.ABCgenetic(rootAct, actGraph, candidates, SQ = 5 * i, MCN = 100 * i, SN = 100, p = 0.5 , minQos = minQos , maxQos = maxQos , weightList = weightList )
         l.append(s)
 
@@ -75,9 +76,10 @@ def test(num_act , num_candidates , weightList) :
 
     print("Done !")
 
-    print("Executing Algorithm ...")
+    # Algorithm execution
 
     for i in range(30) :
+        print("Executing Algorithm ({}/30)".format(i+1), end = "\r")
         start_time = time.time()
         fit = hybrid.ABCgenetic(rootAct, actGraph, candidates, SQ = 3, MCN = 100, SN = 50, p = 0.5 , minQos = minQos , maxQos = maxQos , weightList = weightList )
         z.append(time.time() - start_time)
@@ -130,7 +132,7 @@ fig , sub = plt.subplots(1,2)
 
 sub[0].set(xlabel = "Test variables" , ylabel = "Normalized fitness values")
 sub[0].set_xlim([0, 3])
-sub[0].set_ylim([0, 1])
+sub[0].set_ylim([0.9, 1.01])
 sub[0].set_title("Optimality plot")
 sub[0].plot(X,Y,"ro-")
 
@@ -138,7 +140,7 @@ sub[0].plot(X,Y,"ro-")
 
 sub[1].set(xlabel = "Test variables" , ylabel = "Response Time" )
 sub[1].set_xlim([0, 3])
-sub[1].set_ylim([0, 5])
+sub[1].set_ylim([0, 4])
 sub[1].set_title("Scalability plot")
 sub[1].plot(X,Z,"bo-")
 
