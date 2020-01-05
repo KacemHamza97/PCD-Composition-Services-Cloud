@@ -2,17 +2,13 @@ import numpy
 import math
 import random
 import copy
+from functools import reduce
 
 
 # product of given list elements
 
 def prod(List):
-    result = 1
-    for i in List:
-        result *= i
-    return result
-
-
+    return reduce((lambda x, y: x * y), List)
     #### class Service ####
 
 
@@ -22,7 +18,7 @@ class Service:
 
     def __init__(self, activity, responseTime, reliability, availability, price, matching=1):
 
-        if isinstance(activity, (int)):
+        if isinstance(activity, int):
             self.__activity = activity
         else:
             raise Exception("responseTime must be of type : int or float ")
@@ -43,9 +39,9 @@ class Service:
             raise Exception("availability must be of type : int or float ")
 
         if isinstance(price, (int, float)):
-             self.__price = price
+            self.__price = price
         else:
-             raise Exception("price must be of type : int or float ")
+            raise Exception("price must be of type : int or float ")
 
         if isinstance(matching, (int, float)) and 0 < matching <= 1:
             self.__matching = matching
@@ -99,10 +95,10 @@ class CompositionPlan:
         for i in serviceArcs:
             self.servSet.add(i[0])
             self.servSet.add(i[1])
-            if i[0] not in self.graph.keys():  # creating non-exisitent key
+            try:  # Appending existent value with a new destination
+                self.graph[i[0]].append([i[1], i[2]])
+            except KeyError:  # creating non-exisitent key
                 self.graph[i[0]] = [[i[1], i[2]]]
-            else:
-                self.graph[i[0]].append([i[1], i[2]])  # Appending existent value with a new destination
 
     # Calcul Methods
 
@@ -110,9 +106,7 @@ class CompositionPlan:
         if rootservice == None:
             rootservice = self.rootservice
         graph = self.graph
-        if rootservice not in graph.keys():  # node with no destination
-            return rootservice.getResponseTime()
-        else:
+        try:
             outgoing = graph[rootservice]  # outgoing arcs
             arc = outgoing[0]  # first arc
             # dest = arc[0]
@@ -131,14 +125,14 @@ class CompositionPlan:
             elif arc[1] == 1:
                 # type = parallel
                 return rootservice.getResponseTime() + max([self.evaluateResponseTime(arc[0]) for arc in outgoing])
+        except KeyError:  # node with no destination
+            return rootservice.getResponseTime()
 
     def evaluatePrice(self, rootservice=None):
         if rootservice == None:
             rootservice = self.rootservice
         graph = self.graph
-        if rootservice not in graph.keys():  # node with no destination
-            return rootservice.getPrice()
-        else:
+        try:
             outgoing = graph[rootservice]  # outgoing arcs
             arc = outgoing[0]  # first arc
             # dest = arc[0]
@@ -158,14 +152,14 @@ class CompositionPlan:
             elif arc[1] == 1:
                 # type = parallel
                 return rootservice.getPrice() + sum([self.evaluatePrice(arc[0]) for arc in outgoing])
+        except KeyError:
+            return rootservice.getPrice()
 
     def evaluateAvailability(self, rootservice=None):
         if rootservice == None:
             rootservice = self.rootservice
         graph = self.graph
-        if rootservice not in graph.keys():  # node with no destination
-            return rootservice.getAvailability()
-        else:
+        try:
             outgoing = graph[rootservice]  # outgoing arcs
             arc = outgoing[0]  # first arc
             # dest = arc[0]
@@ -184,14 +178,14 @@ class CompositionPlan:
             elif arc[1] == 1:
                 # type = parallel
                 return rootservice.getAvailability() * prod([self.evaluateAvailability(arc[0]) for arc in outgoing])
+        except KeyError:
+            return rootservice.getAvailability()
 
     def evaluateReliability(self, rootservice=None):
         if rootservice == None:
             rootservice = self.rootservice
         graph = self.graph
-        if rootservice not in graph.keys():  # node with no destination
-            return rootservice.getReliability()
-        else:
+        try:
             outgoing = graph[rootservice]  # outgoing arcs
             arc = outgoing[0]  # first arc
             # dest = arc[0]
@@ -210,14 +204,16 @@ class CompositionPlan:
             elif arc[1] == 1:
                 # type = parallel
                 return rootservice.getReliability() * prod([self.evaluateReliability(arc[0]) for arc in outgoing])
+        except KeyError:
+            return rootservice.getReliability()
 
     # Quality of Service
 
-    def globalQos(self, minQos, maxQos ,weightList):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
-        rt = (maxQos ['responseTime'] - self.evaluateResponseTime()) / (maxQos ['responseTime'] - minQos['responseTime'])
-        pr = (maxQos ['price'] - self.evaluatePrice()) / (maxQos ['price'] - minQos['price'])
-        av = (self.evaluateAvailability() - minQos['availability']) / (maxQos ['availability'] - minQos['availability'])
-        rel = (self.evaluateReliability() - minQos['reliability']) / (maxQos ['reliability'] - minQos['reliability'])
+    def globalQos(self, minQos, maxQos, weightList):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
+        rt = (maxQos['responseTime'] - self.evaluateResponseTime()) / (maxQos['responseTime'] - minQos['responseTime'])
+        pr = (maxQos['price'] - self.evaluatePrice()) / (maxQos['price'] - minQos['price'])
+        av = (self.evaluateAvailability() - minQos['availability']) / (maxQos['availability'] - minQos['availability'])
+        rel = (self.evaluateReliability() - minQos['reliability']) / (maxQos['reliability'] - minQos['reliability'])
         vect1 = numpy.array([rt, pr, av, rel])
         # weights
         vect2 = numpy.array(weightList)
@@ -230,38 +226,38 @@ class CompositionPlan:
             rootservice = self.rootservice
         graph = self.graph
         servNumber = len(self.servSet)
-        if rootservice not in graph.keys():  # node with no destination
-            return rootservice.getMatching() / servNumber
-        else:
+        try:
             outgoing = graph[rootservice]  # list of arcs linked to rootservice
-            s = 0
-            for arc in outgoing:
-                s += self.evaluateMatching(arc[0])
+            s = sum([self.evaluateMatching(arc[0]) for arc in outgoing])
             return s + (rootservice.getMatching() / servNumber)
+        except KeyError:
+            return rootservice.getMatching() / servNumber
 
     # Modifying workflow by mutating a service
 
     def mutate(self, target, new):
-        if target.getActivity() == new.getActivity():  # Activity matching true
-            self.servSet.remove(target)  # Updating servSet
-            self.servSet.add(new)
-            if self.rootservice == target:
-                self.graph[new] = self.graph.pop(self.rootservice)
-                self.rootservice = target  # if target is rootservice than update attribut
-            else:
-                for service in self.graph.keys():
-                    if service == target:
-                        self.graph[new] = self.graph.pop(
-                            service)  # replacing old service with new and keeping outgoing arcs
-
-                    else:
-                        for arc in self.graph[service]:
-                            if arc[0] == target:  # replacing old service if found in other arcs
-                                arc[0] = new
-                                break
+        if target.getActivity() == new.getActivity():# Activity matching true
+            if random.random() > 0.3:
+                self.servSet.remove(target)  # Updating servSet
+                self.servSet.add(new)
+                if self.rootservice == target:
+                    self.graph[new] = self.graph.pop(self.rootservice)
+                    self.rootservice = target  # if target is rootservice than update attribut
+                else:
+                    keys = self.graph.keys()
+                    for service in keys:
+                        if service == target:
+                            # replacing old service with new and keeping outgoing arcs
+                            self.graph[new] = self.graph.pop(service)
+                        else:
+                            for arc in self.graph[service]:
+                                # replacing old service if found in other arcs
+                                if arc[0] == target:
+                                    arc[0] = new
+                                    return True
+            return False
         else:
             raise Exception("Activity mismatch !")
-
 
 
     # choose randomly return a service
@@ -275,18 +271,18 @@ def randomCompositionPlan(rootAct, actGraph, candidates):
     # actGraph : Activity graph is like serviceArcs but S1 and S2 are replaced with activities indexes
     # this function generates random services to fill the serviceArcs
     serviceArcs = copy.deepcopy(actGraph)
-    for act in range(1, len(candidates) + 1):
+    for act, candidate in enumerate(candidates):
         # random service for activity act
-        s = random.sample(candidates[act - 1], 1)[0]
-        if act == rootAct:
+        s = random.sample(candidate, 1)[0]
+        if act + 1 == rootAct:
             rootservice = s
         for arc in serviceArcs:
             # changing activity by service
-            if arc[0] == act:
+            if arc[0] == act + 1:
                 arc[0] = s
-            elif arc[1] == act:
+            elif arc[1] == act + 1:
                 arc[1] = s
-    return(CompositionPlan(rootservice, serviceArcs))
+    return CompositionPlan(rootservice, serviceArcs)
 
 
 # Modifying workflow by workflow-CROSSOVER
