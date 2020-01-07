@@ -209,16 +209,25 @@ class CompositionPlan:
 
     # Quality of Service
 
-    def globalQos(self, minQos, maxQos, weightList):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
-        rt = (maxQos['responseTime'] - self.evaluateResponseTime()) / (maxQos['responseTime'] - minQos['responseTime'])
-        pr = (maxQos['price'] - self.evaluatePrice()) / (maxQos['price'] - minQos['price'])
-        av = (self.evaluateAvailability() - minQos['availability']) / (maxQos['availability'] - minQos['availability'])
-        rel = (self.evaluateReliability() - minQos['reliability']) / (maxQos['reliability'] - minQos['reliability'])
-        vect1 = numpy.array([rt, pr, av, rel])
-        # weights
-        vect2 = numpy.array(weightList)
-        # vectorial product
-        return numpy.dot(vect1, vect2)
+    def globalQos(self, minQos, maxQos, constraints, weightList):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
+
+        drt = constraints['responseTime'] - self.evaluateResponseTime()
+        dpr = constraints['price'] - self.evaluatePrice()
+        dav = self.evaluateAvailability() - constraints['availability']
+        drel = self.evaluateReliability() - constraints['reliability']
+        if drt and dpr and dav and drel:
+            rt = (maxQos['responseTime'] - self.evaluateResponseTime()) / (maxQos['responseTime'] - minQos['responseTime'])
+            pr = (maxQos['price'] - self.evaluatePrice()) / (maxQos['price'] - minQos['price'])
+            av = (self.evaluateAvailability() - minQos['availability']) / (maxQos['availability'] - minQos['availability'])
+            rel = (self.evaluateReliability() - minQos['reliability']) / (maxQos['reliability'] - minQos['reliability'])
+
+            vect1 = numpy.array([rt, pr, av, rel])
+            # weights
+            vect2 = numpy.array(weightList)
+            # vectorial product
+            return numpy.dot(vect1, vect2)
+        else:
+            return -1
 
     # Matching degree
     def evaluateMatching(self, rootservice=None):
@@ -236,28 +245,24 @@ class CompositionPlan:
     # Modifying workflow by mutating a service
 
     def mutate(self, target, new):
-        if target.getActivity() == new.getActivity():# Activity matching true
-            if random.random() > 0.3:
-                self.servSet.remove(target)  # Updating servSet
-                self.servSet.add(new)
-                if self.rootservice == target:
-                    self.graph[new] = self.graph.pop(self.rootservice)
-                    self.rootservice = target  # if target is rootservice than update attribut
-                else:
-                    keys = self.graph.keys()
-                    for service in keys:
-                        if service == target:
-                            # replacing old service with new and keeping outgoing arcs
-                            self.graph[new] = self.graph.pop(service)
-                        else:
-                            for arc in self.graph[service]:
-                                # replacing old service if found in other arcs
-                                if arc[0] == target:
-                                    arc[0] = new
-                                    return True
-            return False
+        self.servSet.remove(target)  # Updating servSet
+        self.servSet.add(new)
+        if self.rootservice == target:
+            self.graph[new] = self.graph.pop(self.rootservice)
+            self.rootservice = target  # if target is rootservice than update attribut
         else:
-            raise Exception("Activity mismatch !")
+            for service in self.graph.keys():
+                if service == target:
+                    # replacing old service with new and keeping outgoing arcs
+                    self.graph[new] = self.graph.pop(service)
+                else:
+                    if service.getActivity() == new.getActivity() - 1:
+                        for arc in self.graph[service]:
+                            # replacing old service if found in other arcs
+                            if arc[0] == target:
+                                arc[0] = new
+
+
 
 
     # choose randomly return a service
@@ -304,4 +309,5 @@ def crossover(w1, w2):  # w1 and w2 two parents
                 if target.getActivity() == serv.getActivity():  # Searching for matching targets
                     child.mutate(target, serv)  # Mutate
 
-    return (child)
+    return child # Mutate
+
