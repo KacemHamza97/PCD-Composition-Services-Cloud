@@ -94,7 +94,6 @@ def test(num_act, num_candidates, weightList):
     with open('dataset.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         file_writer.writerow([str(num_act), str(num_candidates), '10','50', '50', '100', '5', '100', '100', str(y), str(opt), str(y / opt)])
-        file_writer.writerow('')
 
     print('\nDone !')
 
