@@ -2,7 +2,6 @@ import numpy
 import math
 import networkx as nx
 import random
-import copy
 from functools import reduce
 
 
