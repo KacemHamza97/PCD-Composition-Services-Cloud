@@ -2,6 +2,7 @@ import numpy
 import math
 import networkx as nx
 import random
+import copy
 from functools import reduce
 
 
@@ -86,10 +87,10 @@ class CompositionPlan:
 
     # constructor
 
-    # argument activities_edges is a list of lists each list represents an arc [A1 , A2 , 0 or 1 or -1]
-    def __init__(self, activities_edges , candidates):
+    # argument actGraph is a list of lists each list represents an arc [A1 , A2 , 0 or 1 or -1]
+    def __init__(self, actGraph , candidates):
         self.G = nx.DiGraph()
-        self.G.add_weighted_edges_from(activities_edges)
+        self.G.add_weighted_edges_from(actGraph)
         for act, candidate in enumerate(candidates)  :
             self.G.nodes[act]["service"] = random.sample(candidate, 1)[0]
 
@@ -210,11 +211,11 @@ class CompositionPlan:
 
     # Matching degree
     def cpMatching(self, rootAct=0):
-        n = G.number_of_nodes()
+        n = self.G.number_of_nodes()
         try:
             outgoing = list(self.G.successors(rootAct))  # outgoing arcs
             s = sum([self.cpMatching(neighbor) for neighbor in outgoing])
-            return s + (self.G.nodes[rootAct]["service"].getMatching() / servNumber)
+            return s + (self.G.nodes[rootAct]["service"].getMatching() / n)
         except KeyError:
             return self.G.nodes[rootAct]["service"].getMatching() / n
 
@@ -228,9 +229,9 @@ class CompositionPlan:
 # CROSSOVER
 
 def crossover(Plan1, Plan2):
-    activities_edges = list(Plan1.G.edges.data("weight"))
-    candidates = [act[1] for act in list(Plan1.G.nodes.data("service"))]
-    child = CompositionPlan(activities_edges , candidates)
+    actGraph = list(Plan1.G.edges.data("weight"))
+    candidates = [act[1] for act in list(G.nodes.data("service"))]
+    child = CompositionPlan(actGraph , candidates)
     for act in child.G.nodes:  # Selecting services to mutate
         if random.randint(0, 1):  # 50 % chance of mutation
                 child.G.nodes[act]["service"] = Plan2.G.nodes[act]["service"]
