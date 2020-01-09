@@ -230,7 +230,7 @@ class CompositionPlan:
 
 def crossover(Plan1, Plan2):
     actGraph = list(Plan1.G.edges.data("weight"))
-    candidates = [act[1] for act in list(G.nodes.data("service"))]
+    candidates = [act[1] for act in list(Plan1.G.nodes.data("service"))]
     child = CompositionPlan(actGraph , candidates)
     for act in child.G.nodes:  # Selecting services to mutate
         if random.randint(0, 1):  # 50 % chance of mutation
