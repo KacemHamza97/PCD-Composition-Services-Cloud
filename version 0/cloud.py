@@ -116,7 +116,7 @@ class CompositionPlan:
             elif type == 1:
                 # type = parallel
                 return self.G.nodes[rootAct]["service"].getResponseTime() + max([self.cpResponseTime(neighbor) for arc in outgoing])
-        except IndexError:  # node with no destination
+        except :  # node with no destination
             self.G.nodes[rootAct]["service"].getResponseTime()
 
     def cpPrice(self,rootAct = 0):
@@ -140,7 +140,7 @@ class CompositionPlan:
             elif type == 1:
                 # type = parallel
                 return self.G.nodes[rootAct]["service"].getResponseTime() + max([self.cpResponseTime(neighbor) for arc in outgoing])
-        except IndexError:
+        except :
             self.G.nodes[rootAct]["service"].getResponseTime()
 
     def cpAvailability(self, rootAct=0):
@@ -162,7 +162,7 @@ class CompositionPlan:
             elif type == 1:
                 # type = parallel
                 return self.G.nodes[rootAct]["service"].getAvailability() * prod([self.cpAvailability()(neighbor) for arc in outgoing])
-        except IndexError:  # node with no destination
+        except :  # node with no destination
             return self.G.nodes[rootAct]["service"].getAvailability()
 
     def cpReliability(self, rootAct=0):
@@ -184,7 +184,7 @@ class CompositionPlan:
             elif type == 1:
                 # type = parallel
                 return self.G.nodes[rootAct]["service"].getReliability() * prod([self.cpReliability()(neighbor) for arc in outgoing])
-        except IndexError:  # node with no destination
+        except :  # node with no destination
             return self.G.nodes[rootAct]["service"].getReliability()
 
     # Quality of Service
