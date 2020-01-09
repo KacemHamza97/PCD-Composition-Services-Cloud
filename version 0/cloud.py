@@ -101,7 +101,7 @@ class CompositionPlan:
         try:
             outgoing = list(self.G.successors(rootAct)) # outgoing arcs
             neighbor = outgoing[0]  # first neighbor
-            type = self.G.edges(rootAct,neighbor)["weight"]
+            type = self.G.edges[rootAct,neighbor]["weight"]
             if type == 0:
                 # type = sequential
                 return self.G.nodes[rootAct]["service"].getResponseTime() + self.cpResponseTime(neighbor)
@@ -116,14 +116,14 @@ class CompositionPlan:
             elif type == 1:
                 # type = parallel
                 return self.G.nodes[rootAct]["service"].getResponseTime() + max([self.cpResponseTime(neighbor) for arc in outgoing])
-        except KeyError:  # node with no destination
+        except IndexError:  # node with no destination
             self.G.nodes[rootAct]["service"].getResponseTime()
 
     def cpPrice(self,rootAct = 0):
         try:
             outgoing = list(self.G.successors(rootAct)) # outgoing arcs
             neighbor = outgoing[0]  # first neighbor
-            type = self.G.edges(rootAct,neighbor)["weight"]
+            type = self.G.edges[rootAct,neighbor]["weight"]
 
             if type == 0:
                 # type = sequentials
@@ -140,17 +140,17 @@ class CompositionPlan:
             elif type == 1:
                 # type = parallel
                 return self.G.nodes[rootAct]["service"].getResponseTime() + max([self.cpResponseTime(neighbor) for arc in outgoing])
-        except KeyError:
+        except IndexError:
             self.G.nodes[rootAct]["service"].getResponseTime()
 
     def cpAvailability(self, rootAct=0):
         try:
             outgoing = list(self.G.successors(rootAct))  # outgoing arcs
             neighbor = outgoing[0]  # first neighbor
-            type = self.G.edges(rootAct, neighbor)["weight"]
+            type = self.G.edges[rootAct, neighbor]["weight"]
             if type == 0:
                 # type = sequential
-                return return self.G[rootAct]["service"].getAvailability() * self.cpAvailability(neighbor)
+                return self.G[rootAct]["service"].getAvailability() * self.cpAvailability(neighbor)
             elif type == -1:
                 # type = conditional
                 s = 0
@@ -162,17 +162,17 @@ class CompositionPlan:
             elif type == 1:
                 # type = parallel
                 return self.G.nodes[rootAct]["service"].getAvailability() * prod([self.cpAvailability()(neighbor) for arc in outgoing])
-        except KeyError:  # node with no destination
+        except IndexError:  # node with no destination
             return self.G.nodes[rootAct]["service"].getAvailability()
 
     def cpReliability(self, rootAct=0):
         try:
             outgoing = list(self.G.successors(rootAct))  # outgoing arcs
             neighbor = outgoing[0]  # first neighbor
-            type = self.G.edges(rootAct, neighbor)["weight"]
+            type = self.G.edges[rootAct, neighbor]["weight"]
             if type == 0:
                 # type = sequential
-                return return self.G[rootAct]["service"].getReliability() * self.cpReliability(neighbor)
+                return self.G[rootAct]["service"].getReliability() * self.cpReliability(neighbor)
             elif type == -1:
                 # type = conditional
                 s = 0
@@ -184,7 +184,7 @@ class CompositionPlan:
             elif type == 1:
                 # type = parallel
                 return self.G.nodes[rootAct]["service"].getReliability() * prod([self.cpReliability()(neighbor) for arc in outgoing])
-        except KeyError:  # node with no destination
+        except IndexError:  # node with no destination
             return self.G.nodes[rootAct]["service"].getReliability()
 
     # Quality of Service
@@ -216,7 +216,7 @@ class CompositionPlan:
             outgoing = list(self.G.successors(rootAct))  # outgoing arcs
             s = sum([self.cpMatching(neighbor) for neighbor in outgoing])
             return s + (self.G.nodes[rootAct]["service"].getMatching() / n)
-        except KeyError:
+        except IndexError:
             return self.G.nodes[rootAct]["service"].getMatching() / n
 
     # Modifying composition plan by mutating a service
@@ -234,5 +234,5 @@ def crossover(Plan1, Plan2):
     child = CompositionPlan(actGraph , candidates)
     for act in child.G.nodes:  # Selecting services to mutate
         if random.randint(0, 1):  # 50 % chance of mutation
-                child.G.nodes[act]["service"] = Plan2.G.nodes[act]["service"]
+            child.G.nodes[act]["service"] = Plan2.G.nodes[act]["service"]
     return child
