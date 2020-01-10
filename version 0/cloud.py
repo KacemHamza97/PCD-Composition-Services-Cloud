@@ -116,8 +116,13 @@ class CompositionPlan:
             elif type == 1:
                 # type = parallel
                 return self.G.nodes[rootAct]["service"].getResponseTime() + max([self.cpResponseTime(neighbor) for arc in outgoing])
+<<<<<<< HEAD
         except:  # node with no destination
             return self.G.nodes[rootAct]["service"].getResponseTime()
+=======
+        except :  # node with no destination
+            self.G.nodes[rootAct]["service"].getResponseTime()
+>>>>>>> 0a6a7b20d77f56a3d06ca589a6e1572fe5b9ec92
 
     def cpPrice(self, rootAct=0):
         try:
@@ -139,10 +144,16 @@ class CompositionPlan:
                 return (s / n) + self.G.nodes[rootAct]["service"].getResponseTime()
             elif type == 1:
                 # type = parallel
+<<<<<<< HEAD
                 return self.G.nodes[rootAct]["service"].getResponseTime() + max(
                     [self.cpResponseTime(neighbor) for arc in outgoing])
         except:
             return self.G.nodes[rootAct]["service"].getResponseTime()
+=======
+                return self.G.nodes[rootAct]["service"].getResponseTime() + max([self.cpResponseTime(neighbor) for arc in outgoing])
+        except :
+            self.G.nodes[rootAct]["service"].getResponseTime()
+>>>>>>> 0a6a7b20d77f56a3d06ca589a6e1572fe5b9ec92
 
     def cpAvailability(self, rootAct=0):
         try:
@@ -162,9 +173,14 @@ class CompositionPlan:
                 return (s / n) * self.G.nodes[rootAct]["service"].getAvailability()
             elif type == 1:
                 # type = parallel
+<<<<<<< HEAD
                 return self.G.nodes[rootAct]["service"].getAvailability() * prod(
                     [self.cpAvailability()(neighbor) for arc in outgoing])
         except:  # node with no destination
+=======
+                return self.G.nodes[rootAct]["service"].getAvailability() * prod([self.cpAvailability()(neighbor) for arc in outgoing])
+        except :  # node with no destination
+>>>>>>> 0a6a7b20d77f56a3d06ca589a6e1572fe5b9ec92
             return self.G.nodes[rootAct]["service"].getAvailability()
 
     def cpReliability(self, rootAct=0):
@@ -185,9 +201,14 @@ class CompositionPlan:
                 return (s / n) * self.G.nodes[rootAct]["service"].getReliability()
             elif type == 1:
                 # type = parallel
+<<<<<<< HEAD
                 return self.G.nodes[rootAct]["service"].getReliability() * prod(
                     [self.cpReliability()(neighbor) for arc in outgoing])
         except:  # node with no destination
+=======
+                return self.G.nodes[rootAct]["service"].getReliability() * prod([self.cpReliability()(neighbor) for arc in outgoing])
+        except :  # node with no destination
+>>>>>>> 0a6a7b20d77f56a3d06ca589a6e1572fe5b9ec92
             return self.G.nodes[rootAct]["service"].getReliability()
 
     # Quality of Service
