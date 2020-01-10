@@ -41,16 +41,12 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
     for itera in range(1, MCN + 1):
 
         # working bees phase
-        for bee in range(workers):
+        for i in range(workers):
             i = random.randint(0, SN - 1)
-            cp = solutions[i]  # cp is a composition plan
-            # Best two solutions so far
-            best1 = fitnessList.index(max(fitnessList))
-            aux = copy.deepcopy(fitnessList)
-            aux.pop(best1)
-            best2 = aux.index(max(aux))
+            cp1 = solutions[random.randint(0, SN - 1)]  # cp is a composition plan
+            cp2 = solutions[random.randint(0, SN - 1)]
             # Crossover
-            child = cloud.crossover(solutions[best1], solutions[best2])
+            child = cloud.crossover(cp1, cp2)
             Q = f(child, minQos, maxQos, constraints, weightList)
             if Q > fitnessList[i]:
                 fitnessList[i] = Q
@@ -68,14 +64,10 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
         for bee in range(onlookers):
             i = random.randint(0, SN - 1)
             if probabilityList[i] > random.random():
-                cp = solutions[i]  # cp is a composition plan
-                # Best two solutions so far
-                best1 = fitnessList.index(max(fitnessList))
-                aux = copy.deepcopy(fitnessList)
-                aux.pop(best1)
-                best2 = aux.index(max(aux))
+                cp1 = solutions[random.randint(0, SN - 1)]  # cp is a composition plan
+                cp2 = solutions[random.randint(0, SN - 1)]
                 # Crossover
-                child = cloud.crossover(solutions[best1], solutions[best2])
+                child = cloud.crossover(cp1, cp2)
                 Q = f(child, minQos, maxQos, constraints, weightList)
                 if Q > fitnessList[i]:
                     fitnessList[i] = Q
