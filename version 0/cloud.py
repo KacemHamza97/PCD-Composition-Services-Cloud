@@ -103,8 +103,7 @@ class CompositionPlan:
             type = self.G.edges[rootAct, neighbor]["weight"]
             if type == 0:
                 # type = sequential
-                a = self.G.nodes[rootAct]["service"].getResponseTime()
-                return  a + self.cpResponseTime(neighbor)
+                return  self.G.nodes[rootAct]["service"].getResponseTime() + self.cpResponseTime(neighbor)
             elif type == -1:
                 # type = conditional
                 s = 0
@@ -233,7 +232,8 @@ class CompositionPlan:
 
 def crossover(Plan1, Plan2):
     actGraph = list(Plan1.G.edges.data("weight"))
-    candidates = [[act[1] for act in list(Plan1.G.nodes.data("service"))]]
+    candidates = [[act[1]] for act in list(Plan1.G.nodes.data("service"))]
+    print(len(candidates))
     child = CompositionPlan(actGraph, candidates)
     for act in child.G.nodes:  # Selecting services to mutate
         if random.randint(0, 1):  # 50 % chance of mutation
