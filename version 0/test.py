@@ -102,7 +102,7 @@ def test(num_act, num_candidates, constraints, weightList):
 constraints = {'responseTime': 10, 'price': 1000, 'availability': 10, 'reliability': 10}
 weightList = [0.25, 0.25, 0.25, 0.25]
 X, Y, Z = [], [], []  # Y for optimality , Z for scalability
-<<<<<<< HEAD
+
 res = test(5, 50, constraints, weightList)
 =======
 res = test(5 , 50 , constraints, weightList)
