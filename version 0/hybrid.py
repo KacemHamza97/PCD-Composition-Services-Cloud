@@ -18,9 +18,9 @@ def f(cp, minQos, maxQos, constraints, weightList):
     return cp.globalQos(minQos, maxQos, constraints, weightList) + cp.cpMatching()
 
 
-
 # SQ : condition for scouts , MCN : termination condition , SN : number of compositionPlans , p :probability
-def ABCgenetic(actGraph, candidates, workers , onlookers , scouts , SQ, MCN, SN, p, minQos, maxQos, constraints, weightList):
+def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, p, minQos, maxQos, constraints,
+               weightList):
     # initializing
     solutions = list()
     fitnessList = list()
@@ -45,18 +45,18 @@ def ABCgenetic(actGraph, candidates, workers , onlookers , scouts , SQ, MCN, SN,
             i = random.randint(0, SN - 1)
             cp = solutions[i]  # cp is a composition plan
             # choose randomly a service to mutate
-            service = cp.G.nodes[random.randint(0,cp.G.number_of_nodes())]["service"]
+            service = cp.G.nodes[random.randint(0, cp.G.number_of_nodes() - 1)]["service"]
             # new service index
             neighbors = getNeighbors(service, candidates)
             N = len(neighbors)
             # mutation
-            cp.mutate(service, neighbors[(N - 1) // itera])
+            cp.mutate(neighbors[(N - 1) // itera])
             Q = f(cp, minQos, maxQos, constraints, weightList)
             if Q > fitnessList[i]:
                 fitnessList[i] = Q
                 limit[i] = 0
             else:
-                cp.mutate(neighbors[(N - 1) // itera], service)  # mutation reset
+                cp.mutate(service)  # mutation reset
                 limit[i] += 1
 
         # Probability update
@@ -70,18 +70,18 @@ def ABCgenetic(actGraph, candidates, workers , onlookers , scouts , SQ, MCN, SN,
             if probabilityList[i] > p:
                 cp = solutions[i]  # cp is a composition plan
                 # choose randomly a service to mutate
-                service = cp.G.nodes[random.randint(0,cp.G.number_of_nodes())]["service"]
+                service = cp.G.nodes[random.randint(0, cp.G.number_of_nodes() - 1)]["service"]
                 # new service index
                 neighbors = getNeighbors(service, candidates)
                 N = len(neighbors)
                 # mutation
-                cp.mutate(service, neighbors[(N - 1) // itera])
+                cp.mutate(neighbors[(N - 1) // itera])
                 Q = f(cp, minQos, maxQos, constraints, weightList)
                 if Q > fitnessList[i]:
                     fitnessList[i] = Q
                     limit[i] = 0
                 else:
-                    cp.mutate(neighbors[(N - 1) // itera], service)  # mutation reset
+                    cp.mutate(service)  # mutation reset
                     limit[i] += 1
         # scout bees phase
         for bee in range(scouts):
@@ -91,8 +91,8 @@ def ABCgenetic(actGraph, candidates, workers , onlookers , scouts , SQ, MCN, SN,
                 if itera >= CP:
                     # Best two solutions so far
                     best1 = fitnessList.index(max(fitnessList))
-                    aux = copy.deepcopy(fitness)
-                    aux.remove(aux[best1])
+                    aux = copy.deepcopy(fitnessList)
+                    aux.pop(best1)
                     best2 = aux.index(max(aux))
                     # Crossover
                     child = cloud.crossover(solutions[best1], solutions[best2])

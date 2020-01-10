@@ -17,13 +17,11 @@ def minMaxQos(num_act, actGraph):
     cpMin = cloud.CompositionPlan(actGraph, servicesMin)
     cpMax = cloud.CompositionPlan(actGraph, servicesMax)
 
-    k = [cpMin.cpResponseTime(), cpMin.cpPrice(),
-         cpMin.cpAvailability(), cpMin.cpReliability()]
+    k = [cpMin.cpResponseTime(), cpMin.cpPrice(),cpMin.cpAvailability(), cpMin.cpReliability()]
     L = ['responseTime', 'price', 'availability', 'reliability']
     minQos = {i: j for i, j in zip(L, k)}
 
-    k = [cpMax.cpResponseTime(), cpMax.cpPrice(),
-         cpMax.cpAvailability(), cpMax.cpReliability()]
+    k = [cpMax.cpResponseTime(), cpMax.cpPrice(), cpMax.cpAvailability(), cpMax.cpReliability()]
     L = ['responseTime', 'price', 'availability', 'reliability']
     maxQos = {i: j for i, j in zip(L, k)}
 
@@ -84,8 +82,7 @@ def test(num_act, num_candidates, constraints, weightList):
     for i in range(10):
         print("Executing Algorithm ({}/10)".format(i + 1), end="\r")
         start_time = time.time()
-        fit = hybrid.ABCgenetic(actGraph, candidates, workers=50, onlookers=50, scouts=100, SQ=5, MCN=100, SN=100, p=0.5,
-                                minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
+        fit = hybrid.ABCgenetic(actGraph, candidates, workers=50, onlookers=50, scouts=100, SQ=5, MCN=100, SN=100, p=0.5, minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
         z.append(time.time() - start_time)
         y.append(fit)
 
@@ -102,10 +99,10 @@ def test(num_act, num_candidates, constraints, weightList):
 
 
 # main
-constraints = {'responseTime': 10, 'price': 1000, 'availability': 0, 'reliability': 0}
+constraints = {'responseTime': 10, 'price': 1000, 'availability': 10, 'reliability': 10}
 weightList = [0.25, 0.25, 0.25, 0.25]
 X, Y, Z = [], [], []  # Y for optimality , Z for scalability
-res = test(30, 200, constraints, weightList)
+res = test(5, 50, constraints, weightList)
 X.append(res[0])
 Y.append(res[1])
 Z.append(res[2])
