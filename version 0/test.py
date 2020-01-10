@@ -75,7 +75,7 @@ def test(num_act, num_candidates, constraints, weightList):
     rel = 1
     vect1 = np.array([rt, pr, av, rel])
     vect2 = np.array(weightList)
-    opt = np.dot(vect1, vect2) + 1 #Optimal Qos + matching 
+    opt = np.dot(vect1, vect2) + 1 #Optimal Qos + matching
 
     # Algorithm execution
 
@@ -103,10 +103,7 @@ constraints = {'responseTime': 10, 'price': 1000, 'availability': 10, 'reliabili
 weightList = [0.25, 0.25, 0.25, 0.25]
 X, Y, Z = [], [], []  # Y for optimality , Z for scalability
 
-res = test(5, 50, constraints, weightList)
-=======
 res = test(5 , 50 , constraints, weightList)
->>>>>>> 0a6a7b20d77f56a3d06ca589a6e1572fe5b9ec92
 X.append(res[0])
 Y.append(res[1])
 Z.append(res[2])

@@ -105,5 +105,5 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, p,
 
                 limit[minIndex] = 0
 
-    max = max(fitnessList)
-    return solutions[fitnessList.index(max)] , max
+    best = max(fitnessList)
+    return solutions[fitnessList.index(best)] , best
