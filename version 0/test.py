@@ -75,14 +75,14 @@ def test(num_act, num_candidates, constraints, weightList):
     rel = 1
     vect1 = np.array([rt, pr, av, rel])
     vect2 = np.array(weightList)
-    opt = np.dot(vect1, vect2)
+    opt = np.dot(vect1, vect2) + 1 #Optimal Qos + matching 
 
     # Algorithm execution
 
     for i in range(10):
         print("Executing Algorithm ({}/10)".format(i + 1), end="\r")
         start_time = time.time()
-        fit = hybrid.ABCgenetic(actGraph, candidates, workers=50, onlookers=50, scouts=100, SQ=5, MCN=100, SN=100, p=0.5, minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
+        _ , fit = hybrid.ABCgenetic(actGraph, candidates, workers=50, onlookers=50, scouts=100, SQ=5, MCN=100, SN=100, p=0.5, minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
         z.append(time.time() - start_time)
         y.append(fit)
 
