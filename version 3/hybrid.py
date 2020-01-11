@@ -39,9 +39,9 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
     for itera in range(1, MCN + 1):
 
         # working bees phase
-        for i in range(workers):
+        for bee in range(workers):
             i = random.randint(0, SN - 1)
-            cp1 = solutions[random.randint(0, SN - 1)]  # cp is a composition plan
+            cp1 = solutions[i]  # cp is a composition plan
             cp2 = solutions[random.randint(0, SN - 1)]
             # Crossover
             child = cloud.crossover(cp1, cp2)

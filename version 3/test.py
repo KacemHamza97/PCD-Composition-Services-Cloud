@@ -82,7 +82,7 @@ def test(num_act, num_candidates, constraints, weightList):
     for i in range(10):
         print("Executing Algorithm ({}/10)".format(i + 1), end="\r")
         start_time = time.time()
-        _ , fit = hybrid.ABCgenetic(actGraph, candidates, workers=50, onlookers=50, scouts=50, SQ=10, MCN=400, SN=100, minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
+        _ , fit = hybrid.ABCgenetic(actGraph, candidates, workers=50, onlookers=50, scouts=50, SQ=5, MCN=100, SN=100, minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
         z.append(time.time() - start_time)
         y.append(fit)
 
