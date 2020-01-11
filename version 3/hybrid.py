@@ -25,7 +25,6 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
     fitnessList = list()
     probabilityList = list(0 for i in range(SN))
     limit = list(0 for i in range(SN))
-    CP = 4 * MCN / 5  # changing point for scouts
     # solutions and fitness initializing
     for i in range(SN):
         while 1:
@@ -63,40 +62,31 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
         for bee in range(onlookers):
             i = random.randint(0, SN - 1)
             if probabilityList[i] > random.random():
-                cp1 = solutions[random.randint(0, SN - 1)]  # cp is a composition plan
-                cp2 = solutions[random.randint(0, SN - 1)]
-                # Crossover
-                child = cloud.crossover(cp1, cp2)
-                Q = f(child, minQos, maxQos, constraints, weightList)
-                if Q > fitnessList[i]:
-                    fitnessList[i] = Q
-                    solutions[i] = child
-                    limit[i] = 0
-                else:
-                    limit[i] += 1
+                cp = solutions[i]  # cp is a composition plan
+                # choose randomly a service to mutate
+                service = cp.G.nodes[random.randint(0, cp.G.number_of_nodes() - 1)]["service"]
+                # new service index
+                neighbors = getNeighbors(service, candidates)
+                N = len(neighbors)
+                # mutation
+                if random.random() <= 0.7 :
+                    cp.mutate(neighbors[(N - 1) // itera])
+                    Q = f(cp, minQos, maxQos, constraints, weightList)
+                    if Q > fitnessList[i]:
+                        fitnessList[i] = Q
+                        limit[i] = 0
+                    else:
+                        cp.mutate(service)  # mutation reset
+                        limit[i] += 1
 
         # scout bees phase
         for bee in range(scouts):
             i = random.randint(0, SN - 1)
             if limit[i] == SQ:  # scouts bee condition verified
-                minIndex = fitnessList.index(min(fitnessList))  # lowest fitness
-                if itera >= CP:
-                    cp = solutions[minIndex]
-                    # choose randomly a service to mutate
-                    service = cp.G.nodes[random.randint(0, cp.G.number_of_nodes() - 1)]["service"]
-                    # new service index
-                    neighbors = getNeighbors(service, candidates)
-                    # mutation
-                    cp.mutate(neighbors[1])
-                    Q = f(cp, minQos, maxQos, constraints, weightList)
-                    fitnessList[i] = Q
-
-                else:
-                    # Scouting
-                    cp = cloud.CompositionPlan(actGraph, candidates)
-                    solutions[minIndex] = cp
-                    fitnessList[minIndex] = f(cp, minQos, maxQos, constraints, weightList)
-
+                minIndex = fitnessList.index(min(fitnessList))
+                cp = cloud.CompositionPlan(actGraph, candidates)
+                solutions[minIndex] = cp
+                fitnessList[minIndex] = f(cp, minQos, maxQos, constraints, weightList)
                 limit[minIndex] = 0
 
     best = max(fitnessList)
