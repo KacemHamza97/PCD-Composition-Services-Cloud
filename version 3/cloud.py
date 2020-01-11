@@ -1,8 +1,7 @@
-import numpy
-import math
+from numpy import dot , array
+from math import sqrt
 import networkx as nx
-import random
-import copy
+from random import sample , randint
 from functools import reduce
 
 
@@ -78,7 +77,7 @@ class Service:
         dRel = self.__reliability - service.getReliability()
         dAva = self.__availability - service.getAvailability()
 
-        return math.sqrt(dRes ** 2 + dPri ** 2 + dRel ** 2 + dAva ** 2)
+        return sqrt(dRes ** 2 + dPri ** 2 + dRel ** 2 + dAva ** 2)
 
     ##### class workflow #####
 
@@ -92,7 +91,7 @@ class CompositionPlan:
         self.G = nx.DiGraph()
         self.G.add_weighted_edges_from(actGraph)
         for act, candidate in enumerate(candidates):
-            self.G.nodes[act]["service"] = random.sample(candidate, 1)[0]
+            self.G.nodes[act]["service"] = sample(candidate, 1)[0]
 
     # Calcul Methods
 
@@ -204,11 +203,11 @@ class CompositionPlan:
             av = (self.cpAvailability() - minQos['availability']) / (maxQos['availability'] - minQos['availability'])
             rel = (self.cpReliability() - minQos['reliability']) / (maxQos['reliability'] - minQos['reliability'])
 
-            vect1 = numpy.array([rt, pr, av, rel])
+            vect1 = array([rt, pr, av, rel])
             # weights
-            vect2 = numpy.array(weightList)
+            vect2 = array(weightList)
             # vectorial product
-            return numpy.dot(vect1, vect2)
+            return dot(vect1, vect2)
         else:
             return -1
 
@@ -235,6 +234,6 @@ def crossover(Plan1, Plan2):
     candidates = [[act[1]] for act in list(Plan1.G.nodes.data("service"))]
     child = CompositionPlan(actGraph, candidates)
     for act in child.G.nodes:  # Selecting services to mutate
-        if random.randint(0, 1):  # 50 % chance of mutation
+        if randint(0, 1):  # 50 % chance of mutation
             child.G.nodes[act]["service"] = Plan2.G.nodes[act]["service"]
     return child

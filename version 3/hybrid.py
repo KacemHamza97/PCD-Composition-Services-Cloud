@@ -1,6 +1,5 @@
 import cloud
-import copy
-import random
+from random import random , randint 
 
 
 # candidates is a list made of list of services that perform a common activity , each list of services represents an activity
@@ -40,9 +39,9 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
 
         # working bees phase
         for bee in range(workers):
-            i = random.randint(0, SN - 1)
+            i = randint(0, SN - 1)
             cp1 = solutions[i]  # cp is a composition plan
-            cp2 = solutions[random.randint(0, SN - 1)]
+            cp2 = solutions[randint(0, SN - 1)]
             # Crossover
             child = cloud.crossover(cp1, cp2)
             Q = f(child, minQos, maxQos, constraints, weightList)
@@ -60,16 +59,16 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
 
         # onlooker bees phase
         for bee in range(onlookers):
-            i = random.randint(0, SN - 1)
-            if probabilityList[i] > random.random():
+            i = randint(0, SN - 1)
+            if probabilityList[i] > random():
                 cp = solutions[i]  # cp is a composition plan
                 # choose randomly a service to mutate
-                service = cp.G.nodes[random.randint(0, cp.G.number_of_nodes() - 1)]["service"]
+                service = cp.G.nodes[randint(0, cp.G.number_of_nodes() - 1)]["service"]
                 # new service index
                 neighbors = getNeighbors(service, candidates)
                 N = len(neighbors)
                 # mutation
-                if random.random() <= 0.7 :
+                if random() <= 0.7 :
                     cp.mutate(neighbors[(N - 1) // itera])
                     Q = f(cp, minQos, maxQos, constraints, weightList)
                     if Q > fitnessList[i]:
@@ -81,7 +80,7 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
 
         # scout bees phase
         for bee in range(scouts):
-            i = random.randint(0, SN - 1)
+            i = randint(0, SN - 1)
             if limit[i] == SQ:  # scouts bee condition verified
                 minIndex = fitnessList.index(min(fitnessList))
                 cp = cloud.CompositionPlan(actGraph, candidates)
