@@ -104,6 +104,7 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
                     fitnessList[minIndex] = f(cp, minQos, maxQos, constraints, weightList)
                     limit[minIndex] = 0
 
+        # the best of each iteration
         best_itera = max(fitnessList)
         if best_itera > best_fit :
             best = solutions[fitnessList.index(best_itera)]
