@@ -95,7 +95,6 @@ def test(num_act, num_candidates, constraints, weightList):
         file_writer.writerow("")
 
     print('\nDone !')
-
     return x, y / opt, z
 
 
