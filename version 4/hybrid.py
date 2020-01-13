@@ -24,6 +24,7 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
     fitnessList = list()
     probabilityList = list(0 for i in range(SN))
     limit = list(0 for i in range(SN))
+    best_fit = 0
     CP = 4 * MCN / 5  # changing point for scouts
     # solutions and fitness initializing
     for i in range(SN):
@@ -83,9 +84,8 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
         for bee in range(scouts):
             i = randint(0, SN - 1)
             if limit[i] == SQ:  # scouts bee condition verified
-                minIndex = fitnessList.index(min(fitnessList))  # lowest fitness
                 if itera >= CP:
-                    cp = solutions[minIndex]
+                    cp = solutions[i]
                     # choose randomly a service to mutate
                     service = cp.G.nodes[randint(0, cp.G.number_of_nodes() - 1)]["service"]
                     # new service index
@@ -94,14 +94,19 @@ def ABCgenetic(actGraph, candidates, workers, onlookers, scouts, SQ, MCN, SN, mi
                     cp.mutate(neighbors[1])
                     Q = f(cp, minQos, maxQos, constraints, weightList)
                     fitnessList[i] = Q
+                    limit[i] = 0
 
                 else:
                     # Scouting
+                    minIndex = fitnessList.index(min(fitnessList))  # lowest fitness
                     cp = cloud.CompositionPlan(actGraph, candidates)
                     solutions[minIndex] = cp
                     fitnessList[minIndex] = f(cp, minQos, maxQos, constraints, weightList)
+                    limit[minIndex] = 0
 
-                limit[minIndex] = 0
+        best_itera = max(fitnessList)
+        if best_itera > best_fit :
+            best = solutions[fitnessList.index(best_itera)]
+            best_fit = best_itera
 
-    best = max(fitnessList)
-    return solutions[fitnessList.index(best)] , best
+    return best , best_fit
