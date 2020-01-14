@@ -9,8 +9,8 @@ model.fit(X, Y)
 # new
 x1 = int(input("NUMBER OF ACTIVITIES : "))
 x2 = int(input("NUMBER OF CANDIDATE SERVICES : "))
-Xnew = array([n1,n2,1]).reshape(-1,3)
+Xnew = array([x1,x2,1]).reshape(-1,3)
 # predict
 Ynew = model.predict(Xnew)
 print("RECOMMENDED : ")
-print("Iterations = {}\nScouts condition = {}\nFood Sources = {}\n".format(int(ynew[0][0]),int(ynew[0][1]),int(ynew[0][2])))
+print("Iterations = {}\nScouts condition = {}\nFood Sources = {}\n".format(int(Ynew[0][0]),int(Ynew[0][1]),int(Ynew[0][2])))
