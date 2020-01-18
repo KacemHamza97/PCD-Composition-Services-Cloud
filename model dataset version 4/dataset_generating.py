@@ -94,7 +94,6 @@ for i in range(1,11) :
     for j in range(1,201):
         num_candidates = random.randint(5,500)
         for k in range(1,6):
-            print(j*k)
             sn = random.randint(100,100*k)
             mcn = random.randint(100,200*k)
             sq = random.randint(10,10*k)
