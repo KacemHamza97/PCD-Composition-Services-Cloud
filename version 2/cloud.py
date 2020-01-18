@@ -22,7 +22,7 @@ class Service:
         if isinstance(activity, int):
             self.__activity = activity
         else:
-            raise Exception("responseTime must be of type : int or float ")
+            raise Exception("activity must be of type : int or float ")
 
         if isinstance(responseTime, (int, float)):
             self.__responseTime = responseTime
@@ -80,7 +80,7 @@ class Service:
 
         return math.sqrt(dRes ** 2 + dPri ** 2 + dRel ** 2 + dAva ** 2)
 
-    ##### class workflow #####
+    ##### class CompositionPlan #####
 
 
 class CompositionPlan:
