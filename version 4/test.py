@@ -68,15 +68,14 @@ def test(num_act, num_candidates, constraints, weightList):
 
     print('Done')
 
-    # optimal fitness
-    # rt = 1
-    # pr = 1
-    # av = 1
-    # rel = 1
-    # vect1 = np.array([rt, pr, av, rel])
-    # vect2 = np.array(weightList)
-    # opt = np.dot(vect1, vect2) + 1 #Optimal Qos + matching
-    _ , opt = hybrid.ABCgenetic(actGraph, candidates, workers=150, onlookers=150, scouts=150, SQ=10, MCN=1000, SN=300, minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
+    optimal fitness
+    rt = 1
+    pr = 1
+    av = 1
+    rel = 1
+    vect1 = np.array([rt, pr, av, rel])
+    vect2 = np.array(weightList)
+    opt = np.dot(vect1, vect2) + 1 #Optimal Qos + matching
 
 
     # Algorithm execution

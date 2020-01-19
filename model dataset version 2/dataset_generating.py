@@ -89,11 +89,11 @@ def test(num_act, num_candidates,sn,mcn,sq, constraints, weightList):
 constraints = {'responseTime': 10, 'price': 1000, 'availability': 10, 'reliability': 10}
 weightList = [0.25, 0.25, 0.25, 0.25]
 
-for i in range(1,11) :
-    for j in range(1,201):
-        num_candidates = random.randint(5,500)
+for i in range(6,11) :
+    for j in range(1,50):
+        num_candidates = random.randint(5,j*10)
         for k in range(1,6):
-            sn = random.randint(100,100*k)
+            sn = random.randint(50,100*k)
             mcn = random.randint(100,200*k)
             sq = random.randint(10,10*k)
             test(i*5, num_candidates,sn,mcn,sq, constraints, weightList)
