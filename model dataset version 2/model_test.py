@@ -3,6 +3,7 @@ import cloud
 import hybrid
 import numpy as np
 import time
+import csv
 
 def minMaxQos(num_act, actGraph):
     servicesMin = []
@@ -76,6 +77,9 @@ def test(num_act, num_candidates,sn,mcn,sq, constraints, weightList):
 
 
     print("fitness = {}\nScalability = {}".format(fit/opt,rt))
+    with open('results.csv', mode='a') as file:
+        file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        file_writer.writerow([num_act , num_candidates ,sn//2 , sn//2 , sn//2 , sq , mcn , sn , fit / opt , rt])
 
 
 # main
