@@ -88,7 +88,7 @@ def ABCgenetic(actGraph, candidates,SQ, MCN, SN, minQos, maxQos, constraints,wei
                     # new service index
                     neighbors = getNeighbors(service, candidates)
                     # mutation
-                    cp.mutate(neighbors[1])
+                    cp.mutate(neighbors[0])
                     Q = f(cp, minQos, maxQos, constraints, weightList)
                     fitnessList[i] = Q
                     limit[i] = 0

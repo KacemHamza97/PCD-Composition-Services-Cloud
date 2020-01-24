@@ -90,7 +90,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
                     # new service index
                     neighbors = getNeighbors(service, candidates)
                     # mutation
-                    cp.mutate(neighbors[1])
+                    cp.mutate(neighbors[0])
                     Q = f(cp, minQos, maxQos, constraints, weightList)
                     fitnessList[i] = Q
                     limit[i] = 0
@@ -98,7 +98,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
                 else:
                     # Scouting
                     cp = cloud.CompositionPlan(actGraph, candidates)
-                    solutions[i] = cp 
+                    solutions[i] = cp
                     fitnessList[i] = f(cp, minQos, maxQos, constraints, weightList)
                     limit[i] = 0
 
