@@ -1,5 +1,4 @@
 import cloud
-import copy
 import random
 
 
@@ -8,11 +7,11 @@ import random
 # actGraph is a graph with only activities indexes linked to each other by arcs
 
 
-# sort neighbors of service based on euclidean distance from the nearest to the furthest
+# returning the nearest neighbor of service based on euclidean distance
 
-def getNeighbors(service, candidates):
+def getNeighbor(service, candidates):
     L = candidates[service.getActivity()]
-    return sorted([neighbor for neighbor in L if neighbor != service], key=lambda x: service.euclideanDist(x))
+    return min([neighbor for neighbor in L if neighbor != service], key=lambda x: service.euclideanDist(x))
 
 
 # Fitness function
@@ -94,9 +93,9 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
                         # choose randomly a service to mutate
                         service = cp.G.nodes[random.randint(0, cp.G.number_of_nodes() - 1)]["service"]
                         # new service index
-                        neighbors = getNeighbors(service, candidates)
+                        neighbor = getNeighbor(service, candidates)
                         # mutation operation
-                        cp.mutate(neighbors[0])
+                        cp.mutate(neighbor)
                         fit = f(cp, minQos, maxQos, constraints, weightList)
 
                         if fit:

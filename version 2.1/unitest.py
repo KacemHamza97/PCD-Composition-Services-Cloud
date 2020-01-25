@@ -66,7 +66,7 @@ def test(actGraph,candidates,sn,mcn,sq, constraints, weightList):
 # main
 
 # input
-constraints = {'responseTime': 10, 'price': 1000, 'availability': 10, 'reliability': 10}
+constraints = {'responseTime': 10, 'price': 10, 'availability': 0.95, 'reliability': 0.8}
 weightList = [0.25, 0.25, 0.25, 0.25]
 num_act = int(input("NUMBER OF ACTIVITIES : "))
 num_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
