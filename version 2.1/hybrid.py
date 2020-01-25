@@ -1,5 +1,5 @@
 import cloud
-import random
+from random import random , randint , sample
 
 
 # candidates is a list made of list of services that perform a common activity , each list of services represents an activity
@@ -26,6 +26,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
     fitnessList = list()
     probabilityList = list(0 for i in range(SN))
     limit = list(0 for i in range(SN))
+    positions = list(range(SN))
     CP = 4 * MCN / 5  # changing point for scouts
     # solutions and fitness initializing
     for i in range(SN):
@@ -39,12 +40,9 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
 
     # Algorithm
     for itera in range(1, MCN + 1):
-
         # employed bees phase
-        exploited = []
-        for i in range(SN // 2):
-            i = random.randint(0, SN - 1)
-            exploited.append(i)
+        exploited = sample(positions,SN // 2)
+        for i in exploited :
             cp1 = solutions[i]
             cp2 = cloud.CompositionPlan(actGraph, candidates) # randomly generated
             # Crossover operation
@@ -68,7 +66,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
 
         # onlooker bees phase
         for i in exploited:
-            if probabilityList[i] > random.random():
+            if probabilityList[i] > random():
                 cp1 = solutions[i]
                 cp2 = best_cp   # current best
                 # Crossover operation
@@ -91,7 +89,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
                     cp = solutions[i]
                     while 1:
                         # choose randomly a service to mutate
-                        service = cp.G.nodes[random.randint(0, cp.G.number_of_nodes() - 1)]["service"]
+                        service = cp.G.nodes[randint(0, cp.G.number_of_nodes() - 1)]["service"]
                         # new service index
                         neighbor = getNeighbor(service, candidates)
                         # mutation operation

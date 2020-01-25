@@ -1,8 +1,7 @@
 import numpy
-import math
+from math import sqrt
 import networkx as nx
-import random
-import copy
+from random import randint , sample
 from functools import reduce
 
 
@@ -78,7 +77,7 @@ class Service:
         dRel = self.__reliability - service.getReliability()
         dAva = self.__availability - service.getAvailability()
 
-        return math.sqrt(dRes ** 2 + dPri ** 2 + dRel ** 2 + dAva ** 2)
+        return sqrt(dRes ** 2 + dPri ** 2 + dRel ** 2 + dAva ** 2)
 
     ##### class CompositionPlan #####
 
@@ -92,7 +91,7 @@ class CompositionPlan:
         self.G = nx.DiGraph()
         self.G.add_weighted_edges_from(actGraph)
         for act, candidate in enumerate(candidates):
-            self.G.nodes[act]["service"] = random.sample(candidate, 1)[0]
+            self.G.nodes[act]["service"] = sample(candidate, 1)[0]
 
     # Calcul Methods
 
@@ -235,6 +234,6 @@ def crossover(Plan1, Plan2):
     candidates = [[act[1]] for act in list(Plan1.G.nodes.data("service"))]
     child = CompositionPlan(actGraph, candidates)
     for act in child.G.nodes:  # Selecting services to mutate
-        if random.randint(0, 1):  # 50 % chance of mutation
+        if randint(0, 1):  # 50 % chance of mutation
             child.G.nodes[act]["service"] = Plan2.G.nodes[act]["service"]
     return child
