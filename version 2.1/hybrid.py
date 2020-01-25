@@ -6,11 +6,13 @@ import random
 # candidates is a list made of list of services that perform a common activity , each list of services represents an activity
 # candidates is indexed based on the attribut activity of each service (cloud.py)
 # actGraph is a graph with only activities indexes linked to each other by arcs
+
+
 # sort neighbors of service based on euclidean distance from the nearest to the furthest
 
-def getNeighbors(s, candidates):  # s is a service
-    L = candidates[s.getActivity()]
-    return sorted([neighbor for neighbor in L if neighbor != s], key=lambda x: s.euclideanDist(x))
+def getNeighbors(service, candidates):
+    L = candidates[service.getActivity()]
+    return sorted([neighbor for neighbor in L if neighbor != service], key=lambda x: service.euclideanDist(x))
 
 
 # Fitness function
@@ -18,7 +20,7 @@ def f(cp, minQos, maxQos, constraints, weightList):
     return cp.globalQos(minQos, maxQos, constraints, weightList) + cp.cpMatching()
 
 
-# SQ : condition for scouts , MCN : termination condition , SN : number of compositionPlans , p :probability
+# SQ : condition for scouts , MCN : termination condition , SN : number of ressources
 def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,weightList):
     # initializing
     solutions = list()
@@ -44,9 +46,9 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
         for i in range(SN // 2):
             i = random.randint(0, SN - 1)
             exploited.append(i)
-            cp1 = solutions[i]  # cp is a composition plan
-            cp2 = cloud.CompositionPlan(actGraph, candidates)
-            # Crossover
+            cp1 = solutions[i]
+            cp2 = cloud.CompositionPlan(actGraph, candidates) # randomly generated
+            # Crossover operation
             child = cloud.crossover(cp1, cp2)
             Q = f(child, minQos, maxQos, constraints, weightList)
             if Q > fitnessList[i]:
@@ -61,23 +63,23 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
             s = solutions[i]
             probabilityList[i] = fitnessList[i] / sum(fitnessList)
 
-        # finding best solution
+        # finding best solution after employed bees phase
         best_fit = max(fitnessList)
         best_cp = solutions[fitnessList.index(best_fit)]
 
         # onlooker bees phase
         for i in exploited:
             if probabilityList[i] > random.random():
-                cp1 = solutions[i]  # cp is a composition plan
-                cp2 = best_cp
-                # Crossover
+                cp1 = solutions[i]
+                cp2 = best_cp   # current best
+                # Crossover operation
                 child = cloud.crossover(cp1, cp2)
                 Q = f(child, minQos, maxQos, constraints, weightList)
                 if Q > fitnessList[i]:
                     fitnessList[i] = Q
                     solutions[i] = child
                     limit[i] = 0
-                    if Q > best_fit :
+                    if Q > best_fit :       # modifying current best for next bee
                         best_fit = Q
                         best_cp = child
                 else:
@@ -92,7 +94,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
                     service = cp.G.nodes[random.randint(0, cp.G.number_of_nodes() - 1)]["service"]
                     # new service index
                     neighbors = getNeighbors(service, candidates)
-                    # mutation
+                    # mutation operation
                     cp.mutate(neighbors[0])
                     Q = f(cp, minQos, maxQos, constraints, weightList)
                     fitnessList[i] = Q
