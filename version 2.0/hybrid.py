@@ -93,14 +93,14 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
                     cp.mutate(neighbors[0])
                     Q = f(cp, minQos, maxQos, constraints, weightList)
                     fitnessList[i] = Q
-                    limit[i] = 0
 
                 else:
                     # Scouting
                     cp = cloud.CompositionPlan(actGraph, candidates)
                     solutions[i] = cp
                     fitnessList[i] = f(cp, minQos, maxQos, constraints, weightList)
-                    limit[i] = 0
+
+                limit[i] = 0
 
         # the best of each iteration
         best_itera = max(fitnessList)

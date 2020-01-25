@@ -57,7 +57,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
                 limit[i] += 1
 
         # Probability update
-        for i in range(SN):
+        for i in exploited :
             s = solutions[i]
             probabilityList[i] = fitnessList[i] / sum(fitnessList)
 
@@ -102,7 +102,8 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
                     cp = cloud.CompositionPlan(actGraph, candidates)
                     solutions[i] = cp
                     fitnessList[i] = f(cp, minQos, maxQos, constraints, weightList)
-                    limit[i] = 0
+
+                limit[i] = 0
 
         # the best of each iteration
         best_itera = max(fitnessList)
