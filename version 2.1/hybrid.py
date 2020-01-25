@@ -50,9 +50,9 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
             cp2 = cloud.CompositionPlan(actGraph, candidates) # randomly generated
             # Crossover operation
             child = cloud.crossover(cp1, cp2)
-            Q = f(child, minQos, maxQos, constraints, weightList)
-            if Q > fitnessList[i]:
-                fitnessList[i] = Q
+            fit = f(child, minQos, maxQos, constraints, weightList)
+            if fit > fitnessList[i]:
+                fitnessList[i] = fit
                 solutions[i] = child
                 limit[i] = 0
             else:
@@ -60,8 +60,8 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
 
         # Probability update
         for i in exploited :
-            s = solutions[i]
-            probabilityList[i] = fitnessList[i] / sum(fitnessList)
+            s = sum(fitnessList)
+            probabilityList[i] = fitnessList[i] / s
 
         # finding best solution after employed bees phase
         best_fit = max(fitnessList)
@@ -74,13 +74,13 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
                 cp2 = best_cp   # current best
                 # Crossover operation
                 child = cloud.crossover(cp1, cp2)
-                Q = f(child, minQos, maxQos, constraints, weightList)
-                if Q > fitnessList[i]:
-                    fitnessList[i] = Q
+                fit = f(child, minQos, maxQos, constraints, weightList)
+                if fit > fitnessList[i]:
+                    fitnessList[i] = fit
                     solutions[i] = child
                     limit[i] = 0
-                    if Q > best_fit :       # modifying current best for next bee
-                        best_fit = Q
+                    if fit > best_fit :       # modifying current best for next bee
+                        best_fit = fit
                         best_cp = child
                 else:
                     limit[i] += 1
@@ -90,20 +90,29 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
             if limit[i] == SQ:  # scouts bee condition verified
                 if itera >= CP:
                     cp = solutions[i]
-                    # choose randomly a service to mutate
-                    service = cp.G.nodes[random.randint(0, cp.G.number_of_nodes() - 1)]["service"]
-                    # new service index
-                    neighbors = getNeighbors(service, candidates)
-                    # mutation operation
-                    cp.mutate(neighbors[0])
-                    Q = f(cp, minQos, maxQos, constraints, weightList)
-                    fitnessList[i] = Q
+                    while 1:
+                        # choose randomly a service to mutate
+                        service = cp.G.nodes[random.randint(0, cp.G.number_of_nodes() - 1)]["service"]
+                        # new service index
+                        neighbors = getNeighbors(service, candidates)
+                        # mutation operation
+                        cp.mutate(neighbors[0])
+                        fit = f(cp, minQos, maxQos, constraints, weightList)
+
+                        if fit:
+                            solutions[i] = cp
+                            fitnessList[i] = fit
+                            break
 
                 else:
                     # Scouting
-                    cp = cloud.CompositionPlan(actGraph, candidates)
-                    solutions[i] = cp
-                    fitnessList[i] = f(cp, minQos, maxQos, constraints, weightList)
+                    while 1:
+                        cp = cloud.CompositionPlan(actGraph, candidates)
+                        fit = f(sol, minQos, maxQos, constraints, weightList)
+                        if fit:
+                            solutions[i] = cp
+                            fitnessList[i] = f(cp, minQos, maxQos, constraints, weightList)
+                            break
 
                 limit[i] = 0
 
