@@ -1,7 +1,7 @@
-from numpy import dot , array
+import numpy
 from math import sqrt
 import networkx as nx
-from random import sample , randint
+from random import randint , sample
 from functools import reduce
 
 
@@ -21,7 +21,7 @@ class Service:
         if isinstance(activity, int):
             self.__activity = activity
         else:
-            raise Exception("activity must be of type : int")
+            raise Exception("activity must be of type : int or float ")
 
         if isinstance(responseTime, (int, float)):
             self.__responseTime = responseTime
@@ -79,7 +79,7 @@ class Service:
 
         return sqrt(dRes ** 2 + dPri ** 2 + dRel ** 2 + dAva ** 2)
 
-    ##### class compositionPlan #####
+    ##### class CompositionPlan #####
 
 
 class CompositionPlan:
@@ -203,23 +203,19 @@ class CompositionPlan:
             av = (self.cpAvailability() - minQos['availability']) / (maxQos['availability'] - minQos['availability'])
             rel = (self.cpReliability() - minQos['reliability']) / (maxQos['reliability'] - minQos['reliability'])
 
-            vect1 = array([rt, pr, av, rel])
+            vect1 = numpy.array([rt, pr, av, rel])
             # weights
-            vect2 = array(weightList)
+            vect2 = numpy.array(weightList)
             # vectorial product
-            return dot(vect1, vect2)
+            return numpy.dot(vect1, vect2)
         else:
             return -1
 
     # Matching degree
-    def cpMatching(self, rootAct=0):
+    def cpMatching(self):
         n = self.G.number_of_nodes()
-        try:
-            outgoing = list(self.G.successors(rootAct))  # outgoing arcs
-            s = sum([self.cpMatching(neighbor) for neighbor in outgoing])
-            return s + (self.G.nodes[rootAct]["service"].getMatching() / n)
-        except:
-            return self.G.nodes[rootAct]["service"].getMatching() / n
+        s = sum([self.G.nodes[i]["service"].getMatching() for i in range(n)])
+        return s/n
 
     # Modifying composition plan by mutating a service
 

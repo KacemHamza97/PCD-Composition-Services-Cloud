@@ -212,14 +212,10 @@ class CompositionPlan:
             return -1
 
     # Matching degree
-    def cpMatching(self, rootAct=0):
+    def cpMatching(self):
         n = self.G.number_of_nodes()
-        try:
-            outgoing = list(self.G.successors(rootAct))  # outgoing arcs
-            s = sum([self.cpMatching(neighbor) for neighbor in outgoing])
-            return s + (self.G.nodes[rootAct]["service"].getMatching() / n)
-        except:
-            return self.G.nodes[rootAct]["service"].getMatching() / n
+        s = sum([self.G.nodes[i]["service"].getMatching() for i in range(n)])
+        return s/n
 
     # Modifying composition plan by mutating a service
 
