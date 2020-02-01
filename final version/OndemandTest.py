@@ -25,6 +25,7 @@ def minMaxOpt(num_act,actGraph):
     L = ['responseTime', 'price', 'availability', 'reliability']
     maxQos = {i: j for i, j in zip(L, k)}
 
+
     return servicesOpt,minQos, maxQos
 
 
@@ -84,7 +85,6 @@ def test(actGraph,candidates,sn,mcn,sq, constraints, weightList):
     _ , fit = hybrid.ABCgenetic(actGraph, candidates,SQ=sq, MCN=mcn, SN=sn, minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
     rt = time.time() - start_time
     print("fitness = {}\nScalability = {}\nDone !".format(fit / opt,rt))
-
 
 # main
 

@@ -27,6 +27,42 @@ def minMaxOpt(num_act,actGraph):
 
     return servicesOpt,minQos, maxQos
 
+
+def generateActGraph(num_act):   # actGraph entry
+    actGraph = []
+    print("BUILDING ACTGRAPH")
+    while True :
+        ans = input("Enter a new branch ? (y/n)")
+        if ans not in {'y','n'} :
+            continue
+        elif ans == "y" :
+            while True :
+                try :
+                    source = int(input("Source :"))
+                    if source not in range(num_act) :
+                        print("Check input (source not existing)!")
+                        break
+                    destination = int(input("Destination :"))
+                    if destination not in range(num_act) :
+                        print("Check input (destination not existing)!")
+                        break
+                    type = int(input("Type : "))
+                    if type not in {0,-1,1} :
+                        print("Check input !")
+                        break
+                    actGraph.append([source,destination,type])
+                    break
+                except :
+                    print("Check input (must be int)!")
+                    break
+        else :
+            print("Done !")
+            break
+    return(actGraph)
+
+
+
+
 def generateCandidates(num_act, num_candidates,servicesOpt):
     candidates = servicesOpt
     for i in range(num_act):
@@ -39,7 +75,7 @@ def generateCandidates(num_act, num_candidates,servicesOpt):
     return candidates
 
 
-def test(t,actGraph,candidates,sn,mcn,sq, constraints, weightList):
+def test(actGraph,candidates,sn,mcn,sq, constraints, weightList):
 
     # Algorithm execution
 
@@ -47,53 +83,26 @@ def test(t,actGraph,candidates,sn,mcn,sq, constraints, weightList):
     start_time = time.time()
     _ , fit = hybrid.ABCgenetic(actGraph, candidates,SQ=sq, MCN=mcn, SN=sn, minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
     rt = time.time() - start_time
-
-    with open('3GraphTestdataset.csv', mode='a') as file:
-        file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        file_writer.writerow([t,num_candidates,sq, mcn,sn, fit / opt ,rt])
-
     print("fitness = {}\nScalability = {}\nDone !".format(fit / opt,rt))
-
-
-
 
 
 # main
 
 # input
+constraints = {'responseTime': 10, 'price': 10, 'availability': 0.95, 'reliability': 0.8}
 weightList = [0.25, 0.25, 0.25, 0.25]
-actGraphA = [[0,1,1],[1,2,0],[0,3,1],[3,4,0],[4,7,0],[2,7,0],[0,5,1],[5,6,0],[4,8,0],[6,8,0],[7,9,0],[8,9,0]]
-actGraphB = [[0,1,1],[0,2,1],[0,3,1],[0,4,1],[1,5,0],[4,7,0],[2,6,0],[3,6,0],[5,9,0],[6,8,0],[7,8,0],[8,9,0],[9,10,0],[10,11,0],[11,12,1],[11,13,1],[12,14,0],[14,16,0],[13,15,0],[15,17,0],[16,18,0],[17,18,0],[18,19,0]]
-actGraphC = [[0,1,1],[0,2,1],[0,3,1],[0,4,1],[1,5,0],[4,7,0],[2,6,0],[3,6,0],[6,9,0],[7,9,0],[5,8,0],[6,8,0],[8,10,0],[9,10,0],[10,11,0],[11,12,0],[12,13,1],[12,14,1],[12,15,1],[12,16,1],[12,17,1],[13,18,0],[18,23,0],[14,19,0],[19,24,0],[15,20,0],[20,25,0],[16,21,0],[21,26,0],[17,22,0],[22,27,0],[23,28,0],[24,28,0],[25,28,0],[26,28,0],[27,28,0],[28,29,0]]
+num_act = int(input("NUMBER OF ACTIVITIES : "))
+num_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
+actGraph = generateActGraph(num_act)
+servicesOpt , minQos, maxQos = minMaxOpt(num_act, actGraph)
+candidates = generateCandidates(num_act, num_candidates,servicesOpt)
 
 # optimal fitness
 opt = 2.0
 
 while True :
-    while True :
-        t = input("Graph Selected ? (a/b/c)")
-        if t in {'a','b','c'} :
-            break
     x3 = int(input("SCOUT CONDITION : "))
     x4 = int(input("ITERATION NUMBER : "))
     x5 = int(input("RESSOURCES NUMBER : "))
 
-    if t == 'a' :
-        actGraph = actGraphA
-        num_act = 10
-        constraints = {'responseTime': 5 * 0.3, 'price': 10 * 1.55, 'availability': 0.945 ** 10 , 'reliability': 0.825 ** 10}
-    elif t == 'b' :
-        actGraph = actGraphB
-        num_act = 20
-        constraints = {'responseTime': 12 * 0.3, 'price': 20 * 1.55, 'availability': 0.945 ** 20, 'reliability': 0.825 ** 20}
-    else :
-        actGraph = actGraphC
-        num_act = 30
-        constraints = {'responseTime': 12 * 0.3 , 'price': 30 * 1.55, 'availability': 0.945 ** 30, 'reliability': 0.825 ** 30}
-
-
-    num_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-
-    servicesOpt , minQos, maxQos = minMaxOpt(num_act, actGraph)
-    candidates = generateCandidates(num_act, num_candidates,servicesOpt)
-    test(t,actGraph,candidates,x5,x4,x3, constraints, weightList)
+    test(actGraph,candidates,x5,x4,x3, constraints, weightList)

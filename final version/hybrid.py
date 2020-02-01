@@ -38,6 +38,9 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
                 fitnessList.append(fit)
                 break
 
+    best_fit = max(fitnessList)
+    best_cp = solutions[fitnessList.index(best_fit)]
+
     # Algorithm
     for itera in range(1, MCN + 1):
         # employed bees phase
@@ -60,10 +63,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
             s = sum(fitnessList)
             probabilityList[i] = fitnessList[i] / s
 
-        # finding best solution after 1st employed bees phase
-        if itera == 1 :
-            best_fit = max(fitnessList)
-            best_cp = solutions[fitnessList.index(best_fit)]
+
 
         # onlooker bees phase
         for i in exploited:
@@ -77,9 +77,6 @@ def ABCgenetic(actGraph, candidates, SQ, MCN, SN, minQos, maxQos, constraints,we
                     fitnessList[i] = fit
                     solutions[i] = child
                     limit[i] = 0
-                    if fit > best_fit :       # modifying current best for next bee
-                        best_fit = fit
-                        best_cp = child
                 else:
                     limit[i] += 1
 
