@@ -97,150 +97,216 @@ class CompositionPlan:
 
     # Calcul Methods
 
-    def cpResponseTime(self, rootAct=0):
-        if self.G.nodes[rootAct]["visited"] :
-            return 0
-        try:
-            self.visited += 1
-            self.G.nodes[rootAct]["visited"] = True
-            if self.visited == self.G.number_of_nodes() :
-                self.visited = 0
-                for i in range(self.G.number_of_nodes()) :
-                    self.G.nodes[i]["visited"] = False
-            outgoing = list(self.G.successors(rootAct))  # outgoing arcs
-            neighbor = outgoing[0]  # first neighbor
-            type = self.G.edges[rootAct, neighbor]["weight"]
-            if type == 0:
-                # type = sequential
-                return  self.G.nodes[rootAct]["service"].getResponseTime() + self.cpResponseTime(neighbor)
-            elif type == -1:
-                # type = conditional
-                s = 0
-                n = 0
-                for neighbor in outgoing:
-                    n += 1
-                    s += self.cpResponseTime(neighbor)
-                return (s / n) + self.G.nodes[rootAct]["service"].getResponseTime()
-            elif type == 1:
-                # type = parallel
-                return self.G.nodes[rootAct]["service"].getResponseTime() + max([self.cpResponseTime(neighbor) for neighbor in outgoing])
+    # def cpResponseTime(self, rootAct=0):
+    #     if self.G.nodes[rootAct]["visited"] :
+    #         return 0
+    #     try:
+    #         self.visited += 1
+    #         self.G.nodes[rootAct]["visited"] = True
+    #         if self.visited == self.G.number_of_nodes() :
+    #             self.visited = 0
+    #             for i in range(self.G.number_of_nodes()) :
+    #                 self.G.nodes[i]["visited"] = False
+    #         outgoing = list(self.G.successors(rootAct))  # outgoing arcs
+    #         neighbor = outgoing[0]  # first neighbor
+    #         type = self.G.edges[rootAct, neighbor]["weight"]
+    #         if type == 0:
+    #             # type = sequential
+    #             return  self.G.nodes[rootAct]["service"].getResponseTime() + self.cpResponseTime(neighbor)
+    #         elif type == -1:
+    #             # type = conditional
+    #             s = 0
+    #             n = 0
+    #             for neighbor in outgoing:
+    #                 n += 1
+    #                 s += self.cpResponseTime(neighbor)
+    #             return (s / n) + self.G.nodes[rootAct]["service"].getResponseTime()
+    #         elif type == 1:
+    #             # type = parallel
+    #             return self.G.nodes[rootAct]["service"].getResponseTime() + max([self.cpResponseTime(neighbor) for neighbor in outgoing])
+    #
+    #     except IndexError :  # node with no destination
+    #         return self.G.nodes[rootAct]["service"].getResponseTime()
+    #
+    # def cpPrice(self, rootAct=0):
+    #     if self.G.nodes[rootAct]["visited"] :
+    #         return 0
+    #     try:
+    #         self.visited += 1
+    #         self.G.nodes[rootAct]["visited"] = True
+    #         if self.visited == self.G.number_of_nodes() :
+    #             self.visited = 0
+    #             for i in range(self.G.number_of_nodes()) :
+    #                 self.G.nodes[i]["visited"] = False
+    #         outgoing = list(self.G.successors(rootAct))  # outgoing arcs
+    #         neighbor = outgoing[0]  # first neighbor
+    #         type = self.G.edges[rootAct, neighbor]["weight"]
+    #
+    #         if type == 0:
+    #             # type = sequentials
+    #             return self.G.nodes[rootAct]["service"].getPrice() + self.cpPrice(neighbor)
+    #
+    #         elif type == -1:
+    #             # type = conditional
+    #             s = 0
+    #             n = 0
+    #             for neighbor in outgoing:
+    #                 n += 1
+    #                 s += self.cpPrice(neighbor)
+    #             return (s / n) + self.G.nodes[rootAct]["service"].getPrice()
+    #         elif type == 1:
+    #             # type = parallel
+    #             return self.G.nodes[rootAct]["service"].getPrice() + sum([self.cpPrice(neighbor) for neighbor in outgoing])
+    #     except IndexError :
+    #         return self.G.nodes[rootAct]["service"].getPrice()
+    #
+    #
+    #
+    # def cpAvailability(self, rootAct=0):
+    #     if self.G.nodes[rootAct]["visited"] :
+    #         return 1
+    #     try :
+    #         self.visited += 1
+    #         self.G.nodes[rootAct]["visited"] = True
+    #         if self.visited == self.G.number_of_nodes() :
+    #             self.visited = 0
+    #             for i in range(self.G.number_of_nodes()) :
+    #                 self.G.nodes[i]["visited"] = False
+    #         outgoing = list(self.G.successors(rootAct))  # outgoing arcs
+    #         neighbor = outgoing[0]  # first neighbor
+    #         type = self.G.edges[rootAct, neighbor]["weight"]
+    #         if type == 0:
+    #             # type = sequential
+    #             return self.G.nodes[rootAct]["service"].getAvailability() * self.cpAvailability(neighbor)
+    #         elif type == -1:
+    #             # type = conditional
+    #             s = 0
+    #             n = 0
+    #             for neighbor in outgoing:
+    #                 n += 1
+    #                 s += self.cpAvailability(neighbor)
+    #             return (s / n) * self.G.nodes[rootAct]["service"].getAvailability()
+    #         elif type == 1:
+    #             # type = parallel
+    #             return self.G.nodes[rootAct]["service"].getAvailability() * prod([self.cpAvailability(neighbor) for neighbor in outgoing])
+    #     except IndexError :  # node with no destination
+    #         return self.G.nodes[rootAct]["service"].getAvailability()
+    #
+    # def cpReliability(self, rootAct=0):
+    #     if self.G.nodes[rootAct]["visited"] :
+    #         return 1
+    #     try:
+    #         self.visited += 1
+    #         self.G.nodes[rootAct]["visited"] = True
+    #         if self.visited == self.G.number_of_nodes() :
+    #             self.visited = 0
+    #             for i in range(self.G.number_of_nodes()) :
+    #                 self.G.nodes[i]["visited"] = False
+    #         outgoing = list(self.G.successors(rootAct))  # outgoing arcs
+    #         neighbor = outgoing[0]  # first neighbor
+    #         type = self.G.edges[rootAct, neighbor]["weight"]
+    #         if type == 0:
+    #             # type = sequential
+    #             return self.G.nodes[rootAct]["service"].getReliability() * self.cpReliability(neighbor)
+    #         elif type == -1:
+    #             # type = conditional
+    #             s = 0
+    #             n = 0
+    #             for neighbor in outgoing:
+    #                 n += 1
+    #                 s += self.cpReliability(neighbor)
+    #             return (s / n) * self.G.nodes[rootAct]["service"].getReliability()
+    #         elif type == 1:
+    #             # type = parallel
+    #             return self.G.nodes[rootAct]["service"].getReliability() * prod([self.cpReliability(neighbor) for neighbor in outgoing])
+    #     except IndexError  :  # node with no destination
+    #         return self.G.nodes[rootAct]["service"].getReliability()
 
-        except IndexError :  # node with no destination
-            return self.G.nodes[rootAct]["service"].getResponseTime()
 
-    def cpPrice(self, rootAct=0):
-        if self.G.nodes[rootAct]["visited"] :
-            return 0
-        try:
-            self.visited += 1
-            self.G.nodes[rootAct]["visited"] = True
-            if self.visited == self.G.number_of_nodes() :
-                self.visited = 0
-                for i in range(self.G.number_of_nodes()) :
-                    self.G.nodes[i]["visited"] = False
-            outgoing = list(self.G.successors(rootAct))  # outgoing arcs
-            neighbor = outgoing[0]  # first neighbor
-            type = self.G.edges[rootAct, neighbor]["weight"]
-
-            if type == 0:
-                # type = sequentials
-                return self.G.nodes[rootAct]["service"].getPrice() + self.cpPrice(neighbor)
-
-            elif type == -1:
-                # type = conditional
-                s = 0
-                n = 0
-                for neighbor in outgoing:
-                    n += 1
-                    s += self.cpPrice(neighbor)
-                return (s / n) + self.G.nodes[rootAct]["service"].getPrice()
-            elif type == 1:
-                # type = parallel
-                return self.G.nodes[rootAct]["service"].getPrice() + sum([self.cpPrice(neighbor) for neighbor in outgoing])
-        except IndexError :
-            return self.G.nodes[rootAct]["service"].getPrice()
-
-
-
-    def cpAvailability(self, rootAct=0):
-        if self.G.nodes[rootAct]["visited"] :
-            return 1
-        try :
-            self.visited += 1
-            self.G.nodes[rootAct]["visited"] = True
-            if self.visited == self.G.number_of_nodes() :
-                self.visited = 0
-                for i in range(self.G.number_of_nodes()) :
-                    self.G.nodes[i]["visited"] = False
-            outgoing = list(self.G.successors(rootAct))  # outgoing arcs
-            neighbor = outgoing[0]  # first neighbor
-            type = self.G.edges[rootAct, neighbor]["weight"]
-            if type == 0:
-                # type = sequential
-                return self.G.nodes[rootAct]["service"].getAvailability() * self.cpAvailability(neighbor)
-            elif type == -1:
-                # type = conditional
-                s = 0
-                n = 0
-                for neighbor in outgoing:
-                    n += 1
-                    s += self.cpAvailability(neighbor)
-                return (s / n) * self.G.nodes[rootAct]["service"].getAvailability()
-            elif type == 1:
-                # type = parallel
-                return self.G.nodes[rootAct]["service"].getAvailability() * prod([self.cpAvailability(neighbor) for neighbor in outgoing])
-        except IndexError :  # node with no destination
-            return self.G.nodes[rootAct]["service"].getAvailability()
-
-    def cpReliability(self, rootAct=0):
-        if self.G.nodes[rootAct]["visited"] :
-            return 1
-        try:
-            self.visited += 1
-            self.G.nodes[rootAct]["visited"] = True
-            if self.visited == self.G.number_of_nodes() :
-                self.visited = 0
-                for i in range(self.G.number_of_nodes()) :
-                    self.G.nodes[i]["visited"] = False
-            outgoing = list(self.G.successors(rootAct))  # outgoing arcs
-            neighbor = outgoing[0]  # first neighbor
-            type = self.G.edges[rootAct, neighbor]["weight"]
-            if type == 0:
-                # type = sequential
-                return self.G.nodes[rootAct]["service"].getReliability() * self.cpReliability(neighbor)
-            elif type == -1:
-                # type = conditional
-                s = 0
-                n = 0
-                for neighbor in outgoing:
-                    n += 1
-                    s += self.cpReliability(neighbor)
-                return (s / n) * self.G.nodes[rootAct]["service"].getReliability()
-            elif type == 1:
-                # type = parallel
-                return self.G.nodes[rootAct]["service"].getReliability() * prod([self.cpReliability(neighbor) for neighbor in outgoing])
-        except IndexError  :  # node with no destination
-            return self.G.nodes[rootAct]["service"].getReliability()
 
     # Quality of Service
 
+    def cpQos(self,rootAct=0):
+        if self.G.nodes[rootAct]["visited"] :
+            return {'responseTime' : 0 , 'price' : 0 , 'availability' : 1 , 'reliability' : 1}
+
+        try:
+            self.visited += 1
+            self.G.nodes[rootAct]["visited"] = True
+            if self.visited == self.G.number_of_nodes() :
+                self.visited = 0
+                for i in range(self.G.number_of_nodes()) :
+                    self.G.nodes[i]["visited"] = False
+            outgoing = list(self.G.successors(rootAct))  # outgoing arcs
+            neighbor = outgoing[0]  # first neighbor
+            type = self.G.edges[rootAct, neighbor]["weight"]
+            if type == 0:
+                # type = sequential
+                QosDict = self.cpQos(neighbor)
+                QosDict['responseTime'] += self.G.nodes[rootAct]["service"].getResponseTime()
+                QosDict['price'] += self.G.nodes[rootAct]["service"].getPrice()
+                QosDict['availability'] *= self.G.nodes[rootAct]["service"].getAvailability()
+                QosDict['reliability'] *= self.G.nodes[rootAct]["service"].getReliability()
+                return QosDict
+            elif type == -1:
+                # type = conditional
+                s1 = 0
+                s2 = 0
+                s3 = 1
+                s4 = 1
+                n = 0
+                for neighbor in outgoing:
+                    n += 1
+                    QosDict = self.cpQos(neighbor)
+                    s1 += QosDict['responseTime']
+                    s2 += QosDict['price']
+                    s3 *= QosDict['availability']
+                    s4 *= QosDict['reliability']
+                QosDict = {}
+                QosDict['responseTime'] = (s1 / n) + self.G.nodes[rootAct]["service"].getResponseTime()
+                QosDict['price'] = (s2 / n) + self.G.nodes[rootAct]["service"].getPrice()
+                QosDict['availability'] = (s3 / n) * self.G.nodes[rootAct]["service"].getAvailability()
+                QosDict['reliability'] = (s4 / n) * self.G.nodes[rootAct]["service"].getReliability()
+                return QosDict
+            elif type == 1:
+                # type = parallel
+                l1 , l2 , l3 , l4 = [] , [] , [] , []
+                for neighbor in outgoing :
+                    QosDict = self.cpQos(neighbor)
+                    l1.append(QosDict['responseTime'])
+                    l2.append(QosDict['price'])
+                    l3.append(QosDict['availability'])
+                    l4.append(QosDict['reliability'])
+                QosDict = {}
+                QosDict['responseTime'] = self.G.nodes[rootAct]["service"].getResponseTime() + max(l1)
+                QosDict['price'] = self.G.nodes[rootAct]["service"].getPrice() + sum(l2)
+                QosDict['availability'] = self.G.nodes[rootAct]["service"].getAvailability() * prod(l3)
+                QosDict['reliability'] = self.G.nodes[rootAct]["service"].getReliability() * prod(l4)
+
+                return QosDict
+
+        except IndexError :  # node with no destination
+            QosDict = {}
+            QosDict['responseTime'] = self.G.nodes[rootAct]["service"].getResponseTime()
+            QosDict['price'] = self.G.nodes[rootAct]["service"].getPrice()
+            QosDict['availability'] = self.G.nodes[rootAct]["service"].getAvailability()
+            QosDict['reliability'] = self.G.nodes[rootAct]["service"].getReliability()
+            return QosDict
+
     def globalQos(self, minQos, maxQos, constraints, weightList):  # weightList should be in order (Price,ResponseTime,Availability,Reliability)
 
-        rt = self.cpResponseTime()
-        pr = self.cpPrice()
-        av = self.cpAvailability()
-        rel = self.cpReliability()
+        QosDict = self.cpQos()
 
-        drt = constraints['responseTime'] - rt
-        dpr = constraints['price'] - pr
-        dav = av - constraints['availability']
-        drel = rel - constraints['reliability']
-        
+        drt = constraints['responseTime'] - QosDict['responseTime']
+        dpr = constraints['price'] - QosDict['price']
+        dav = QosDict['availability'] - constraints['availability']
+        drel = QosDict['reliability'] - constraints['reliability']
+
         if drt and dpr and dav and drel:
-            rt = (maxQos['responseTime'] - rt) / (maxQos['responseTime'] - minQos['responseTime'])
-            pr = (maxQos['price'] - pr) / (maxQos['price'] - minQos['price'])
-            av = (av - minQos['availability']) / (maxQos['availability'] - minQos['availability'])
-            rel = (rel - minQos['reliability']) / (maxQos['reliability'] - minQos['reliability'])
+            rt = (maxQos['responseTime'] - QosDict['responseTime']) / (maxQos['responseTime'] - minQos['responseTime'])
+            pr = (maxQos['price'] - QosDict['price']) / (maxQos['price'] - minQos['price'])
+            av = (QosDict['availability'] - minQos['availability']) / (maxQos['availability'] - minQos['availability'])
+            rel = (QosDict['reliability'] - minQos['reliability']) / (maxQos['reliability'] - minQos['reliability'])
 
             vect1 = numpy.array([rt, pr, av, rel])
             # weights

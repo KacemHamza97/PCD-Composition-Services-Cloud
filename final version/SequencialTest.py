@@ -17,13 +17,9 @@ def minMaxOpt(num_act, actGraph):
     cpMin = cloud.CompositionPlan(actGraph, servicesMin)
     cpMax = cloud.CompositionPlan(actGraph, servicesMax)
 
-    k = [cpMin.cpResponseTime(), cpMin.cpPrice(),cpMin.cpAvailability(), cpMin.cpReliability()]
-    L = ['responseTime', 'price', 'availability', 'reliability']
-    minQos = {i: j for i, j in zip(L, k)}
+    minQos = cpMin.cpQos()
 
-    k = [cpMax.cpResponseTime(), cpMax.cpPrice(), cpMax.cpAvailability(), cpMax.cpReliability()]
-    L = ['responseTime', 'price', 'availability', 'reliability']
-    maxQos = {i: j for i, j in zip(L, k)}
+    maxQos = cpMax.cpQos()
 
     return servicesOpt,minQos, maxQos
 

@@ -17,13 +17,9 @@ def minMaxOpt(num_act,actGraph):
     cpMin = cloud.CompositionPlan(actGraph, servicesMin)
     cpMax = cloud.CompositionPlan(actGraph, servicesMax)
 
-    k = [cpMin.cpResponseTime(), cpMin.cpPrice(),cpMin.cpAvailability(), cpMin.cpReliability()]
-    L = ['responseTime', 'price', 'availability', 'reliability']
-    minQos = {i: j for i, j in zip(L, k)}
+    minQos = cpMin.cpQos()
 
-    k = [cpMax.cpResponseTime(), cpMax.cpPrice(), cpMax.cpAvailability(), cpMax.cpReliability()]
-    L = ['responseTime', 'price', 'availability', 'reliability']
-    maxQos = {i: j for i, j in zip(L, k)}
+    maxQos = cpMax.cpQos()
 
     return servicesOpt,minQos, maxQos
 
@@ -57,12 +53,11 @@ def test(t,actGraph,candidates,sn,mcn,sq, constraints, weightList):
 
 
 
-
 # main
 
 # input
 weightList = [0.25, 0.25, 0.25, 0.25]
-actGraphA = [[0,1,1],[1,2,0],[0,3,1],[3,4,0],[4,7,0],[2,7,0],[0,5,1],[5,6,0],[4,8,0],[6,8,0],[7,9,0],[8,9,0]]
+actGraphA = [[0,1,1],[0,2,1],[0,3,1],[1,4,0],[2,5,0],[3,6,0],[4,7,0],[5,7,0],[5,8,0],[6,8,0],[7,9,0],[8,9,0]]
 actGraphB = [[0,1,1],[0,2,1],[0,3,1],[0,4,1],[1,5,0],[4,7,0],[2,6,0],[3,6,0],[5,9,0],[6,8,0],[7,8,0],[8,9,0],[9,10,0],[10,11,0],[11,12,1],[11,13,1],[12,14,0],[14,16,0],[13,15,0],[15,17,0],[16,18,0],[17,18,0],[18,19,0]]
 actGraphC = [[0,1,1],[0,2,1],[0,3,1],[0,4,1],[1,5,0],[4,7,0],[2,6,0],[3,6,0],[6,9,0],[7,9,0],[5,8,0],[6,8,0],[8,10,0],[9,10,0],[10,11,0],[11,12,0],[12,13,1],[12,14,1],[12,15,1],[12,16,1],[12,17,1],[13,18,0],[18,23,0],[14,19,0],[19,24,0],[15,20,0],[20,25,0],[16,21,0],[21,26,0],[17,22,0],[22,27,0],[23,28,0],[24,28,0],[25,28,0],[26,28,0],[27,28,0],[28,29,0]]
 
