@@ -24,8 +24,9 @@ def minMaxOpt(num_act,actGraph):
     return servicesOpt,minQos, maxQos
 
 def generateCandidates(num_act, num_candidates,servicesOpt):
-    candidates = servicesOpt
-    for i in range(num_act):
+    candidates = list()
+    for i in range(num_act) :
+        candidates.append([servicesOpt[i][0]])
         for j in range(num_candidates - 1):
             responseTime = np.random.uniform(0.1, 5, 1)[0]
             price = np.random.uniform(0.1, 3, 1)[0]
@@ -35,20 +36,21 @@ def generateCandidates(num_act, num_candidates,servicesOpt):
     return candidates
 
 
-def test(t,actGraph,candidates,sn,mcn,sq, constraints, weightList):
+def test(t,actGraph,candidates,mcn,sq, constraints, weightList):
 
     # Algorithm execution
 
     print("Executing Algorithm ")
     start_time = time.time()
-    _ , fit = hybrid.ABCgenetic(actGraph, candidates,SQ=sq, MCN=mcn, SN=sn, minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
+    _ , fit = hybrid.ABCgenetic(actGraph, candidates,MCN=mcn,SQ=sq,minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
     rt = time.time() - start_time
 
     with open('3GraphTestdataset.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        file_writer.writerow([t,num_candidates,sq, mcn,sn, fit / opt ,rt])
+        file_writer.writerow([t,num_candidates,sq, mcn, fit / opt ,rt])
 
     print("fitness = {}\nScalability = {}\nDone !".format(fit / opt,rt))
+
 
 
 
@@ -69,9 +71,9 @@ while True :
         t = input("Graph Selected ? (a/b/c)")
         if t in {'a','b','c'} :
             break
-    x3 = int(input("SCOUT CONDITION : "))
-    x4 = int(input("ITERATION NUMBER : "))
-    x5 = int(input("RESSOURCES NUMBER : "))
+
+    x3 = int(input("ITERATION NUMBER : "))
+    x4 = int(input("SCOUT CONDITION : "))
 
     if t == 'a' :
         actGraph = actGraphA
@@ -91,4 +93,4 @@ while True :
 
     servicesOpt , minQos, maxQos = minMaxOpt(num_act, actGraph)
     candidates = generateCandidates(num_act, num_candidates,servicesOpt)
-    test(t,actGraph,candidates,x5,x4,x3, constraints, weightList)
+    test(t,actGraph,candidates,x3,x4,constraints, weightList)

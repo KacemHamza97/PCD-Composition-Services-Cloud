@@ -60,8 +60,9 @@ def generateActGraph(num_act):   # actGraph entry
 
 
 def generateCandidates(num_act, num_candidates,servicesOpt):
-    candidates = servicesOpt
-    for i in range(num_act):
+    candidates = list()
+    for i in range(num_act) :
+        candidates.append([servicesOpt[i][0]])
         for j in range(num_candidates - 1):
             responseTime = np.random.uniform(0.1, 5, 1)[0]
             price = np.random.uniform(0.1, 3, 1)[0]
@@ -71,15 +72,16 @@ def generateCandidates(num_act, num_candidates,servicesOpt):
     return candidates
 
 
-def test(actGraph,candidates,sn,mcn,sq, constraints, weightList):
+def test(actGraph,candidates,mcn,sq, constraints, weightList):
 
     # Algorithm execution
 
     print("Executing Algorithm ")
     start_time = time.time()
-    _ , fit = hybrid.ABCgenetic(actGraph, candidates,SQ=sq, MCN=mcn, SN=sn, minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
+    _ , fit = hybrid.ABCgenetic(actGraph, candidates,SQ=sq, MCN=mcn,minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
     rt = time.time() - start_time
     print("fitness = {}\nScalability = {}\nDone !".format(fit / opt,rt))
+    print(_.cpQos())
 
 
 # main
@@ -93,12 +95,11 @@ actGraph = generateActGraph(num_act)
 servicesOpt , minQos, maxQos = minMaxOpt(num_act, actGraph)
 candidates = generateCandidates(num_act, num_candidates,servicesOpt)
 
+
 # optimal fitness
 opt = 2.0
 
 while True :
-    x3 = int(input("SCOUT CONDITION : "))
-    x4 = int(input("ITERATION NUMBER : "))
-    x5 = int(input("RESSOURCES NUMBER : "))
-
-    test(actGraph,candidates,x5,x4,x3, constraints, weightList)
+    x3 = int(input("ITERATION NUMBER : "))
+    x4 = int(input("SCOUT CONDITION : "))
+    test(actGraph,candidates,x3,x4, constraints, weightList)
