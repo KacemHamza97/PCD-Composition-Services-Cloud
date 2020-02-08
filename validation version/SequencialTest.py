@@ -8,7 +8,6 @@ def minMaxOpt(actNum, actGraph):
     servicesMin = []
     servicesMax = []
     servicesOpt = []
-    listQos = []
     for i in range(actNum):
         servicesMin.append([cloud.Service(i, 0.1, 0.7, 0.9, 0.1, matching=1)])
         servicesMax.append([cloud.Service(i, 5, 0.95, 0.99, 3, matching=1)])
@@ -59,7 +58,7 @@ while True :
 
     mcn = int(input("ITERATION NUMBER : "))
     sq = int(input("SCOUT CONDITION : "))
-    
+
     print("Executing Algorithm ")
     start_time = time.time()
     _ , fit = hybrid.ABCgenetic(actGraph, candidates,SQ=sq, MCN=mcn,minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)

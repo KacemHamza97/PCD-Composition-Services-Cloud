@@ -1,6 +1,6 @@
 from math import sqrt
 import networkx as nx
-from random import randint , sample
+from random import sample
 from functools import reduce
 
 

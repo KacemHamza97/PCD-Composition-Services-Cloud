@@ -35,7 +35,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints, weightList):
     def updateMinMax() :
         nonlocal best_fit , fitnessList , minQos , maxQos
         # updating minQos and maxQos
-        # checking best_cp
+        # looking for minQos and maxQos in best_Qos
         try :
             for qos in best_Qos :
                 if best_Qos[qos] < minQos[qos] :
@@ -44,7 +44,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints, weightList):
                     maxQos[qos] = best_Qos[qos]
         except : # best_Qos not created
             None
-        # checking solutionsLlist
+        # looking for minQos and maxQos in solutionsList
         for QosDict in QosList :
             for qos in QosDict :
                 if QosDict[qos] < minQos[qos] :

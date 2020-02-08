@@ -8,7 +8,6 @@ def minMaxOpt(actNum,actGraph):
     servicesMin = []
     servicesMax = []
     servicesOpt = []
-    listQos = []
     for i in range(actNum):
         servicesMin.append([cloud.Service(i, 0.1, 0.7, 0.9, 0.1, matching=1)])
         servicesMax.append([cloud.Service(i, 5, 0.95, 0.99, 3, matching=1)])

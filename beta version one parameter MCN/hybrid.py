@@ -22,7 +22,7 @@ def ABCgenetic(actGraph, candidates,MCN,minQos, maxQos, constraints, weightList)
             best_cp = solutionsList[fitnessList.index(fit)]   # Updating best solution
 
     # Objective function
-    def f(cp, minQos, maxQos, constraints, weightList):
+    def f(cp):
         QosDict = cp.cpQos()
         # constraints verification
         drt = constraints['responseTime'] - QosDict['responseTime']
@@ -86,7 +86,7 @@ def ABCgenetic(actGraph, candidates,MCN,minQos, maxQos, constraints, weightList)
     for i in range(SN):
         while 1:
             cp = cloud.CompositionPlan(actGraph, candidates)
-            fit = f(cp, minQos, maxQos, constraints, weightList)
+            fit = f(cp)
             if fit:
                 solutionsList.append(cp)
                 fitnessList.append(fit)
@@ -104,7 +104,7 @@ def ABCgenetic(actGraph, candidates,MCN,minQos, maxQos, constraints, weightList)
             cp1 = solutionsList[i]
             cp2 = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
             child = crossover(cp1, cp2) # Crossover operation
-            fit = f(child, minQos, maxQos, constraints, weightList)
+            fit = f(child)
             if fit > fitnessList[i]:  # checking if child fitness is better than parent fitness
                 fitnessList[i] = fit
                 solutionsList[i] = child
@@ -126,7 +126,7 @@ def ABCgenetic(actGraph, candidates,MCN,minQos, maxQos, constraints, weightList)
                 cp1 = solutionsList[i]
                 cp2 = best_cp   # current best
                 child = crossover(cp1, cp2) # Crossover operation
-                fit = f(child, minQos, maxQos, constraints, weightList)
+                fit = f(child)
                 if fit > fitnessList[i]:    # checking if child fitness is better than parent fitness
                     fitnessList[i] = fit
                     solutionsList[i] = child
@@ -147,7 +147,7 @@ def ABCgenetic(actGraph, candidates,MCN,minQos, maxQos, constraints, weightList)
                         neighbor = getNeighbor(service)
                         # mutation operation
                         mutate(cp,neighbor)
-                        fit = f(cp, minQos, maxQos, constraints, weightList)
+                        fit = f(cp)
 
                         if fit:   # verifying constraints compatibility of mutated ressource
                             solutionsList[i] = cp
@@ -157,7 +157,7 @@ def ABCgenetic(actGraph, candidates,MCN,minQos, maxQos, constraints, weightList)
                 else:   # searching for new ressources to exploit
                     while 1:
                         cp = cloud.CompositionPlan(actGraph, candidates)
-                        fit = f(cp, minQos, maxQos, constraints, weightList)
+                        fit = f(cp)
                         if fit:  # verifying constraints compatibility of new ressource
                             solutionsList[i] = cp
                             fitnessList[i] = fit
