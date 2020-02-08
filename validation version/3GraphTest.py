@@ -4,12 +4,12 @@ import numpy as np
 import time
 import csv
 
-def minMaxOpt(num_act,actGraph):
+def minMaxOpt(actNum,actGraph):
     servicesMin = []
     servicesMax = []
     servicesOpt = []
     listQos = []
-    for i in range(num_act):
+    for i in range(actNum):
         servicesMin.append([cloud.Service(i, 0.1, 0.7, 0.9, 0.1, matching=1)])
         servicesMax.append([cloud.Service(i, 5, 0.95, 0.99, 3, matching=1)])
         servicesOpt.append([cloud.Service(i, 0.1, 0.95, 0.99, 0.1, matching=1)])
@@ -23,9 +23,9 @@ def minMaxOpt(num_act,actGraph):
 
     return servicesOpt,minQos, maxQos
 
-def generateCandidates(num_act, num_candidates,servicesOpt):
+def generateCandidates(actNum, num_candidates,servicesOpt):
     candidates = list()
-    for i in range(num_act) :
+    for i in range(actNum) :
         candidates.append([servicesOpt[i][0]])
         for j in range(num_candidates - 1):
             responseTime = np.random.uniform(0.1, 5, 1)[0]
@@ -34,25 +34,6 @@ def generateCandidates(num_act, num_candidates,servicesOpt):
             reliability = np.random.uniform(0.7, 0.95, 1)[0]
             candidates[i].append(cloud.Service(i, responseTime, reliability, availability, price, matching=1))
     return candidates
-
-
-def test(t,actGraph,candidates,mcn,sq, constraints, weightList):
-
-    # Algorithm execution
-
-    print("Executing Algorithm ")
-    start_time = time.time()
-    _ , fit = hybrid.ABCgenetic(actGraph, candidates,MCN=mcn,SQ=sq,minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
-    rt = time.time() - start_time
-
-    with open('3GraphTestdataset.csv', mode='a') as file:
-        file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        file_writer.writerow([t,num_candidates,sq, mcn, fit / opt ,rt])
-
-    print("fitness = {}\nScalability = {}\nDone !".format(fit / opt,rt))
-
-
-
 
 
 # main
@@ -72,25 +53,35 @@ while True :
         if t in {'a','b','c'} :
             break
 
-    x3 = int(input("ITERATION NUMBER : "))
-    x4 = int(input("SCOUT CONDITION : "))
+    mcn = int(input("ITERATION NUMBER : "))
+    sq = int(input("SCOUT CONDITION : "))
 
     if t == 'a' :
         actGraph = actGraphA
-        num_act = 10
+        actNum = 10
         constraints = {'responseTime': 5 * 0.3, 'price': 10 * 1.55, 'availability': 0.945 ** 10 , 'reliability': 0.825 ** 10}
     elif t == 'b' :
         actGraph = actGraphB
-        num_act = 20
+        actNum = 20
         constraints = {'responseTime': 12 * 0.3, 'price': 20 * 1.55, 'availability': 0.945 ** 20, 'reliability': 0.825 ** 20}
     else :
         actGraph = actGraphC
-        num_act = 30
+        actNum = 30
         constraints = {'responseTime': 12 * 0.3 , 'price': 30 * 1.55, 'availability': 0.945 ** 30, 'reliability': 0.825 ** 30}
 
 
     num_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
 
-    servicesOpt , minQos, maxQos = minMaxOpt(num_act, actGraph)
-    candidates = generateCandidates(num_act, num_candidates,servicesOpt)
-    test(t,actGraph,candidates,x3,x4,constraints, weightList)
+    servicesOpt , minQos, maxQos = minMaxOpt(actNum, actGraph)
+    candidates = generateCandidates(actNum, num_candidates,servicesOpt)
+
+    print("Executing Algorithm ")
+    start_time = time.time()
+    _ , fit = hybrid.ABCgenetic(actGraph, candidates,MCN=mcn,SQ=sq,minQos=minQos, maxQos=maxQos, constraints=constraints, weightList=weightList)
+    rt = time.time() - start_time
+
+    with open('3GraphTestdataset.csv', mode='a') as file:
+        file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        file_writer.writerow([t,num_candidates,sq, mcn, fit / opt ,rt])
+
+    print("fitness = {}\nScalability = {}\nDone !".format(fit / opt,rt))

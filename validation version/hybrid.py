@@ -5,6 +5,8 @@ from random import random , randint , sample
 # SQ : condition for scouts , MCN : number of iterations
 def ABCgenetic(actGraph, candidates, SQ, MCN,minQos, maxQos, constraints, weightList):
 
+    ############################# operations defitinition ##################################
+
     # returning the nearest neighbor of service based on euclidean distance
     def getNeighbor(service):
         neighborsList = candidates[service.getActivity()]
@@ -65,6 +67,9 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,minQos, maxQos, constraints, weight
 
         return child
 
+
+
+    ############################# Algorithm start  ##################################
 
     # initializing parameters
 
@@ -153,7 +158,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,minQos, maxQos, constraints, weight
                     while 1:
                         cp = cloud.CompositionPlan(actGraph, candidates)
                         fit = f(cp, minQos, maxQos, constraints, weightList)
-                        if fit: # verifying constraints compatibility of new ressource
+                        if fit:  # verifying constraints compatibility of new ressource
                             solutionsList[i] = cp
                             fitnessList[i] = f(cp, minQos, maxQos, constraints, weightList)
                             break
