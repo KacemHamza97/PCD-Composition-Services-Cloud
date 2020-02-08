@@ -160,7 +160,7 @@ def ABCgenetic(actGraph, candidates,MCN,minQos, maxQos, constraints, weightList)
                         fit = f(cp, minQos, maxQos, constraints, weightList)
                         if fit:  # verifying constraints compatibility of new ressource
                             solutionsList[i] = cp
-                            fitnessList[i] = f(cp, minQos, maxQos, constraints, weightList)
+                            fitnessList[i] = fit
                             SQ += 1
                             break
 

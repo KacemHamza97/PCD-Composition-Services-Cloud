@@ -1,9 +1,10 @@
 import cloud
 from numpy import array , dot
 from random import random , randint , sample
+from math import inf
 
 # SQ : condition for scouts , MCN : number of iterations
-def ABCgenetic(actGraph, candidates, SQ, MCN,minQos, maxQos, constraints, weightList):
+def ABCgenetic(actGraph, candidates, SQ, MCN,constraints, weightList):
 
     ############################# operations defitinition ##################################
 
@@ -19,18 +20,53 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,minQos, maxQos, constraints, weight
 
         if  fit > best_fit :
             best_fit = fit      # Updating best fitness
-            best_cp = solutionsList[fitnessList.index(fit)]   # Updating best solution
+            pos = fitnessList.index(fit)
+            best_cp = solutionsList[pos]   # Updating best solution
+            best_Qos = QosList[pos]
 
-    # Objective function
-    def f(cp, minQos, maxQos, constraints, weightList):
-        QosDict = cp.cpQos()
-        # constraints verification
+    def verifyConstraints(QosDict) :
         drt = constraints['responseTime'] - QosDict['responseTime']
         dpr = constraints['price'] - QosDict['price']
         dav = QosDict['availability'] - constraints['availability']
         drel = QosDict['reliability'] - constraints['reliability']
 
-        if drt and dpr and dav and drel:  # constraints verified
+        return drt and dpr and dav and drel
+
+    def updateMinMax() :
+        nonlocal best_fit , fitnessList , minQos , maxQos
+        # updating minQos and maxQos
+        # checking best_cp
+        try :
+            for qos in best_Qos :
+                if best_Qos[qos] < minQos[qos] :
+                    minQos[qos] = best_Qos[qos]
+                if best_Qos[qos] > maxQos[qos] :
+                    maxQos[qos] = best_Qos[qos]
+        except : # best_Qos not created
+            None
+        # checking solutionsLlist
+        for QosDict in QosList :
+            for qos in QosDict :
+                if QosDict[qos] < minQos[qos] :
+                    minQos[qos] = QosDict[qos]
+                if QosDict[qos] > maxQos[qos] :
+                    maxQos[qos] = QosDict[qos]
+        # Updating best fitness
+        try :
+            _ , best_fit = f(best_cp)
+        except : # best_cp not created
+            None
+        # updating fitnessList
+        for i in range(SN) :
+            _ , fitnessList[i] = f(solutionsList[i])
+
+
+
+
+    # Objective function
+    def f(cp):
+        QosDict = cp.cpQos()
+        if verifyConstraints(QosDict) :
             rt = (maxQos['responseTime'] - QosDict['responseTime']) / (maxQos['responseTime'] - minQos['responseTime'])
             pr = (maxQos['price'] - QosDict['price']) / (maxQos['price'] - minQos['price'])
             av = (QosDict['availability'] - minQos['availability']) / (maxQos['availability'] - minQos['availability'])
@@ -41,7 +77,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,minQos, maxQos, constraints, weight
             vect2 = array(weightList)
             # vectorial product
             globalQos =  dot(vect1, vect2)
-            return globalQos + cp.cpMatching()
+            return QosDict , globalQos + cp.cpMatching()
 
         else :  # constraints not verified
             return -1
@@ -77,25 +113,32 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,minQos, maxQos, constraints, weight
     SCP = 4 * MCN / 5  # changing point for scouts
 
 
-    # solutions and fitness initializing
+    # solutions , fitness , maxQos and minQos initializing
     solutionsList = list()
-    fitnessList = list()
+    fitnessList = list(0 for i in range(SN))
+    QosList = list()
+    minQos = {'responseTime': inf,'price' : inf,'availability' : inf,'reliability' : inf}
+    maxQos = {'responseTime': 0,'price' : 0,'availability' : 0,'reliability' : 0}
     probabilityList = list(0 for i in range(SN))
     limit = list(0 for i in range(SN))
 
     for i in range(SN):
         while 1:
             cp = cloud.CompositionPlan(actGraph, candidates)
-            fit = f(cp, minQos, maxQos, constraints, weightList)
-            if fit:
+            QosDict = cp.cpQos()
+
+            if verifyConstraints(QosDict) :
                 solutionsList.append(cp)
-                fitnessList.append(fit)
+                QosList.append(QosDict)
                 break
 
 
     # initializing best_fit and best_cp
+    updateMinMax()
     best_fit = max(fitnessList)
-    best_cp =  solutionsList[fitnessList.index(best_fit)]
+    pos = fitnessList.index(best_fit)
+    best_cp =  solutionsList[pos]
+    best_Qos = QosList[pos]
     # Algorithm
     for itera in range(MCN):
         # employed bees phase
@@ -104,10 +147,11 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,minQos, maxQos, constraints, weight
             cp1 = solutionsList[i]
             cp2 = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
             child = crossover(cp1, cp2) # Crossover operation
-            fit = f(child, minQos, maxQos, constraints, weightList)
+            child_Qos , fit = f(child)
             if fit > fitnessList[i]:  # checking if child fitness is better than parent fitness
                 fitnessList[i] = fit
                 solutionsList[i] = child
+                QosList[i] = child_Qos
                 limit[i] = 0
             else:
                 limit[i] += 1
@@ -126,10 +170,11 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,minQos, maxQos, constraints, weight
                 cp1 = solutionsList[i]
                 cp2 = best_cp   # current best
                 child = crossover(cp1, cp2) # Crossover operation
-                fit = f(child, minQos, maxQos, constraints, weightList)
+                child_Qos , fit = f(child)
                 if fit > fitnessList[i]:    # checking if child fitness is better than parent fitness
                     fitnessList[i] = fit
                     solutionsList[i] = child
+                    QosList[i] = child_Qos
                     limit[i] = 0
                     updateBest(fit)
                 else:
@@ -147,25 +192,27 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,minQos, maxQos, constraints, weight
                         neighbor = getNeighbor(service)
                         # mutation operation
                         mutate(cp,neighbor)
-                        fit = f(cp, minQos, maxQos, constraints, weightList)
+                        QosDict ,fit = f(cp)
 
                         if fit:   # verifying constraints compatibility of mutated ressource
                             solutionsList[i] = cp
                             fitnessList[i] = fit
+                            QosList[i] = QosDict
                             break
 
                 else:   # searching for new ressources to exploit
                     while 1:
                         cp = cloud.CompositionPlan(actGraph, candidates)
-                        fit = f(cp, minQos, maxQos, constraints, weightList)
+                        QosDict , fit = f(cp)
                         if fit:  # verifying constraints compatibility of new ressource
                             solutionsList[i] = cp
                             fitnessList[i] = fit
+                            QosList[i] = QosDict
                             break
 
                 limit[i] = 0
         # end of scout bees phase
-
+        updateMinMax()
 
     # end of algorithm
     return best_cp , best_fit
