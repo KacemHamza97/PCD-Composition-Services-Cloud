@@ -139,7 +139,7 @@ def ABCgenetic(actGraph, candidates,MCN,minQos, maxQos, constraints, weightList)
         # scout bees phase
         for i in exploited:
             if limit[i] == SQ:  # verifying scouts condition
-                if itera >= SCP: # change of scouts behaviour condition to mutating
+                if itera > SCP: # change of scouts behaviour condition to mutating
                     cp = solutionsList[i]
                     while 1:
                         # choose randomly a service to mutate
@@ -161,12 +161,11 @@ def ABCgenetic(actGraph, candidates,MCN,minQos, maxQos, constraints, weightList)
                         if fit:  # verifying constraints compatibility of new ressource
                             solutionsList[i] = cp
                             fitnessList[i] = fit
-                            SQ += 1
+                            SQ = (SQ+1) % 200
                             break
 
                 limit[i] = 0
         # end of scout bees phase
-
 
     # end of algorithm
     return best_cp , best_fit
