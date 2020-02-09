@@ -5,7 +5,7 @@ from random import random , randint , sample
 # MCN : number of iterations
 def ABCgenetic(actGraph, candidates,MCN,minQos, maxQos, constraints, weightList):
 
-    ############################# operations defitinition ##################################
+    ############################# operations definition ##################################
 
     # returning the nearest neighbor of service based on euclidean distance
     def getNeighbor(service):

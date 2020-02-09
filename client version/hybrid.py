@@ -6,7 +6,7 @@ from math import inf
 # SQ : condition for scouts , MCN : number of iterations
 def ABCgenetic(actGraph, candidates, SQ, MCN,constraints, weightList):
 
-    ############################# operations defitinition ##################################
+    ############################# operations definition ##################################
 
     # returning the nearest neighbor of service based on euclidean distance
     def getNeighbor(service):
