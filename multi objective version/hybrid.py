@@ -8,8 +8,6 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
 
     ############################# operations definition ##################################
 
-    # returning the nearest neighbor of service based on euclidean distance
-
     def verifyConstraints(QosDict) :
         drt = constraints['responseTime'] - QosDict['responseTime']
         dpr = constraints['price'] - QosDict['price']
