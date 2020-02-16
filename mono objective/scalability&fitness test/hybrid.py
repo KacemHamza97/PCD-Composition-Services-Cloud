@@ -139,13 +139,13 @@ def ABCgenetic(actGraph, candidates,SQ,MCN,constraints, weights):
         updateBest()
 
         # Probability update
+        s = sum(fitnessList)
         for i in exploited :
-            s = sum(fitnessList)
             probabilityList[i] = fitnessList[i] / s
 
         # onlooker bees phase
         for i in exploited:
-            if probabilityList[i] > uniform(min(fitnessList)/s,max(fitnessList)/s):
+            if probabilityList[i] > uniform(min(probabilityList),max(probabilityList)):
                 cp1 = solutionsList[i]
                 cp2 = best_cp   # current best
                 while 1 :
