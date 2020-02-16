@@ -1,38 +1,89 @@
 import cloud
 from numpy import array , dot
 from random import random , randint , sample
-from math import inf
+
+def verifyConstraints(QosDict) :
+    drt = constraints['responseTime'] - QosDict['responseTime']
+    dpr = constraints['price'] - QosDict['price']
+    dav = QosDict['availability'] - constraints['availability']
+    drel = QosDict['reliability'] - constraints['reliability']
+
+    return drt and dpr and dav and drel
+
+def fit(cp):
+    dom = 0
+    F = np.array(list(cp.cpQos().values())+[cp.cpMatching()])
+    for i in range(SN) :
+        G = np.array(list(solutionsList[i].cpQos().values())+solutionsList[i].cpMatching())
+        if (F >= G).all() and (F > G).any() :
+            dom += 1
+    return dom / SN
+
+def BSG(cp1, cp2):
+
+    # Crossover
+
+    # First neighbor
+
+    neighbor1 = new_cp = cp1.clone()
+
+    while 1 :
+        x1 = randint(0,cp2.actNum-2)
+        x2 = randint(x1+1,cp2.actNum-1)
+        for act in list(cp2.G.nodes)[x1,x2+1]:  # Selecting service to replace
+                # replacing with service from second parent
+                neighbor1.G.nodes[act]["service"] = cp2.G.nodes[act]["service"]
+                if verifyConstraints(neighbor1.cpQos()) :
+                    break
+
+    # Second neighbor
+
+    neighbor2 = new_cp = cp2.clone()
+
+    while 1 :
+        x1 = randint(0,cp1.actNum-2)
+        x2 = randint(x1+1,cp1.actNum-1)
+        for act in list(cp1.G.nodes)[x1,x2+1]:  # Selecting service to replace
+                # replacing with service from second parent
+                neighbor2.G.nodes[act]["service"] = cp1.G.nodes[act]["service"]
+                if verifyConstraints(neighbor2.cpQos()) :
+                    break
+
+    # Mutation
+
+    # First neighbor
+
+    neighbor3 = new_cp = cp1.clone()
+
+    # choose randomly a service to mutate
+    service = neighbor3.G.nodes[randint(0, neighbor3.actNum - 1)]["service"]
+    while 1 :
+        new = sample(candidates[service.getActivity()],1)[0]
+        # mutation operation
+        neighbor3.G.nodes[new.getActivity()]["service"] = new
+        if verifyConstraints(neighbor3.cpQos()) :
+            break
+
+    # Second neighbor
+
+    neighbor4 = new_cp = cp2.clone()
+
+    # choose randomly a service to mutate
+    service = neighbor4.G.nodes[randint(0, neighbor4.actNum - 1)]["service"]
+    while 1 :
+        new = sample(candidates[service.getActivity()],1)[0]
+        # mutation operation
+        neighbor4.G.nodes[new.getActivity()]["service"] = new
+        if verifyConstraints(neighbor4.cpQos()) :
+            break
+
+    return [neighbor1 , neighbor2 , neighbor3 , neighbor4]
+
 
 # SQ : condition for scouts , MCN : number of iterations
 def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
 
     ############################# operations definition ##################################
-
-    def verifyConstraints(QosDict) :
-        drt = constraints['responseTime'] - QosDict['responseTime']
-        dpr = constraints['price'] - QosDict['price']
-        dav = QosDict['availability'] - constraints['availability']
-        drel = QosDict['reliability'] - constraints['reliability']
-
-        return drt and dpr and dav and drel
-
-    def fitnessCalc(pos):
-        dom = 0
-        F = functionsList[pos]
-        for i in range(SN) :
-            G = functionsList[i]
-            if i != pos and (F >= G).all() and (F > G).any() :
-                dom += 1
-        return dom / SN
-
-
-    def multi_f(QosDict) :
-        f1 = -QosDict['responseTime']
-        f2 = -QosDict['price']
-        f3 = QosDict['availability']
-        f4 = QosDict['reliability']
-        return array([QosDict[qos] for qos in QosDict]+[cp.cpMatching()])
-
 
     def nonDominatedSort(X) :
         fronts = [[]]
@@ -67,79 +118,12 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
         return [[solutionsList[x] for x in f] for f in fronts]
 
 
-    def BSG(cp1, cp2):
-
-        # creating neighbor1 , neighbor3 identical to cp1 and neighbor2 , neighbor 4 identical to cp2
-        actGraph = list(cp1.G.edges.data("weight"))  # getting actGraph from parent
-        cp1_services = [[act[1]] for act in list(cp1.G.nodes.data("service"))] # getting services from parent
-        cp2_services = [[act[1]] for act in list(cp2.G.nodes.data("service"))] # getting services from parent
-        neighbor1 = cloud.CompositionPlan(actGraph, cp1_services)
-        neighbor2 = cloud.CompositionPlan(actGraph, cp2_services)
-        neighbor3 = cloud.CompositionPlan(actGraph, cp1_services)
-        neighbor4 = cloud.CompositionPlan(actGraph, cp2_services)
-
-        # Crossover
-
-        # modifying neighbor1
-        while 1 :
-            x1 = randint(0,cp2.actNum-2)
-            x2 = randint(x1+1,cp2.actNum-1)
-            for act in cp2.G.nodes:  # Selecting service to replace
-                if x1 <= act <= x2:
-                    # replacing with service from second parent
-                    neighbor1.G.nodes[act]["service"] = cp2.G.nodes[act]["service"]
-                    QosDict1 = neighbor1.cpQos()
-                    if verifyConstraints(QosDict1) :
-                        break
-
-        # modifying neighbor2
-        while 1 :
-            x1 = randint(0,cp1.actNum-2)
-            x2 = randint(x1+1,cp1.actNum-1)
-            for act in cp1.G.nodes:  # Selecting service to replace
-                if x1 <= act <= x2:
-                    # replacing with service from second parent
-                    neighbor2.G.nodes[act]["service"] = cp1.G.nodes[act]["service"]
-                    QosDict2 = neighbor2.cpQos()
-                    if verifyConstraints(QosDict2) :
-                        break
-
-        # Mutation
-
-        # modifying neighbor3
-        # choose randomly a service to mutate
-        service = neighbor3.G.nodes[randint(0, neighbor3.actNum - 1)]["service"]
-        while 1 :
-            new = sample(candidates[service.getActivity()],1)[0]
-            # mutation operation
-            neighbor3.G.nodes[new.getActivity()]["service"] = new
-            QosDict3 = neighbor3.cpQos()
-            if verifyConstraints(QosDict3) :
-                break
-
-        # modifying neighbor4
-        # choose randomly a service to mutate
-        service = neighbor4.G.nodes[randint(0, neighbor4.actNum - 1)]["service"]
-        while 1 :
-            new = sample(candidates[service.getActivity()],1)[0]
-            # mutation operation
-            neighbor4.G.nodes[new.getActivity()]["service"] = new
-            QosDict3 = neighbor3.cpQos()
-            if verifyConstraints(QosDict3) :
-            new = sample(candidates[service.getActivity()],1)[0]
-            # mutation operation
-            neighbor4.G.nodes[new.getActivity()]["service"] = new
-            QosDict4 = neighbor4.cpQos()
-            if verifyConstraints(QosDict4) :
-                break    break
-
-        return [neighbor1 , neighbor2 , neighbor3 , neighbor4] , [QosDict1 , QosDict2, QosDict3 , QosDict4]
-
 
     def crowdingSort(front) :
         for p in front :
             F = functionsList[p]
             # not complete
+
     def updateSolutions() :
         i = 0
         S = []

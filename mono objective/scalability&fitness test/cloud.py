@@ -65,7 +65,6 @@ class CompositionPlan:
         for act, candidate in enumerate(candidates):  # Generating random services from candidates
             self.G.nodes[act]["service"] = sample(candidate, 1)[0]
             self.G.nodes[act]["visited"] = False      # this attribut is used for calculating qos once per node
-        self.__actNum = self.G.number_of_nodes()        # number of activities
         self.__qos = None  # not initialized
         self.__matching = None # not initialized
 
@@ -139,7 +138,7 @@ class CompositionPlan:
             return qos
 
         if rootAct == 0 :  # reversing visited attribut of each node to False - final step
-            for act in range(self.__actNum) :
+            for act in range(self.G.number_of_nodes()) :
                 self.G.nodes[act]["visited"] = False
             self.qos = qos  # storing qos in attribut
 
@@ -150,8 +149,8 @@ class CompositionPlan:
         if self.__matching != None :
             return self.__matching
         # sum of matching degree of each service
-        s = sum([self.G.nodes[i]["service"].getMatching() for i in range(self.__actNum)])
-        return s / self.__actNum
+        s = sum([self.G.nodes[i]["service"].getMatching() for i in range(self.G.number_of_nodes())])
+        return s / self.G.number_of_nodes()
 
     # cloning composition plan
     def clone(self) :
