@@ -28,12 +28,11 @@ def generateCandidates(actNum, num_candidates):
 actNum = int(input("NUMBER OF ACTIVITIES : "))
 num_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
 constraints = {'responseTime': actNum * 0.3, 'price': actNum * 1.55, 'availability': 0.945 ** actNum, 'reliability': 0.825 ** actNum}
-weightList = [0.25, 0.25, 0.25, 0.25]
 actGraph = generateActGraph(actNum)
 candidates = generateCandidates(actNum, num_candidates)
 
 # optimal fitness
-_ , opt =  hybrid.ABCgenetic(actGraph, candidates,SQ=30, MCN=3000,constraints=constraints, weightList=weightList)
+#_ , opt =  hybrid.ABCgenetic(actGraph, candidates,SQ=30, MCN=3000,constraints=constraints, weightList=weightList)
 
 while True :
 
@@ -42,11 +41,11 @@ while True :
 
     print("Executing Algorithm ")
     start_time = time.time()
-    _ , fit = hybrid.ABCgenetic(actGraph, candidates,SQ=sq, MCN=mcn,constraints=constraints, weightList=weightList)
+    result = hybrid.ABCgenetic(actGraph, candidates,SQ=sq, MCN=mcn,constraints=constraints)
     rt = time.time() - start_time
 
     with open('Sequencialdataset.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        file_writer.writerow([actNum,num_candidates,sq, mcn,fit / opt ,rt])
+        file_writer.writerow([actNum,num_candidates,sq, mcn,rt])
 
-    print("fitness = {}\nScalability = {}\nDone !".format(fit / opt,rt))
+    print(result)

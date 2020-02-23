@@ -1,6 +1,7 @@
 import cloud
-from numpy import array , dot
+from numpy import array , dot , minimum , maximum
 from random import uniform , randint , sample
+from math import inf
 
 def verifyConstraints(QosDict,constraints) :
     drt = constraints['responseTime'] - QosDict['responseTime']
@@ -12,67 +13,8 @@ def verifyConstraints(QosDict,constraints) :
 
 
 def functions(cp) :
-    return np.array(list(cp.cpQos().values())+[cp.cpMatching()])
+    return array(list(cp.cpQos().values())+[cp.cpMatching()])
 
-def BSG(cp1, cp2):
-
-    # Crossover
-
-    # First neighbor
-
-    neighbor1 = cp1.clone()
-
-    while 1 :
-        x1 = randint(0,cp2.actNum-2)
-        x2 = randint(x1+1,cp2.actNum-1)
-        for act in list(cp2.G.nodes)[x1:x2+1]:  # Selecting service to replace
-                # replacing with service from second parent
-                neighbor1.G.nodes[act]["service"] = cp2.G.nodes[act]["service"]
-                if verifyConstraints(neighbor1.cpQos()) :
-                    break
-
-    # Second neighbor
-
-    neighbor2 = cp2.clone()
-
-    while 1 :
-        x1 = randint(0,cp1.actNum-2)
-        x2 = randint(x1+1,cp1.actNum-1)
-        for act in list(cp1.G.nodes)[x1:x2+1]:  # Selecting service to replace
-                # replacing with service from second parent
-                neighbor2.G.nodes[act]["service"] = cp1.G.nodes[act]["service"]
-                if verifyConstraints(neighbor2.cpQos()) :
-                    break
-
-    # Mutation
-
-    # First neighbor
-
-    neighbor3 = cp1.clone()
-
-    # choose randomly a service to mutate
-    service = neighbor3.G.nodes[randint(0, neighbor3.actNum - 1)]["service"]
-    while 1 :
-        new = sample(candidates[service.getActivity()],1)[0]
-        # mutation operation
-        neighbor3.G.nodes[new.getActivity()]["service"] = new
-        if verifyConstraints(neighbor3.cpQos()) :
-            break
-
-    # Second neighbor
-
-    neighbor4 = cp2.clone()
-
-    # choose randomly a service to mutate
-    service = neighbor4.G.nodes[randint(0, neighbor4.actNum - 1)]["service"]
-    while 1 :
-        new = sample(candidates[service.getActivity()],1)[0]
-        # mutation operation
-        neighbor4.G.nodes[new.getActivity()]["service"] = new
-        if verifyConstraints(neighbor4.cpQos()) :
-            break
-
-    return [neighbor1 , neighbor2 , neighbor3 , neighbor4]
 
 
 # SQ : condition for scouts , MCN : number of iterations
@@ -88,6 +30,67 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
             if (F >= G).all() and (F > G).any() :
                 dom += 1
         return dom / SN
+
+    def BSG(cp1, cp2 , constraints):
+
+        # Crossover
+
+        # First neighbor
+
+        neighbor1 = cp1.clone()
+
+        while 1 :
+            x1 = randint(0,cp2.G.number_of_nodes()-2)
+            x2 = randint(x1+1,cp2.G.number_of_nodes()-1)
+            for act in list(cp2.G.nodes)[x1:x2+1]:  # Selecting service to replace
+                    # replacing with service from second parent
+                    neighbor1.G.nodes[act]["service"] = cp2.G.nodes[act]["service"]
+            if verifyConstraints(neighbor1.cpQos() , constraints) :
+                break
+
+        # Second neighbor
+
+        neighbor2 = cp2.clone()
+
+        while 1 :
+            x1 = randint(0,cp1.G.number_of_nodes()-2)
+            x2 = randint(x1+1,cp1.G.number_of_nodes()-1)
+            for act in list(cp1.G.nodes)[x1:x2+1]:  # Selecting service to replace
+                    # replacing with service from second parent
+                    neighbor2.G.nodes[act]["service"] = cp1.G.nodes[act]["service"]
+            if verifyConstraints(neighbor2.cpQos() , constraints) :
+                break
+
+        # Mutation
+
+        # First neighbor
+
+        neighbor3 = cp1.clone()
+
+        # choose randomly a service to mutate
+        service = neighbor3.G.nodes[randint(0, neighbor3.G.number_of_nodes() - 1)]["service"]
+        while 1 :
+            new = sample(candidates[service.getActivity()],1)[0]
+            # mutation operation
+            neighbor3.G.nodes[new.getActivity()]["service"] = new
+            if verifyConstraints(neighbor3.cpQos() , constraints) :
+                break
+
+        # Second neighbor
+
+        neighbor4 = cp2.clone()
+
+        # choose randomly a service to mutate
+        service = neighbor4.G.nodes[randint(0, neighbor4.G.number_of_nodes() - 1)]["service"]
+        while 1 :
+            new = sample(candidates[service.getActivity()],1)[0]
+            # mutation operation
+            neighbor4.G.nodes[new.getActivity()]["service"] = new
+            if verifyConstraints(neighbor4.cpQos() , constraints) :
+                break
+
+        neighborsList = [neighbor1 , neighbor2 , neighbor3 , neighbor4]
+        return [{"cp" : cp , "fitness" : None , "functions" : functions(cp) , "limit" : 0 , "probability" : 0} for cp in neighborsList]
 
 
     def nonDominatedSort(X) :
@@ -123,28 +126,51 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
         return [[X[p] for p in f] for f in fronts]
 
 
-
     def crowdingSort(front) :
+        scoresList = list()
         for p in front :
-            F = functionsList[p]
-            # not complete
+            score = list()
+            for f in range(5) :
+                high = []
+                low = []
+                for q in front :
+                    if q["functions"][f] < p["functions"][f]  :
+                        low.append(q["functions"][f])
+                    if q["functions"][f] > p["functions"][f] :
+                        high.append(q["functions"][f])
+                if len(high) == 0 :
+                    next_high = p["functions"][f]
+                else :
+                    next_high = min(high)
+                if len(low) == 0 :
+                     next_low = p["functions"][f]
+                else :
+                    next_low = max(low)
+                score.append(next_high-next_low)
+            scoresList.append(sum(score))
 
-    def updateSolutions() :
+        return sorted(front , key=dict(zip(front, scoresList)).get)
+
+
+
+
+
+    def updateSolutions(solutionsList) :
         i = 0
         S = []
         while len(fronts[i]) <= SN - len(S) :
             S += fronts[i]
             i += 1
 
-        crowding_selection = crowdingSort(fronts[i])
+        crowding_selection = crowdingSort(fronts[i])[0:SN - len(S)]
         S += crowding_selection
         for cp in S :
             if cp in solutionsList :
                 cp["limit"] += 1
 
         solutionsList = S
-        for cp in S :
-            cp["fitness"] = fit(cp)
+        for solution in solutionsList :
+            solution["fitness"] = fit(solution["cp"])
 
 
 
@@ -154,8 +180,6 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
     # initializing parameters
 
     SN = 20           # SN : number of ressources
-    SCP = 4 * MCN / 5  # changing point for scouts
-
 
     # solutions  initializing
     solutionsList = list()
@@ -165,28 +189,31 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
             cp = cloud.CompositionPlan(actGraph, candidates)
             QosDict = cp.cpQos()
             if verifyConstraints(QosDict,constraints) :
-                solutionsList[i].append({"cp" : cp , "fitness" : None , "functions" : functions(cp) , "limit" : 0 , "probability" : 0})
+                solutionsList.append({"cp" : cp , "fitness" : None , "functions" : functions(cp) , "limit" : 0 , "probability" : 0})
                 break
 
     # initializing fitnessList
     for i in range(SN) :
-        solutionsList[i]["fitness"] = fit(i)
+        solutionsList[i]["fitness"] = fit(solutionsList[i]["cp"])
 
 
     # Algorithm
     for itera in range(MCN):
+
+        print(f"completed = {(itera+1) * 100 / MCN } %",end = '\r')
+
         # employed bees phase
         exploited = sample(list(range(SN)),SN // 2)   # Generating positions list for exploitation
         for i in exploited :
             cp1 = solutionsList[i]["cp"]
             cp2 = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
-            neighbors = BSG(cp1, cp2) # BSG
-            solutionsList += neighborsList
+            neighbors = BSG(cp1, cp2 , constraints) # BSG
+            solutionsList += neighbors
         # end of employed bees phase
         fronts = nonDominatedSort(solutionsList)
-        updateSolutions()
+        updateSolutions(solutionsList)
         # Probability update
-        s = sum([solutionsList[j]["fitness"] for j in range(SN))
+        s = sum([solutionsList[i]["fitness"] for i in range(SN)])
         for i in exploited :
             solutionsList[i]["probability"] = solutionsList[i]["fitness"] / s
 
@@ -195,11 +222,11 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
             if solutionsList[i]["probability"] > uniform(min([solutionsList[x]["probability"] for x in range(SN)]) , max([solutionsList[x]["probability"] for x in range(SN)])) :
                 cp1 = solutionsList[i]["cp"]
                 cp2 = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
-                neighbors = BSG(cp1, cp2) # BSG
-                solutionsList += {"cp" : neighborsList[i] , "fitness" : None , "functions" : functions(neighborsList[i]) , "limit" : 0 , "probability" : 0 for i in range(4)}
+                neighbors = BSG(cp1, cp2 , constraints) # BSG
+                solutionsList += neighbors
         # end of employed bees phase
         fronts = nonDominatedSort(solutionsList)
-        updateSolutions()
+        updateSolutions(solutionsList)
         # end of onlooker bees phase
 
         # scout bees phase
@@ -208,12 +235,13 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
                 while 1 :
                     cp = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
                     if verifyConstraints(cp.cpQos(),constraints) :
-                        solutionsList[i]["cp"] = cp
-                        solutionsList[i]["fitness"] = fit(cp)
-                        solutionsList[i]["functions"] = functions(cp)
-                        solutionsList[i]["limit"] = 0
+                        solutionsList.append({"cp" : cp , "fitness" : fit(cp) , "functions" : functions(cp) , "limit" : 0})
                         break
 
+        fronts = nonDominatedSort(solutionsList)
+        updateSolutions(solutionsList)
         # end of scout bees phase
 
     # end of algorithm
+    print("\n")
+    return [sol["cp"] for sol in solutionsList]
