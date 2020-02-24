@@ -48,4 +48,5 @@ while True :
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         file_writer.writerow([actNum,num_candidates,sq, mcn,rt])
 
-    print(result)
+    for cp in result :
+        print(f"possible solution :\n{cp.cpQos()}\n")

@@ -1,7 +1,6 @@
 import cloud
-from numpy import array , dot , minimum , maximum
+from numpy import array , dot
 from random import uniform , randint , sample
-from math import inf
 
 def verifyConstraints(QosDict,constraints) :
     drt = constraints['responseTime'] - QosDict['responseTime']
@@ -13,7 +12,13 @@ def verifyConstraints(QosDict,constraints) :
 
 
 def functions(cp) :
-    return array(list(cp.cpQos().values())+[cp.cpMatching()])
+    QosDict = cp.cpQos()
+    f1 = - QosDict["responseTime"]
+    f2 = - QosDict["price"]
+    f3 = QosDict["availability"]
+    f4 = QosDict["reliability"]
+    f5 = cp.cpMatching()
+    return array([f1,f2,f3,f4,f5])
 
 
 
@@ -23,7 +28,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
     ############################# operations definition ##################################
 
     def fit(cp):
-        dom = 0
+        dom = 1
         F = functions(cp)
         for i in range(SN) :
             G = functions(solutionsList[i]["cp"])
@@ -149,28 +154,32 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
                 score.append(next_high-next_low)
             scoresList.append(sum(score))
 
-        return sorted(front , key=dict(zip(front, scoresList)).get)
+        return [i[1] for i in sorted(zip(scoresList , front) , key = lambda x:x[0] , reverse = True)]
 
 
-
-
-
-    def updateSolutions(solutionsList) :
+    def updateSolutions(solutionsList , fronts) :
         i = 0
         S = []
-        while len(fronts[i]) <= SN - len(S) :
+
+        while i < len(fronts) and len(fronts[i]) <= SN - len(S) :
             S += fronts[i]
             i += 1
 
-        crowding_selection = crowdingSort(fronts[i])[0:SN - len(S)]
-        S += crowding_selection
+        if i < len(fronts) :
+            crowding_selection = crowdingSort(fronts[i])[0:SN - len(S)]
+            S += crowding_selection
+
         for cp in S :
             if cp in solutionsList :
                 cp["limit"] += 1
 
-        solutionsList = S
-        for solution in solutionsList :
-            solution["fitness"] = fit(solution["cp"])
+        solutionsList[:] = S
+
+        for cp in solutionsList :
+            cp["fitness"] = fit(cp["cp"])
+
+
+
 
 
 
@@ -189,7 +198,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
             cp = cloud.CompositionPlan(actGraph, candidates)
             QosDict = cp.cpQos()
             if verifyConstraints(QosDict,constraints) :
-                solutionsList.append({"cp" : cp , "fitness" : None , "functions" : functions(cp) , "limit" : 0 , "probability" : 0})
+                solutionsList.append({"cp" : cp , "fitness" : 0 , "functions" : functions(cp) , "limit" : 0 , "probability" : 0})
                 break
 
     # initializing fitnessList
@@ -211,7 +220,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
             solutionsList += neighbors
         # end of employed bees phase
         fronts = nonDominatedSort(solutionsList)
-        updateSolutions(solutionsList)
+        updateSolutions(solutionsList , fronts)
         # Probability update
         s = sum([solutionsList[i]["fitness"] for i in range(SN)])
         for i in exploited :
@@ -226,7 +235,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
                 solutionsList += neighbors
         # end of employed bees phase
         fronts = nonDominatedSort(solutionsList)
-        updateSolutions(solutionsList)
+        updateSolutions(solutionsList , fronts)
         # end of onlooker bees phase
 
         # scout bees phase
@@ -235,13 +244,12 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
                 while 1 :
                     cp = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
                     if verifyConstraints(cp.cpQos(),constraints) :
-                        solutionsList.append({"cp" : cp , "fitness" : fit(cp) , "functions" : functions(cp) , "limit" : 0})
+                        solutionsList.append({"cp" : cp , "fitness" : fit(cp) , "functions" : functions(cp) , "limit" : 0 , "probability" : 0})
                         break
-
-        fronts = nonDominatedSort(solutionsList)
-        updateSolutions(solutionsList)
+                fronts = nonDominatedSort(solutionsList)
+                updateSolutions(solutionsList , fronts)
         # end of scout bees phase
 
     # end of algorithm
     print("\n")
-    return [sol["cp"] for sol in solutionsList]
+    return [sol["cp"] for sol in fronts[0]]
