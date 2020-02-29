@@ -258,4 +258,4 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
 
     # end of algorithm
     print("\n")
-    return [sol["cp"] for sol in fronts[0]]
+    return array([sol["functions"] for sol in solutionsList]) , array([sol["functions"] for sol in fronts[0]])
