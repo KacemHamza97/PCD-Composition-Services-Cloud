@@ -304,7 +304,7 @@ def ABCgenetic(actGraph, candidates, SQ, MCN,constraints):
         U = list()
         U[:] = solutionsList
         for i in exploited :
-            if solutionsList[i]["limit"] == SQ :
+            if solutionsList[i]["limit"] >= SQ :
                 print(f"solution {i} reached limit ... ")
                 while 1 :
                     cp = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp

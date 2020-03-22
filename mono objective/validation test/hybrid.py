@@ -215,7 +215,7 @@ def ABCgenetic(actGraph, candidates,SQ,MCN,constraints, weights):
         show_solutions()
         # scout bees phase
         for i in exploited:
-            if limit[i] == SQ:  # verifying scouts condition
+            if limit[i] >= SQ:  # verifying scouts condition
                 print(f"solution {i} reached limit ... ")
                 if itera >= SCP: # change of scouts behaviour condition to mutating
                     cp = solutionsList[i]

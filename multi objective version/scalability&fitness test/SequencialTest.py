@@ -85,7 +85,7 @@ while True :
 
 
     print("Executing moabc Algorithm ")
-    solutions_moabc = moabc.algorithm(actGraph, candidates,MCN=mcn,constraints=constraints)
+    solutions_moabc = moabc.algorithm(actGraph, candidates,SQ = sq ,MCN=mcn,constraints=constraints)[0]
     paretosList.extend(solutions_moabc)
 
 
@@ -106,6 +106,9 @@ while True :
 
     if len(solutions_nsga2) > 10 :
         solutions_nsga2 = crowdingSort(solutions_nsga2)[:10]
+
+    if len(solutions_moabc) > 10 :
+        solutions_moabc = crowdingSort(solutions_moabc)[:10]
 
     solutions_hybrid = np.array([sol["functions"] for sol in solutions_hybrid])
     solutions_moabc = np.array([sol["functions"] for sol in solutions_moabc])

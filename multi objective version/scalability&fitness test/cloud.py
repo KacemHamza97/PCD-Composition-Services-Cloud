@@ -141,7 +141,7 @@ class CompositionPlan:
         if rootAct == 0 :  # reversing visited attribut of each node to False - final step
             for act in range(self.__actNum) :
                 self.G.nodes[act]["visited"] = False
-            self.qos = qos  # storing qos in attribut
+            self.__qos = qos  # storing qos in attribut
 
         return qos
 

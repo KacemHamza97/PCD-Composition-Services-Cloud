@@ -185,7 +185,7 @@ def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
 
     # initializing parameters
 
-    SN = 50           # SN : number of ressources
+    SN = 20           # SN : number of ressources
 
     # solutions  initializing
     solutionsList = list()
@@ -229,13 +229,13 @@ def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
         U = list()
         U[:] = solutionsList
         for i in exploited :
-            if solutionsList[i]["probability"] > uniform(min([solutionsList[x]["probability"] for x in range(SN)]) , max([solutionsList[x]["probability"] for x in range(SN)])) :
+            if solutionsList[i]["probability"] >= uniform(min([solutionsList[x]["probability"] for x in range(SN)]) , max([solutionsList[x]["probability"] for x in range(SN)])) :
                 cp1 = solutionsList[i]["cp"]
                 cp2 = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
                 neighbors = BSG(cp1, cp2 , constraints) # BSG
                 U += neighbors
         # end of employed bees phase
-        fronts = nonDominatedSort(solutionsList)
+        fronts = nonDominatedSort(U)
         updateSolutions(solutionsList , fronts)
         # end of onlooker bees phase
 
@@ -244,7 +244,7 @@ def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
         U = list()
         U[:] = solutionsList
         for i in exploited :
-            if solutionsList[i]["limit"] == SQ :
+            if solutionsList[i]["limit"] >= SQ :
                 while 1 :
                     cp = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
                     if verifyConstraints(cp.cpQos(),constraints) :
