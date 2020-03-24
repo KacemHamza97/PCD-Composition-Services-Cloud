@@ -1,3 +1,6 @@
-## Scalability & fitness
-* tests to verify that results are close to the optimal fitness
-* tests to record response time of the algorithm 
+## First version
+* SN = 100
+* CR = 80 %
+* Bee number = SN 
+* CP =  4 / 5
+* Roulette = 0,1
