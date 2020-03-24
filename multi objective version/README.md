@@ -1,2 +1,4 @@
-## Performance comparaison
-* tests the 3 multi objective algorithms in order to compare performance
+## Multi Objective algorithms
+* MOABC
+* NSGA-II
+* MOABC-NSGA-II (HYBRID) 
