@@ -130,7 +130,7 @@ def moabc(actGraph, candidates, SQ , MCN,constraints):
 
     # initializing parameters
 
-    SN = 20           # SN : number of ressources
+    SN = 50           # SN : number of ressources
 
     # solutions  initializing
     solutionsList = list()
@@ -198,7 +198,7 @@ def moabc(actGraph, candidates, SQ , MCN,constraints):
             if solutionsList[pick]["limit"] >= SQ :
                 while 1 :
                     cp = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
-                    if verifyConstraints(cp["cp"].cpQos(),constraints) :
+                    if verifyConstraints(cp.cpQos(),constraints) :
                         solutionsList[pick] = {"cp" : cp , "fitness" : fit(cp) , "functions" : functions(cp) , "limit" : 0 , "probability" : 0}
                         break
         # end of scout bees phase

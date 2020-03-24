@@ -185,7 +185,7 @@ def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
 
     # initializing parameters
 
-    SN = 20           # SN : number of ressources
+    SN = 50           # SN : number of ressources
 
     # solutions  initializing
     solutionsList = list()

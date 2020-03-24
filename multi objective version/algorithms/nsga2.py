@@ -35,7 +35,7 @@ def nsga2(actGraph, candidates,G,constraints):
         while 1 :
             x1 = randint(0,cp2.G.number_of_nodes()-2)
             x2 = randint(x1+1,cp2.G.number_of_nodes()-1)
-            for act in list(cp2.G.nodes)[x1:x2+1]:  # Selecting service to replace
+            for act in range(x1,x2+1):  # Selecting service to replace
                     # replacing with service from second parent
                     neighbor1.G.nodes[act]["service"] = cp2.G.nodes[act]["service"]
             if verifyConstraints(neighbor1.cpQos() , constraints) :
@@ -48,7 +48,7 @@ def nsga2(actGraph, candidates,G,constraints):
         while 1 :
             x1 = randint(0,cp1.G.number_of_nodes()-2)
             x2 = randint(x1+1,cp1.G.number_of_nodes()-1)
-            for act in list(cp1.G.nodes)[x1:x2+1]:  # Selecting service to replace
+            for act in range(x1,x2+1):  # Selecting service to replace
                     # replacing with service from second parent
                     neighbor2.G.nodes[act]["service"] = cp1.G.nodes[act]["service"]
             if verifyConstraints(neighbor2.cpQos() , constraints) :
