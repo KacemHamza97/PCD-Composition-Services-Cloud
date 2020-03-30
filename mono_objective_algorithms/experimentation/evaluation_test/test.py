@@ -41,7 +41,7 @@ constraints = {'responseTime': actNum * 0.3, 'price': actNum * 1.55, 'availabili
 weights = [0.25, 0.25, 0.25, 0.25]
 actGraph = generateActGraph(actNum)
 candidates = generateCandidates(actNum, num_candidates)
-
+normalized_fitness = 0
 mcn = int(input("ITERATION NUMBER : "))
 sn = int(input("RESSOURCES NUMBER : "))
 sq = int(input("SCOUTS CONDITION : "))
@@ -64,10 +64,13 @@ for itera in range(30) :
     normalized_fitness += (fit(result, minQos, maxQos, weights) / fit(opt, minQos, maxQos, weights)) / 30
     div += abs(fit(result, minQos, maxQos, weights)-fit_prev) / 30
     res_prev = fit(result, minQos, maxQos, weights)
-    if fit(result, minQos, maxQos, weights)-fit(res_prev, minQos, maxQos, weights) :
+    if fit(result, minQos, maxQos, weights)-fit_prev ==0 :
         conv.append(itera)
 
-conv = min(conv) 
+try:
+    conv = min(conv)
+except:
+    conv = "_"
 
 with open('test_results.csv', mode='a') as file:
     file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -85,12 +88,15 @@ for itera in range(30) :
     result, minQos, maxQos = ABC(actGraph, candidates, SN=sn,SQ=sq, MCN=mcn, N=sn // 2, constraints=constraints, weights=weights)
     rt += (time.time() - start_time) / 30
     normalized_fitness += (fit(result, minQos, maxQos, weights) / fit(opt, minQos, maxQos, weights)) / 30
-    div += abs(fit(result, minQos, maxQos, weights)-fit(res_prev, minQos, maxQos, weights)) / 30
+    div += abs(fit(result, minQos, maxQos, weights)-fit_prev)
     fit_prev = fit(result, minQos, maxQos, weights)
-    if fit(result, minQos, maxQos, weights)-fit(res_prev, minQos, maxQos, weights) :
+    if fit(result, minQos, maxQos, weights)-fit_prev ==0 :
         conv.append(itera)
 
-conv = min(conv) 
+try:
+    conv = min(conv)
+except:
+    conv = "_"
 
 with open('test_results.csv', mode='a') as file:
     file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -108,12 +114,14 @@ for itera in range(30) :
     result, minQos, maxQos = genetic(actGraph, candidates, SN=sn,CP=0.7, constraints=constraints, weights=weights)
     rt += (time.time() - start_time) / 30
     normalized_fitness += (fit(result, minQos, maxQos, weights) / fit(opt, minQos, maxQos, weights)) / 30
-    div += abs(fit(result, minQos, maxQos, weights)-fit(res_prev, minQos, maxQos, weights)) / 30
+    div += abs(fit(result, minQos, maxQos, weights)- fit_prev)
     fit_prev = fit(result, minQos, maxQos, weights)
-    if fit(result, minQos, maxQos, weights)-fit(res_prev, minQos, maxQos, weights) :
+    if fit(result, minQos, maxQos, weights)-fit_prev ==0 :
         conv.append(itera)
-
-conv = min(conv) 
+try:
+    conv = min(conv)
+except:
+    conv = "_"
 
 with open('test_results.csv', mode='a') as file:
     file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
