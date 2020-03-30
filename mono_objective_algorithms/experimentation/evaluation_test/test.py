@@ -4,6 +4,8 @@ import csv
 
 from data_structure.Service import Service
 from mono_objective_algorithms.algorithms.main.hybrid import ABCgenetic
+from mono_objective_algorithms.algorithms.main.ABC import ABC
+from mono_objective_algorithms.algorithms.main.genetic import genetic
 from mono_objective_algorithms.algorithms.objective_function.fitness import fit
 
 state = ["over", "precise"]
@@ -49,15 +51,67 @@ print("optimal fitness search !")
 opt, _, _ = ABCgenetic(actGraph, candidates, SN=sn, SQ=100, MCN=mcn * 10,SCP=9 * mcn // 10, N=sn // 2,CP=0.2, constraints=constraints, weights=weights)
 print("\nDone !")
 
-print("Executing Algorithm ")
-start_time = time.time()
-result, minQos, maxQos = ABCgenetic(actGraph, candidates, SN=sn, SQ=sq, MCN=mcn,SCP=9 * mcn // 10, N=sn // 2,CP=0.2, constraints=constraints, weights=weights)
-rt = time.time() - start_time
+for itera in range(30) : 
+    rt = 0
+    res_prev = 0
+    div = 0
+    conv = []
+    print(f"Executing Algorithm : hybrid {itera+1}/30")
+    start_time = time.time()
+    result, minQos, maxQos = ABCgenetic(actGraph, candidates, SN=sn, SQ=sq, MCN=mcn ,SCP=9 * mcn // 10, N=sn // 2,CP=0.2, constraints=constraints, weights=weights)
+    rt += (time.time() - start_time) / 30
+    normalized_fitness += (fit(result, minQos, maxQos, weights) / fit(opt, minQos, maxQos, weights)) / 30
+    div += abs(normalized_fitness-fit(res_prev, minQos, maxQos, weights)) / 30
+    res_prev = result
+    if normalized_fitness-fit(res_prev, minQos, maxQos, weights) :
+        conv.append(itera)
 
-normalized_fitness = fit(result, minQos, maxQos, weights) / fit(opt, minQos, maxQos, weights)
+conv = min(conv) 
 
 with open('test_results.csv', mode='a') as file:
     file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    file_writer.writerow([actNum, num_candidates, sn, sq, mcn, normalized_fitness, rt])
+    file_writer.writerow(["hybrid",actNum, num_candidates, sn, sq, mcn, normalized_fitness, rt,div,conv])
 
-print(f"Scalability = {rt} Fitness = {normalized_fitness}")
+
+for itera in range(30) : 
+    rt = 0
+    res_prev = 0
+    div = 0
+    conv = []
+    print(f"Executing Algorithm : abc {itera+1}/30")
+    start_time = time.time()
+    result, minQos, maxQos = ABC(actGraph, candidates, SN=sn,SQ=sq, MCN=mcn, N=sn // 2, constraints=constraints, weights=weights)
+    rt += (time.time() - start_time) / 30
+    normalized_fitness += (fit(result, minQos, maxQos, weights) / fit(opt, minQos, maxQos, weights)) / 30
+    div += abs(normalized_fitness-fit(res_prev, minQos, maxQos, weights)) / 30
+    res_prev = result
+    if normalized_fitness-fit(res_prev, minQos, maxQos, weights) :
+        conv.append(itera)
+
+conv = min(conv) 
+
+with open('test_results.csv', mode='a') as file:
+    file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    file_writer.writerow(["ABC",actNum, num_candidates, sn, sq, mcn, normalized_fitness, rt,div,conv])
+
+
+for itera in range(30) : 
+    rt = 0
+    res_prev = 0
+    div = 0
+    conv = []
+    print(f"Executing Algorithm : genetic {itera+1}/30")
+    start_time = time.time()
+    result, minQos, maxQos = genetic(actGraph, candidates, SN=sn,CP=0.7, constraints=constraints, weights=weights)
+    rt += (time.time() - start_time) / 30
+    normalized_fitness += (fit(result, minQos, maxQos, weights) / fit(opt, minQos, maxQos, weights)) / 30
+    div += abs(normalized_fitness-fit(res_prev, minQos, maxQos, weights)) / 30
+    res_prev = result
+    if normalized_fitness-fit(res_prev, minQos, maxQos, weights) :
+        conv.append(itera)
+
+conv = min(conv) 
+
+with open('test_results.csv', mode='a') as file:
+    file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    file_writer.writerow(["genetic",actNum, num_candidates, sn, sq, mcn, normalized_fitness, rt,div,conv])
