@@ -1,5 +1,6 @@
-import cloud
 from numpy import array
+
+from data_structure.Composition_plan import CompositionPlan
 
 
 def verifyConstraints(QosDict, constraints):
@@ -43,7 +44,7 @@ def SPEA2(actGraph, candidates, SQ, MCN, constraints):
     def intialize(n, L):
         for i in range(n):
             while 1:
-                cp = cloud.CompositionPlan(actGraph, candidates)
+                cp = CompositionPlan(actGraph, candidates)
                 QosDict = cp.cpQos()
                 if verifyConstraints(QosDict, constraints):
                     L.append({"cp": cp, "fitness": 0, "functions": functions(cp)})

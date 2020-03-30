@@ -1,6 +1,8 @@
-import cloud
-from numpy import array , dot
+from numpy import array
 from random import uniform , randint , sample
+
+from data_structure.Composition_plan import CompositionPlan
+
 
 def verifyConstraints(QosDict,constraints) :
     drt = constraints['responseTime'] - QosDict['responseTime']
@@ -19,8 +21,8 @@ def functions(cp) :   # Objective functions
     return array([f1,f2,f3])
 
 
-# SQ : condition for scouts , G : number of generations
-def nsga2(actGraph, candidates,G,constraints):
+# SQ : condition for scouts , MCN : number of iterations
+def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
 
     ############################# operations definition ##################################
 
@@ -83,7 +85,7 @@ def nsga2(actGraph, candidates,G,constraints):
                 break
 
         neighborsList = [neighbor1 , neighbor2 , neighbor3 , neighbor4]
-        return [{"cp" : cp , "fitness" : None , "functions" : functions(cp) , "probability" : 0} for cp in neighborsList]
+        return [{"cp" : cp , "fitness" : None , "functions" : functions(cp) , "limit" : 0 , "probability" : 0} for cp in neighborsList]
 
     def fit(cp):
         dom = 1
@@ -166,9 +168,14 @@ def nsga2(actGraph, candidates,G,constraints):
             crowding_selection = crowdingSort(fronts[i])[0:SN - len(S)]
             S += crowding_selection
 
+        for cp in S :
+            if cp in solutionsList :
+                cp["limit"] += 1
 
         solutionsList[:] = S
 
+        for cp in solutionsList :
+            cp["fitness"] = fit(cp["cp"])
 
 
 
@@ -180,17 +187,17 @@ def nsga2(actGraph, candidates,G,constraints):
 
     # initializing parameters
 
-    SN = 50           # SN : generation size
+    SN = 50           # SN : number of ressources
 
     # solutions  initializing
     solutionsList = list()
 
     for i in range(SN):
         while 1:
-            cp = cloud.CompositionPlan(actGraph, candidates)
+            cp = CompositionPlan(actGraph, candidates)
             QosDict = cp.cpQos()
             if verifyConstraints(QosDict,constraints) :
-                solutionsList.append({"cp" : cp , "fitness" : 0 , "functions" : functions(cp) , "probability" : 0})
+                solutionsList.append({"cp" : cp , "fitness" : 0 , "functions" : functions(cp) , "limit" : 0 , "probability" : 0})
                 break
 
     # initializing fitnessList
@@ -199,31 +206,57 @@ def nsga2(actGraph, candidates,G,constraints):
 
 
     # Algorithm
-    for itera in range(G):
+    for itera in range(MCN):
 
-        print(f"completed = {(itera+1) * 100 / G } %",end = '\r')
+        print(f"completed = {(itera+1) * 100 / MCN } %",end = '\r')
 
-        # Probability update
-        s = sum([solutionsList[i]["fitness"] for i in range(SN)])
-        for i in range(SN) :
-            solutionsList[i]["probability"] = solutionsList[i]["fitness"] / s
-
-
+        # employed bees phase
+        exploited = sample(list(range(SN)),SN // 2)   # Generating positions list for exploitation
         U = list()
         U[:] = solutionsList
-        # Roulette selection
-        if solutionsList[i]["probability"] > uniform(min([solutionsList[x]["probability"] for x in range(SN)]) , max([solutionsList[x]["probability"] for x in range(SN)])) :
+        for i in exploited :
             cp1 = solutionsList[i]["cp"]
-            cp2 = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
+            cp2 = CompositionPlan(actGraph, candidates) # randomly generated cp
             neighbors = BSG(cp1, cp2 , constraints) # BSG
-            # New generation being created
             U += neighbors
-
-
-        # Finalizing generation
-        fronts = nonDominatedSort(solutionsList)
+        # end of employed bees phase
+        fronts = nonDominatedSort(U)
         updateSolutions(solutionsList , fronts)
+        # Probability update
+        s = sum([solutionsList[i]["fitness"] for i in range(SN)])
+        for i in exploited :
+            solutionsList[i]["probability"] = solutionsList[i]["fitness"] / s
 
+        # onlooker bees phase
+        U = list()
+        U[:] = solutionsList
+        for i in exploited :
+            if solutionsList[i]["probability"] >= uniform(min([solutionsList[x]["probability"] for x in range(SN)]) , max([solutionsList[x]["probability"] for x in range(SN)])) :
+                cp1 = solutionsList[i]["cp"]
+                cp2 = CompositionPlan(actGraph, candidates) # randomly generated cp
+                neighbors = BSG(cp1, cp2 , constraints) # BSG
+                U += neighbors
+        # end of employed bees phase
+        fronts = nonDominatedSort(U)
+        updateSolutions(solutionsList , fronts)
+        # end of onlooker bees phase
+
+        # scout bees phase
+        update = 0
+        U = list()
+        U[:] = solutionsList
+        for i in exploited :
+            if solutionsList[i]["limit"] >= SQ :
+                while 1 :
+                    cp = CompositionPlan(actGraph, candidates) # randomly generated cp
+                    if verifyConstraints(cp.cpQos(),constraints) :
+                        U.append({"cp" : cp , "fitness" : fit(cp) , "functions" : functions(cp) , "limit" : 0 , "probability" : 0})
+                        break
+                update = 1
+        # end of scout bees phase
+        if update :
+            fronts = nonDominatedSort(U)
+            updateSolutions(solutionsList , fronts)
 
     # end of algorithm
     print("\n")

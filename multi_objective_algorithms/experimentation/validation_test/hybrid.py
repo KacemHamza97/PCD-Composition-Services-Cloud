@@ -1,6 +1,9 @@
-import cloud
-from numpy import array , dot
+from numpy import array
 from random import uniform , randint , sample
+from prettytable import PrettyTable
+
+from data_structure.Composition_plan import CompositionPlan
+
 
 def verifyConstraints(QosDict,constraints) :
     drt = constraints['responseTime'] - QosDict['responseTime']
@@ -11,7 +14,7 @@ def verifyConstraints(QosDict,constraints) :
     return drt and dpr and dav and drel
 
 
-def functions(cp) :   # Objective functions
+def functions(cp) :
     QosDict = cp.cpQos()
     f1 = - QosDict["responseTime"]
     f2 = - QosDict["price"]
@@ -19,10 +22,55 @@ def functions(cp) :   # Objective functions
     return array([f1,f2,f3])
 
 
+
 # SQ : condition for scouts , MCN : number of iterations
 def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
 
     ############################# operations definition ##################################
+    print("SN = 10 , SQ = 2 , MCN = 10")
+
+    def show_solutions(X) :
+        t = PrettyTable(['solution','fitness',"f1","f2","f3",'probability','limit'])
+        for i in range(len(X)) :
+            t.add_row([i, X[i]["fitness"],X[i]["functions"][0],X[i]["functions"][1],X[i]["functions"][2] , X[i]["probability"],X[i]["limit"]])
+        print(t)
+
+    def show_solution(cp) :
+        t = PrettyTable(['fitness',"f1","f2","f3",'probability','limit'])
+        t.add_row([cp["fitness"],cp["functions"][0],cp["functions"][1],cp["functions"][2] , cp["probability"],cp["limit"]])
+        print(t)
+        print("services are :")
+        show_services(cp["cp"])
+
+    def show_services(cp) :
+        t = PrettyTable(['activity', 'price','responseTime','availability','reliability','matching'])
+        for i in range(cp.G.number_of_nodes()) :
+            t.add_row([i, cp.G.nodes[i]["service"].getPrice(),cp.G.nodes[i]["service"].getResponseTime() , cp.G.nodes[i]["service"].getAvailability(),cp.G.nodes[i]["service"].getReliability(),cp.G.nodes[i]["service"].getMatching()])
+        print(t)
+
+    def show_neighbors() :
+        t = PrettyTable(['solution','fitness',"f1","f2","f3",'probability','limit'])
+        for i in range(4) :
+            t.add_row([i, neighbors[i]["fitness"],neighbors[i]["functions"][0],neighbors[i]["functions"][1],neighbors[i]["functions"][2] , neighbors[i]["probability"],neighbors[i]["limit"]])
+        print(t)
+
+    def show_fronts() :
+        for i in range(len(fronts)-1) :
+            print(f"front {i} : ")
+            t = PrettyTable(['solution','f1','f2','f3'])
+            for j in range(len(fronts[i])) :
+                t.add_row([j,fronts[i][j]["functions"][0],fronts[i][j]["functions"][1],fronts[i][j]["functions"][2]])
+            print(t)
+
+
+    def fit(cp):
+        dom = 1
+        F = functions(cp)
+        for i in range(SN) :
+            G = functions(solutionsList[i]["cp"])
+            if (F >= G).all() and (F > G).any() :
+                dom += 1
+        return dom / SN
 
     def BSG(cp1, cp2 , constraints):
 
@@ -41,6 +89,8 @@ def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
             if verifyConstraints(neighbor1.cpQos() , constraints) :
                 break
 
+        print(f"BSG 1 : x1 = {x1} , x2 = {x2}")
+
         # Second neighbor
 
         neighbor2 = cp2.clone()
@@ -53,6 +103,9 @@ def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
                     neighbor2.G.nodes[act]["service"] = cp1.G.nodes[act]["service"]
             if verifyConstraints(neighbor2.cpQos() , constraints) :
                 break
+
+        print(f"BSG 2 : x1 = {x1} , x2 = {x2}")
+
 
         # Mutation
 
@@ -69,6 +122,7 @@ def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
             if verifyConstraints(neighbor3.cpQos() , constraints) :
                 break
 
+        print(f"BSG 3 : x1 = {x1} , x2 = {x2}")
         # Second neighbor
 
         neighbor4 = cp2.clone()
@@ -82,17 +136,11 @@ def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
             if verifyConstraints(neighbor4.cpQos() , constraints) :
                 break
 
-        neighborsList = [neighbor1 , neighbor2 , neighbor3 , neighbor4]
-        return [{"cp" : cp , "fitness" : None , "functions" : functions(cp) , "limit" : 0 , "probability" : 0} for cp in neighborsList]
+        print(f"BSG 4 : x1 = {x1} , x2 = {x2}")
 
-    def fit(cp):
-        dom = 1
-        F = functions(cp)
-        for i in range(SN) :
-            G = functions(solutionsList[i]["cp"])
-            if (F >= G).all() and (F > G).any() :   # Domination condition F not worse than G and better at least once
-                dom += 1
-        return dom / SN
+        neighborsList = [neighbor1 , neighbor2 , neighbor3 , neighbor4]
+        return [{"cp" : cp , "fitness" : 0 , "functions" : functions(cp) , "limit" : 0 , "probability" : 0} for cp in neighborsList]
+
 
 
     def nonDominatedSort(X) :
@@ -109,10 +157,10 @@ def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
                     Sp.append(q)
                 elif q != p and (G >= F).all() and (G > F).any() :
                     Np += 1
+            NList.append(Np)
             if Np == 0 :
                 fronts[0].append(p)
             SList.append(Sp)
-            NList.append(Np)
 
         i = 0
         while len(fronts[i]) != 0 :
@@ -151,7 +199,13 @@ def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
                 score.append(next_high-next_low)
             scoresList.append(sum(score))
 
-        return [i[1] for i in sorted(zip(scoresList , front) , key = lambda x:x[0] , reverse = True)]
+        L = [i[1] for i in sorted(zip(scoresList , front) , key = lambda x:x[0] , reverse = True)]
+        print("Crowding scores are :")
+        t = PrettyTable(['solution','score'])
+        for i in range(len(scoresList)) :
+            t.add_row([i, scoresList[i]])
+        print(t)
+        return L
 
 
     def updateSolutions(solutionsList , fronts) :
@@ -185,77 +239,122 @@ def moabc_nsga2(actGraph, candidates, SQ, MCN,constraints):
 
     # initializing parameters
 
-    SN = 50           # SN : number of ressources
+    SN = 10           # SN : number of ressources
 
     # solutions  initializing
     solutionsList = list()
 
     for i in range(SN):
         while 1:
-            cp = cloud.CompositionPlan(actGraph, candidates)
+            cp = CompositionPlan(actGraph, candidates)
             QosDict = cp.cpQos()
             if verifyConstraints(QosDict,constraints) :
                 solutionsList.append({"cp" : cp , "fitness" : 0 , "functions" : functions(cp) , "limit" : 0 , "probability" : 0})
                 break
 
-    # initializing fitnessList
-    for i in range(SN) :
-        solutionsList[i]["fitness"] = fit(solutionsList[i]["cp"])
 
 
+    show_solutions(solutionsList)
+    print("algorithm start")
     # Algorithm
     for itera in range(MCN):
 
-        print(f"completed = {(itera+1) * 100 / MCN } %",end = '\r')
-
         # employed bees phase
+        print("employed bees phase ...")
         exploited = sample(list(range(SN)),SN // 2)   # Generating positions list for exploitation
+        print(f"exploited solutions = {exploited}")
         U = list()
         U[:] = solutionsList
         for i in exploited :
+            print(f"solution {i} chosen ... ")
             cp1 = solutionsList[i]["cp"]
-            cp2 = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
+            show_solution(solutionsList[i])
+            cp2 = CompositionPlan(actGraph, candidates) # randomly generated cp
+            print("randomly generating a composition plan")
+            print(show_solution({"cp" : cp2 , "fitness" : 0 , "functions" : functions(cp2) , "limit" : 0 , "probability" : 0}))
             neighbors = BSG(cp1, cp2 , constraints) # BSG
+            print("generating neighbors by BSG ...")
+            show_neighbors()
             U += neighbors
+
+        print("solutionsList after adding neighbors !")
+        show_solutions(U)
+        print("end of employed bees phase")
         # end of employed bees phase
+        print("Appplying nonDominatedSort and updating solutionsList")
         fronts = nonDominatedSort(U)
+        print("Fronts calculated !")
+        show_fronts()
         updateSolutions(solutionsList , fronts)
+        show_solutions(solutionsList)
         # Probability update
         s = sum([solutionsList[i]["fitness"] for i in range(SN)])
         for i in exploited :
             solutionsList[i]["probability"] = solutionsList[i]["fitness"] / s
+        print("probability calculated !")
 
+        show_solutions(solutionsList)
         # onlooker bees phase
+        print("onlooker bees phase ...")
         U = list()
         U[:] = solutionsList
         for i in exploited :
-            if solutionsList[i]["probability"] >= uniform(min([solutionsList[x]["probability"] for x in range(SN)]) , max([solutionsList[x]["probability"] for x in range(SN)])) :
+            print(f"solution {i} chosen ... ")
+            r = uniform(min([solutionsList[x]["probability"] for x in range(SN)]) , max([solutionsList[x]["probability"] for x in range(SN)]))
+            print(f"probability = {solutionsList[i]['probability']} vs random = {r}")
+
+            if solutionsList[i]["probability"] > r :
                 cp1 = solutionsList[i]["cp"]
-                cp2 = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
+                show_solution(solutionsList[i])
+                cp2 = CompositionPlan(actGraph, candidates) # randomly generated cp
+                print("randomly generating a composition plan")
+                show_solution({"cp" : cp2 , "fitness" : 0 , "functions" : functions(cp2) , "limit" : 0 , "probability" : 0})
                 neighbors = BSG(cp1, cp2 , constraints) # BSG
                 U += neighbors
-        # end of employed bees phase
-        fronts = nonDominatedSort(U)
-        updateSolutions(solutionsList , fronts)
-        # end of onlooker bees phase
+                show_neighbors()
 
+        print("solutionsList after adding neighbors !")
+        show_solutions(U)
+        print("end of onlooker bees phase")
+        # end of onlooker bees phase
+        print("Appplying nonDominatedSort and updating solutionsList")
+        fronts = nonDominatedSort(U)
+        print("Fronts calculated !")
+        show_fronts()
+        updateSolutions(solutionsList , fronts)
+        show_solutions(solutionsList)
         # scout bees phase
+        print("Scout bees phase ...")
         update = 0
         U = list()
         U[:] = solutionsList
         for i in exploited :
             if solutionsList[i]["limit"] >= SQ :
+                print(f"solution {i} reached limit ... ")
                 while 1 :
-                    cp = cloud.CompositionPlan(actGraph, candidates) # randomly generated cp
+                    cp = CompositionPlan(actGraph, candidates) # randomly generated cp
                     if verifyConstraints(cp.cpQos(),constraints) :
-                        U.append({"cp" : cp , "fitness" : fit(cp) , "functions" : functions(cp) , "limit" : 0 , "probability" : 0})
+                        new_solution = {"cp" : cp , "fitness" : fit(cp) , "functions" : functions(cp) , "limit" : 0 , "probability" : 0}
+                        U += [new_solution]
+                        print("generating new solution ...")
+                        show_solution(new_solution)
                         break
+                print("randomly generating a composition plan")
+                show_solution({"cp" : cp , "fitness" : 0 , "functions" : functions(cp) , "limit" : 0 , "probability" : 0})
                 update = 1
+        print("end of scout bees phase ...")
         # end of scout bees phase
         if update :
+            print("solutionsList after adding new scout solutions !")
+            show_solutions(U)
+            print("Appplying nonDominatedSort and updating solutionsList")
             fronts = nonDominatedSort(U)
+            print("Fronts calculated !")
+            show_fronts()
             updateSolutions(solutionsList , fronts)
+            show_solutions(solutionsList)
 
     # end of algorithm
     print("\n")
-    return fronts
+    for sol in solutionsList :
+        print(f"possible solution :\n{sol['cp'].cpQos()}\n")
