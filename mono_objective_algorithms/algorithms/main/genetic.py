@@ -88,6 +88,7 @@ def genetic(actGraph, candidates, SN, CP,constraints, weights):
                     solutionsList[i] = child_mutated
                     break
 
+            updateMinMax()
             updateBest()
     return best_cp , minQos , maxQos
 
