@@ -1,13 +1,13 @@
-import numpy as np
+# a modifier
 from math import inf
-from random import sample
-
-from data_structure.Service import Service
+from random import sample, randint
 from mono_objective_algorithms.algorithms.genetic_operation.genetic_operations import crossover, mutate
 from mono_objective_algorithms.algorithms.objective_function.Qos_constraints import verifyConstraints
 from mono_objective_algorithms.algorithms.objective_function.fitness import fit
 from data_structure.Composition_plan import CompositionPlan
 
+def getNeighbor(service, candidates):
+    return min([neighbor for neighbor in candidates if neighbor != service], key=lambda x: service.euclideanDist(x))
 
 def genetic(actGraph, candidates, SN, CP,constraints, weights):
     def updateBest(fit=None):
@@ -52,7 +52,7 @@ def genetic(actGraph, candidates, SN, CP,constraints, weights):
     ############################# Algorithm start  ##################################
 
     # solutions and fitness initializing
-    g = 30  # number of generations
+    g = 10  # number of generations
     solutionsList = list()
     fitnessList = list(0 for i in range(SN))
     minQos = {'responseTime': inf, 'price': inf, 'availability': inf, 'reliability': inf}
@@ -72,56 +72,23 @@ def genetic(actGraph, candidates, SN, CP,constraints, weights):
     best_cp = solutionsList[fitnessList.index(best_fit)]
     # Algorithm
     cp1 = solutionsList[i]
-    for i in range(g):
-        cp2 = CompositionPlan(actGraph, candidates)  # randomly generated cp
-        child = crossover(cp1, cp2, CP)  # Crossover operation
-        new_service = sample(candidates[i], 1)[0]
-        child_mutated = mutate(child, new_service)
-        if verifyConstraints(child_mutated.cpQos(), constraints):
-            new_fitness = fit(child_mutated, minQos, maxQos, weights)
-            if new_fitness > fitnessList[i]:  # checking if child fitness is better than parent fitness
-                fitnessList[i] = new_fitness
-                solutionsList[i] = child_mutated
-                break
+    for j in range(g):
+        for i in range(SN):
+            cp2 = CompositionPlan(actGraph, candidates)  # randomly generated cp
+            child = crossover(cp1, cp2, CP)  # Crossover operation
+            service = child.G.nodes[randint(0, child.G.number_of_nodes() - 1)]["service"]
+            neighborsList = candidates[service.getActivity()]
+            neighbor = getNeighbor(service, neighborsList)
+            # mutation operation
+            child_mutated = mutate(child, neighbor)
+            if verifyConstraints(child_mutated.cpQos(), constraints):
+                new_fitness = fit(child_mutated, minQos, maxQos, weights)
+                if new_fitness > fitnessList[i]:  # checking if child fitness is better than parent fitness
+                    fitnessList[i] = new_fitness
+                    solutionsList[i] = child_mutated
+                    break
 
-        updateBest()
+            updateBest()
     return best_cp , minQos , maxQos
 
 
-# def generateActGraph(actNum):  # Sequential
-#     return [[i, i + 1, 0] for i in range(actNum - 1)]
-#
-#
-# def generateCandidates(actNum, num_candidates):
-#     candidates = list()
-#     for i in range(actNum):
-#         candidates.append([])
-#         for j in range(num_candidates):
-#             responseTime = np.random.uniform(0.1, 5, 1)[0]
-#             price = np.random.uniform(0.1, 3, 1)[0]
-#             availability = np.random.uniform(0.9, 0.99, 1)[0]
-#             reliability = np.random.uniform(0.7, 0.95, 1)[0]
-#             matchingState = np.random.choice(state)
-#             if matchingState == "precise":
-#                 candidates[i].append(Service(i, responseTime, reliability, availability, price, matchingState))
-#             candidates[i].append(Service(i, responseTime, reliability, availability, price, matchingState))
-#     return candidates
-# # input
-# state = ["over", "precise"]
-# actNum = int(input("NUMBER OF ACTIVITIES : "))
-# num_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-# constraints = {'responseTime': actNum * 0.3, 'price': actNum * 1.55, 'availability': 0.945 ** actNum,'reliability': 0.825 ** actNum}
-# weights = [0.25, 0.25, 0.25, 0.25]
-# actGraph = generateActGraph(actNum)
-# candidates = generateCandidates(actNum, num_candidates)
-# sn = int(input("population number : "))
-#
-# # optimal fitness
-# print("optimal fitness search !")
-# opt, _, _ = genetic(actGraph, candidates, SN = sn, CP=0.7,constraints=constraints, weights=weights)
-# print("\nDone !")
-#
-# print("Executing Algorithm ")
-# result, minQos, maxQos = genetic(actGraph, candidates, SN = 100, CP=0.7,constraints=constraints, weights=weights)
-# normalized_fitness = fit(result, minQos, maxQos, weights) / fit(opt, minQos, maxQos, weights)
-# print(normalized_fitness)
