@@ -51,19 +51,20 @@ print("optimal fitness search !")
 opt, _, _ = ABCgenetic(actGraph, candidates, SN=sn, SQ=100, MCN=mcn * 10,SCP=9 * mcn // 10, N=sn // 2,CP=0.2, constraints=constraints, weights=weights)
 print("\nDone !")
 
+rt = 0
+fit_prev = 0
+div = 0
+conv = []
+normalized_fitness = 0
 for itera in range(30) : 
-    rt = 0
-    res_prev = 0
-    div = 0
-    conv = []
     print(f"Executing Algorithm : hybrid {itera+1}/30")
     start_time = time.time()
     result, minQos, maxQos = ABCgenetic(actGraph, candidates, SN=sn, SQ=sq, MCN=mcn ,SCP=9 * mcn // 10, N=sn // 2,CP=0.2, constraints=constraints, weights=weights)
     rt += (time.time() - start_time) / 30
     normalized_fitness += (fit(result, minQos, maxQos, weights) / fit(opt, minQos, maxQos, weights)) / 30
-    div += abs(normalized_fitness-fit(res_prev, minQos, maxQos, weights)) / 30
-    res_prev = result
-    if normalized_fitness-fit(res_prev, minQos, maxQos, weights) :
+    div += abs(fit(result, minQos, maxQos, weights)-fit_prev) / 30
+    res_prev = fit(result, minQos, maxQos, weights)
+    if fit(result, minQos, maxQos, weights)-fit(res_prev, minQos, maxQos, weights) :
         conv.append(itera)
 
 conv = min(conv) 
@@ -73,19 +74,20 @@ with open('test_results.csv', mode='a') as file:
     file_writer.writerow(["hybrid",actNum, num_candidates, sn, sq, mcn, normalized_fitness, rt,div,conv])
 
 
+rt = 0
+fit_prev = 0
+div = 0
+conv = []
+normalized_fitness = 0
 for itera in range(30) : 
-    rt = 0
-    res_prev = 0
-    div = 0
-    conv = []
     print(f"Executing Algorithm : abc {itera+1}/30")
     start_time = time.time()
     result, minQos, maxQos = ABC(actGraph, candidates, SN=sn,SQ=sq, MCN=mcn, N=sn // 2, constraints=constraints, weights=weights)
     rt += (time.time() - start_time) / 30
     normalized_fitness += (fit(result, minQos, maxQos, weights) / fit(opt, minQos, maxQos, weights)) / 30
-    div += abs(normalized_fitness-fit(res_prev, minQos, maxQos, weights)) / 30
-    res_prev = result
-    if normalized_fitness-fit(res_prev, minQos, maxQos, weights) :
+    div += abs(fit(result, minQos, maxQos, weights)-fit(res_prev, minQos, maxQos, weights)) / 30
+    fit_prev = fit(result, minQos, maxQos, weights)
+    if fit(result, minQos, maxQos, weights)-fit(res_prev, minQos, maxQos, weights) :
         conv.append(itera)
 
 conv = min(conv) 
@@ -95,19 +97,20 @@ with open('test_results.csv', mode='a') as file:
     file_writer.writerow(["ABC",actNum, num_candidates, sn, sq, mcn, normalized_fitness, rt,div,conv])
 
 
+rt = 0
+fit_prev = 0
+div = 0
+conv = []
+normalized_fitness = 0
 for itera in range(30) : 
-    rt = 0
-    res_prev = 0
-    div = 0
-    conv = []
     print(f"Executing Algorithm : genetic {itera+1}/30")
     start_time = time.time()
     result, minQos, maxQos = genetic(actGraph, candidates, SN=sn,CP=0.7, constraints=constraints, weights=weights)
     rt += (time.time() - start_time) / 30
     normalized_fitness += (fit(result, minQos, maxQos, weights) / fit(opt, minQos, maxQos, weights)) / 30
-    div += abs(normalized_fitness-fit(res_prev, minQos, maxQos, weights)) / 30
-    res_prev = result
-    if normalized_fitness-fit(res_prev, minQos, maxQos, weights) :
+    div += abs(fit(result, minQos, maxQos, weights)-fit(res_prev, minQos, maxQos, weights)) / 30
+    fit_prev = fit(result, minQos, maxQos, weights)
+    if fit(result, minQos, maxQos, weights)-fit(res_prev, minQos, maxQos, weights) :
         conv.append(itera)
 
 conv = min(conv) 
