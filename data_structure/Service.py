@@ -38,3 +38,8 @@ class Service:
         drel = self.__reliability - service.getReliability()
         dav = self.__availability - service.getAvailability()
         return (drt ** 2 + dpr ** 2 + drel ** 2 + dav ** 2) ** 0.5
+
+    # Nearest neighbor 
+
+    def getNeighbor(self, candidates) :
+        return min([neighbor for neighbor in candidates if neighbor != self], key=lambda x: self.euclideanDist(x))

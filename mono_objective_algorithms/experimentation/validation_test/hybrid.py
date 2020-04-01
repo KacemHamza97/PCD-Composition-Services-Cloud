@@ -1,214 +1,180 @@
 from random import uniform, randint, sample, random
 from math import inf
 from prettytable import PrettyTable
+from data_structure.CompositionPlan import CompositionPlan
+from data_structure.Solution import Solution
+from genetic_operations.implementation import crossover, mutate
+from mono_objective_algorithms.algorithms.operations.fitness import fit 
+from mono_objective_algorithms.algorithms.operations.update import updateBest , updateMinMax
 
-from data_structure.Composition_plan import CompositionPlan
-from mono_objective_algorithms.algorithms.genetic_operation.genetic_operations import crossover,mutate
-from mono_objective_algorithms.algorithms.objective_function.Qos_constraints import verifyConstraints
-from mono_objective_algorithms.algorithms.objective_function.fitness import fit
+# SN : n of ressources  , SQ : condition for scouts , MCN : number of iterations 
+# N : n of bees , CP : crossover probability , SCP : scout bees changing point
 
-# returning the nearest neighbor of service based on euclidean distance
-def getNeighbor(service, candidates):
-    return min([neighbor for neighbor in candidates if neighbor != service], key=lambda x: service.euclideanDist(x))
+def simABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
 
-
-# SQ : condition for scouts , MCN : number of iterations
-def ABCgenetic(actGraph, candidates, SN, SQ, MCN,SCP,N,CP, constraints, weights):
-    print(f"SN = {SN} , SQ = {SQ} , MCN = {MCN}")
+    print(f"SN = {SN} , SQ = {SQ} , MCN = {MCN} , N = {N} , CP = {CP}")
 
     def show_solutions():
         t = PrettyTable(['solution', 'fitness', 'probability', 'limit'])
-        for i in range(SN):
-            t.add_row([i, fitnessList[i], probabilityList[i], limit[i]])
-        t.add_row(["best_cp", best_fit, "", ""])
+        for sol in solutionsList:
+            t.add_row([sol.number, sol.fitness, sol.probability, sol.limit])
+        t.add_row(["best_cp", best_solution.fitness, "", ""])
         print(t)
 
     def show_solution(cp):
         t = PrettyTable(['activity', 'price', 'responseTime', 'availability', 'reliability', 'matching'])
-        for i in range(cp.G.number_of_nodes()):
-            t.add_row([i, cp.G.nodes[i]["service"].getPrice(), cp.G.nodes[i]["service"].getResponseTime(),
-                       cp.G.nodes[i]["service"].getAvailability(), cp.G.nodes[i]["service"].getReliability(),
-                       cp.G.nodes[i]["service"].getMatching()])
+        for i in range(cp.getNumberOfActivities()):
+            t.add_row([i, cp.getService(i).getPrice(), cp.getService(i).getResponseTime(),
+                       cp.getService(i).getAvailability(), cp.getService(i).getReliability(),
+                       cp.getService(i).getMatching()])
         print(t)
 
-    def updateBest(fit=None):
-        nonlocal best_fit, best_cp
-        if fit == None:  # No parameters passed
-            fit = max(fitnessList)
-
-        if fit > best_fit:
-            best_fit = fit  # Updating best fitness
-            best_cp = solutionsList[fitnessList.index(fit)]  # Updating best solution
-
-    def updateMinMax():
-        nonlocal best_fit, fitnessList, minQos, maxQos
-        # updating minQos and maxQos
-        # looking for minQos and maxQos in best_Qos
-        try:
-            best_cp_Qos = best_cp.cpQos()
-            for qos in best_cp_Qos:
-                if best_cp_Qos[qos] < minQos[qos]:
-                    minQos[qos] = best_cp_Qos[qos]
-                if best_cp_Qos[qos] > maxQos[qos]:
-                    maxQos[qos] = best_cp_Qos[qos]
-        except:  # best_Qos not created
-            None
-        # looking for minQos and maxQos in solutionsList
-        for cp in solutionsList:
-            qosDict = cp.cpQos()
-            for qos in qosDict:
-                if qosDict[qos] < minQos[qos]:
-                    minQos[qos] = qosDict[qos]
-                if qosDict[qos] > maxQos[qos]:
-                    maxQos[qos] = qosDict[qos]
-        # Updating best fitness
-        try:
-            best_fit = fit(best_cp, minQos, maxQos, weights)
-        except:  # best_cp not created
-            None
-        # updating fitnessList
-        for i in range(SN):
-            fitnessList[i] = fit(solutionsList[i], minQos, maxQos, weights)
-
+    
     ############################# Algorithm start  ##################################
     print("Initialzing ...")
 
-    # solutions and fitness initializing
+    # solutions initializing
     solutionsList = list()
-    fitnessList = list(0 for i in range(SN))
-    probabilityList = list(0 for i in range(SN))
+
     minQos = {'responseTime': inf, 'price': inf, 'availability': inf, 'reliability': inf}
     maxQos = {'responseTime': 0, 'price': 0, 'availability': 0, 'reliability': 0}
-    limit = list(0 for i in range(SN))
 
     for i in range(SN):
         while 1:
-            cp = CompositionPlan(actGraph, candidates)
-            if verifyConstraints(cp.cpQos(), constraints):
-                solutionsList.append(cp)
+            cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
+            if cp.verifyConstraints(problem.getConstraints()):
+                solutionsList.append(Solution(cp = cp , fitness = 0 , probability = 0 , limit = 0 , number = i+1))
                 break
 
-    # minQos maxQos and fitnessList initializing
-    updateMinMax()
+    # minQos maxQos and fitness initializing
+    updateMinMax(solutionsList , minQos, maxQos , problem.getWeights())
 
-    # initializing best_fit and best_cp
-    best_fit = max(fitnessList)
-    best_cp = solutionsList[fitnessList.index(best_fit)]
+    # initializing best_solution
+    best_solution = max(solutionsList , key = lambda sol:sol.fitness)
+
     show_solutions()
+
     print("algorithm start")
     print("employed bees phase ...")
+
+    #+----------------------------------------------------------------------------------------------+#
+
     # Algorithm
     for itera in range(MCN):
         print(f"iteration = {itera + 1}")
         # employed bees phase
-        exploited = sample(list(range(SN)), N)  # Generating positions list for exploitation
-        print(f"exploited solutions = {exploited}")
-        for i in exploited:
-            print(f"solution {i} chosen ... ")
-            cp1 = solutionsList[i]
-            show_solution(cp1)
+        exploited = sample(solutionsList, N)  # Generating positions list for exploitation
+        print(f"exploited solutions = {[sol.number for sol in exploited]}")
+        for sol in exploited:
+            print(f"solution {sol.number} chosen ... ")
+            show_solution(sol.cp)
             while 1:
-                cp2 = CompositionPlan(actGraph, candidates)  # randomly generated cp
+                random = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
                 print("generating random plan")
-                show_solution(cp2)
-                child = crossover(cp1, cp2,CP)  # Crossover operation
+                show_solution(random)
+                offspring = crossover(sol.cp, random , CP)  # Crossover operation
                 print("crossover execution !")
-                show_solution(child)
-                if verifyConstraints(child.cpQos(), constraints):
-                    new_fitness = fit(child, minQos, maxQos, weights)
+                show_solution(offspring)
+                if offspring.verifyConstraints(problem.getConstraints()):
+                    new_fitness = fit(offspring, minQos, maxQos, problem.getWeights())
                     print(f"new_fitness = {new_fitness}")
-                    print(f"old_fitness = {fitnessList[i]}")
-                    if new_fitness > fitnessList[i]:  # checking if child fitness is better than parent fitness
-                        fitnessList[i] = new_fitness
-                        solutionsList[i] = child
-                        limit[i] = 0
+                    print(f"old_fitness = {sol.fitness}")
+                    if new_fitness > sol.fitness:  # checking if offspring fitness is better than parent fitness
+                        sol.cp = offspring
+                        sol.fitness = new_fitness 
+                        sol.probability = 0 
+                        sol.limit = 0
                         print("replaced !")
                     else:
-                        limit[i] += 1
+                        sol.limit += 1
                         print("not replaced !")
                     break
         # end of employed bees phase
 
-        updateBest()
+        updateBest(solutionsList, best_solution)
         print("updating best !")
         print("onlooker bees phase ...")
+
         # Probability update
-        for i in exploited:
-            s = sum(fitnessList)
-            probabilityList[i] = fitnessList[i] / s
-        show_solutions()
+        s = sum([sol.fitness for sol in solutionsList])
+        for sol in exploited:
+            sol.probability = sol.fitness / s
+
         # onlooker bees phase
-        for i in exploited:
-            print(f"solution {i} chosen ... ")
-            r = uniform(min(fitnessList) / s, max(fitnessList) / s)
-            print(f"probability = {probabilityList[i]} vs random = {r}")
-            if probabilityList[i] > r:
+        probabilityList = [sol.probability for sol in solutionsList]
+        a = min(probabilityList)
+        b = max(probabilityList)
+        for sol in exploited:
+            print(f"solution {sol.number} chosen ... ")
+            r = uniform(a,b)
+            print(f"probability = {sol.probability} vs random = {r}")
+            if sol.probability > r:
                 "selected by probability !"
-                cp1 = solutionsList[i]
-                show_solution(cp1)
-                cp2 = best_cp  # current best
+                show_solution(sol.cp)
                 print("crossover with best_cp")
-                show_solution(cp2)
+                show_solution(best_solution.cp)
                 while 1:
-                    child = crossover(cp1, cp2,CP)  # Crossover operation
+                    offspring = crossover(sol.cp, best_solution.cp,CP)  # Crossover operation
                     print("crossover execution !")
-                    show_solution(child)
-                    if verifyConstraints(child.cpQos(), constraints):
-                        new_fitness = fit(child, minQos, maxQos, weights)
+                    show_solution(offspring)
+                    if offspring.verifyConstraints(problem.getConstraints()):
+                        new_fitness = fit(offspring, minQos, maxQos, problem.getWeights())
                         print(f"new_fitness = {new_fitness}")
-                        print(f"old_fitness = {fitnessList[i]}")
-                        if new_fitness > fitnessList[i]:  # checking if child fitness is better than parent fitness
-                            fitnessList[i] = new_fitness
-                            solutionsList[i] = child
-                            limit[i] = 0
+                        print(f"old_fitness = {sol.fitness}")
+                        if new_fitness > sol.fitness:  # checking if offspring fitness is better than parent fitness
+                            sol.cp = offspring
+                            sol.fitness = new_fitness 
+                            sol.probability = 0 
+                            sol.limit = 0
                             print("replaced !")
-                            updateBest(new_fitness)
-                            print("updating best !")
+                            updateBest(solutionsList, best_solution  , sol)
                         else:
-                            limit[i] += 1
+                            sol.limit += 1
                             print("not replaced !")
                         break
         # end of onlooker bees phase
         print("scouts bees phase ...")
         show_solutions()
         # scout bees phase
-        for i in exploited:
-            if limit[i] >= SQ:  # verifying scouts condition
-                print(f"solution {i} reached limit ... ")
+        for sol in exploited:
+            if sol.limit >= SQ:  # verifying scouts condition
+                print(f"solution {sol.number} reached limit ... ")
                 if itera >= SCP:  # change of scouts behaviour condition to mutating
-                    cp = solutionsList[i]
-                    show_solution(cp)
+                    show_solution(sol.cp)
                     while 1:
                         # choose randomly a service to mutate
-                        x = randint(0, cp.G.number_of_nodes() - 1)
-                        service = cp.G.nodes[x]["service"]
+                        x = randint(0, sol.cp.getNumberOfActivities() - 1)
+                        service = sol.cp.getService(x)
                         print(f"the service of activity {x} will be mutated")
-                        neighborsList = candidates[service.getActivity()]
-                        neighbor = getNeighbor(service, neighborsList)
+                        neighborsList = problem.getCandidates()[service.getActivity()]
+                        neighbor = service.getNeighbor(neighborsList)
                         # mutation operation
-                        new = mutate(cp, neighbor)
+                        new = mutate(sol.cp, neighbor)
                         print("mutation execution !")
-                        if verifyConstraints(new.cpQos(), constraints):
+                        if new.verifyConstraints(problem.getConstraints()):
                             show_solution(new)
-                            solutionsList[i] = new
-                            fitnessList[i] = fit(new, minQos, maxQos, weights)
+                            sol.cp = new
+                            sol.fitness = fit(new, minQos, maxQos, problem.getWeights())
+                            sol.probability = 0
+                            sol.limit = 0
                             break
 
                 else:  # searching for new ressources to exploit
                     while 1:
                         print("generating random solution instead !")
-                        cp = CompositionPlan(actGraph, candidates)
-                        if verifyConstraints(cp.cpQos(), constraints):
-                            solutionsList[i] = cp
-                            fitnessList[i] = fit(cp, minQos, maxQos, weights)
+                        random = CompositionPlan(problem.getActGraph(), problem.getCandidates())
+                        if random.verifyConstraints(problem.getConstraints()):
+                            show_solution(random)
+                            sol.cp = random
+                            sol.fitness = fit(cp, minQos, maxQos, problem.getWeights())
+                            sol.probability = 0
+                            sol.limit = 0
                             break
-
-                limit[i] = 0
         # end of scout bees phase
-        updateMinMax()
+        updateMinMax(solutionsList, minQos, maxQos , problem.getWeights() , best_solution)
+        updateBest(solutionsList, best_solution)
         print("end of iteration")
         show_solutions()
 
     print("end of algorithm")
     # end of algorithm
-    return best_cp

@@ -1,12 +1,17 @@
 import networkx as nx
-from random import sample
+from numpy.random import choice , randint
 from functools import reduce
+
+#+----------------------------------------------------------------------------------------------+#
 
 
 # product of given list elements
 
 def prod(List):
     return reduce((lambda x, y: x * y), List)
+
+
+#+----------------------------------------------------------------------------------------------+#
 
 
 class CompositionPlan:
@@ -16,17 +21,19 @@ class CompositionPlan:
     def __init__(self, actGraph, candidates):
         self.G = nx.DiGraph()  # Graph attribut
         self.G.add_weighted_edges_from(actGraph)
-        for act, candidate in enumerate(candidates):  # Generating random services from candidates
-            self.G.nodes[act]["service"] = sample(candidate, 1)[0]
+        for act, services in enumerate(candidates):  # Generating random services from candidates
+            self.G.nodes[act]["service"] = choice(services)
             self.G.nodes[act]["visited"] = False  # this attribut is used for calculating qos once per node
-        self.__actNum = self.G.number_of_nodes()  # number of activities
+        self.__n_act = self.G.number_of_nodes()  # number of activities
         self.__qos = None  # not initialized
-        self.__matching = None  # not initialized
+
+    # get number of activities 
+    def getNumberOfActivities(self) : 
+        return self.__n_act
 
     # Quality of Service
 
-    # rootAct parameter is used for recursive calls
-    def cpQos(self, rootAct=0):
+    def cpQos(self, rootAct=0): # rootAct parameter is used for recursive calls
         if self.__qos != None:
             return self.__qos
 
@@ -91,15 +98,47 @@ class CompositionPlan:
             return qos
 
         if rootAct == 0:  # reversing visited attribut of each node to False - final step
-            for act in range(self.__actNum):
+            for act in range(self.__n_act):
                 self.G.nodes[act]["visited"] = False
             self.__qos = qos  # storing qos in attribut
 
         return qos
 
+
+    # overloading != operator
+
+    def __ne__(self,other) :
+        pass
+
     # cloning composition plan
+
     def clone(self):
         actGraph = list(self.G.edges.data("weight"))  # getting graph arcs
         services = [[act[1]] for act in list(self.G.nodes.data("service"))]  # getting services
         clone = CompositionPlan(actGraph, services)
         return clone
+
+
+    # verifying that a compositionPlan meets certain constraints
+
+    def verifyConstraints(self, constraints):
+        qos = self.cpQos()
+        drt = constraints['responseTime'] - qos['responseTime']
+        dpr = constraints['price'] - qos['price']
+        dav = qos['availability'] - constraints['availability']
+        drel = qos['reliability'] - constraints['reliability']
+
+        return drt and dpr and dav and drel
+
+    # generate random service
+
+    def randomService(self) :
+        return self.G.nodes[randint(0, self.getNumberOfActivities() - 1)]["service"] 
+
+
+    # return that performs the ith activity
+
+    def getService(self,i) :
+        return self.G.nodes[i]["service"]
+
+        

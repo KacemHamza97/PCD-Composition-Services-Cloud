@@ -1,5 +1,6 @@
 from random import random
 
+#+----------------------------------------------------------------------------------------------+#
 
 # mutation
 def mutate(cp, new_service):
@@ -8,6 +9,8 @@ def mutate(cp, new_service):
     new_cp.G.nodes[new_service.getActivity()]["service"] = new_service
     return new_cp
 
+
+#+----------------------------------------------------------------------------------------------+#
 
 # Crossover
 def crossover(parent1, parent2, pc):
