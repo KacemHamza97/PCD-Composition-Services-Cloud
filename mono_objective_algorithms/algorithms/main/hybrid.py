@@ -38,6 +38,7 @@ def ABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
 
     # Algorithm
     for itera in range(MCN):
+        print(f"Completed = {((itera+1)/MCN)*100:.2f}%" , end = '\r')
         # employed bees phase
         exploited = sample(solutionsList, N)  # Generating positions list for exploitation
         for sol in exploited:
@@ -119,4 +120,5 @@ def ABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
         updateBest(solutionsList, best_solution)
     
     # end of algorithm
+    print("")
     return best_solution.cp , minQos , maxQos

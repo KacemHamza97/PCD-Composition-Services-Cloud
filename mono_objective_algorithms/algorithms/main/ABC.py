@@ -37,6 +37,7 @@ def ABC(problem, SN, SQ, MCN, N):
 
     # Algorithm
     for itera in range(MCN):
+        print(f"Completed = {((itera+1)/MCN)*100:.2f}%" , end = '\r')
         # employed bees phase
         exploited = sample(solutionsList, N)  # Generating positions list for exploitation
         for sol in exploited:
@@ -101,4 +102,5 @@ def ABC(problem, SN, SQ, MCN, N):
         updateBest(solutionsList, best_solution)
     
     # end of algorithm
+    print("")
     return best_solution.cp , minQos , maxQos

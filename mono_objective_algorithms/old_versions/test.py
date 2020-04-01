@@ -1,60 +1,47 @@
-import numpy as np
 import time
 import csv
+import sys
+path = "/Users/asus/Desktop/pcd/PCD-Composition-Services-Cloud"
+sys.path.append(path)
 
-from data_structure.Service import Service
+from data_structure.Problem import Problem
 from mono_objective_algorithms.algorithms.main.hybrid import ABCgenetic
-from mono_objective_algorithms.algorithms.objective_function.fitness import fit
-
-state = ["over" , "precise"]
-
-def generateActGraph(actNum):       # Sequential
-    return [[i, i + 1, 0] for i in range(actNum - 1)]
+from mono_objective_algorithms.algorithms.operations.fitness import fit
 
 
-def generateCandidates(actNum, num_candidates):
-    candidates = list()
-    for i in range(actNum) :
-        candidates.append([])
-        for j in range(num_candidates):
-            responseTime = np.random.uniform(0.1, 5, 1)[0]
-            price = np.random.uniform(0.1, 3, 1)[0]
-            availability = np.random.uniform(0.9, 0.99, 1)[0]
-            reliability = np.random.uniform(0.7, 0.95, 1)[0]
-            matchingState = np.random.choice(state)
-            if matchingState == "precise" :
-                candidates[i].append(Service(i, responseTime, reliability, availability, price, matchingState))
-            candidates[i].append(Service(i, responseTime, reliability, availability, price, matchingState))
-    return candidates
 
 # main
 
 # input
-actNum = int(input("NUMBER OF ACTIVITIES : "))
-num_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-constraints = {'responseTime': actNum * 0.3, 'price': actNum * 1.55, 'availability': 0.945 ** actNum, 'reliability': 0.825 ** actNum}
+n_act = int(input("NUMBER OF ACTIVITIES : "))
+n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
+constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act, 'reliability': 0.825 ** n_act}
 weights = [0.25, 0.25, 0.25, 0.25]
-actGraph = generateActGraph(actNum)
-candidates = generateCandidates(actNum, num_candidates)
-
 mcn = int(input("ITERATION NUMBER : "))
 sq = int(input("SCOUTS CONDITION : "))
-sn = int(input("RESSOURCES NUMBER : "))
+
+
+# problem init
+
+p = Problem(n_act , n_candidates , constraints , weights)
+
 
 # optimal fitness
 print("optimal fitness search !")
-opt , _ , _ =  ABCgenetic(actGraph, candidates,SQ = 100, SN = 100 , MCN=mcn * 10, SCP=(4*mcn) //5 , N=100, CP=0.2, constraints=constraints, weights=weights)
+opt , _ , _ =  ABCgenetic(problem = p ,SQ = 100, SN = 100 , MCN=mcn * 10, SCP=(4*mcn) //5 , N=100, CP=0.8)
 print("\nDone !")
+
+# executing scenario
 
 print("Executing Algorithm ")
 start_time = time.time()
-result , minQos , maxQos = ABCgenetic(actGraph, candidates,SQ = 100, SN = 100 , MCN=mcn , SCP=(4*mcn) //5 , N=100, CP=0.2, constraints=constraints, weights=weights)
+result , minQos , maxQos = ABCgenetic(problem = p ,SQ = sq, SN = 100 , MCN=mcn , SCP=(4*mcn) //5 , N=100, CP=0.8)
 rt = time.time() - start_time
 
 normalized_fitness = fit(result, minQos , maxQos , weights) / fit(opt, minQos , maxQos , weights)
 
-with open('test_results.csv', mode='a') as file:
+with open('./mono_objective_algorithms/old_versions/test_results.csv', mode='a') as file:
     file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    file_writer.writerow([actNum,num_candidates,sn,sq, mcn, normalized_fitness ,rt])
+    file_writer.writerow([n_act,n_candidates,100,sq, mcn, normalized_fitness ,rt])
 
 print(f"Scalability = {rt} Fitness = {normalized_fitness}")
