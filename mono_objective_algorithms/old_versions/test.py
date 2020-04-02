@@ -1,8 +1,5 @@
 import time
 import csv
-import sys
-path = "/Users/asus/Desktop/pcd/PCD-Composition-Services-Cloud"
-sys.path.append(path)
 
 from data_structure.Problem import Problem
 from mono_objective_algorithms.algorithms.main.hybrid import ABCgenetic
@@ -40,7 +37,7 @@ rt = time.time() - start_time
 
 normalized_fitness = fit(result, minQos , maxQos , weights) / fit(opt, minQos , maxQos , weights)
 
-with open('./mono_objective_algorithms/old_versions/test_results.csv', mode='a') as file:
+with open('test_results.csv', mode='a') as file:
     file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     file_writer.writerow([n_act,n_candidates,100,sq, mcn, normalized_fitness ,rt])
 

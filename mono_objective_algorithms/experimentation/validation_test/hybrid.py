@@ -4,14 +4,14 @@ from prettytable import PrettyTable
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
 from genetic_operations.implementation import crossover, mutate
-from mono_objective_algorithms.algorithms.operations.fitness import fit 
-from mono_objective_algorithms.algorithms.operations.update import updateBest , updateMinMax
+from mono_objective_algorithms.algorithms.operations.fitness import fit
+from mono_objective_algorithms.algorithms.operations.update import updateBest, updateMinMax
 
-# SN : n of ressources  , SQ : condition for scouts , MCN : number of iterations 
+
+# SN : n of ressources  , SQ : condition for scouts , MCN : number of iterations
 # N : n of bees , CP : crossover probability , SCP : scout bees changing point
 
 def simABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
-
     print(f"SN = {SN} , SQ = {SQ} , MCN = {MCN} , N = {N} , CP = {CP}")
 
     def show_solutions():
@@ -29,7 +29,6 @@ def simABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
                        cp.getService(i).getMatching()])
         print(t)
 
-    
     ############################# Algorithm start  ##################################
     print("Initialzing ...")
 
@@ -43,21 +42,21 @@ def simABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
         while 1:
             cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
             if cp.verifyConstraints(problem.getConstraints()):
-                solutionsList.append(Solution(cp = cp , fitness = 0 , probability = 0 , limit = 0 , number = i+1))
+                solutionsList.append(Solution(cp=cp, fitness=0, probability=0, limit=0, number=i + 1))
                 break
 
     # minQos maxQos and fitness initializing
-    updateMinMax(solutionsList , minQos, maxQos , problem.getWeights())
+    updateMinMax(solutionsList, minQos, maxQos, problem.getWeights())
 
     # initializing best_solution
-    best_solution = max(solutionsList , key = lambda sol:sol.fitness)
+    best_solution = max(solutionsList, key=lambda sol: sol.fitness)
 
     show_solutions()
 
     print("algorithm start")
     print("employed bees phase ...")
 
-    #+----------------------------------------------------------------------------------------------+#
+    # +----------------------------------------------------------------------------------------------+#
 
     # Algorithm
     for itera in range(MCN):
@@ -72,7 +71,7 @@ def simABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
                 random = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
                 print("generating random plan")
                 show_solution(random)
-                offspring = crossover(sol.cp, random , CP)  # Crossover operation
+                offspring = crossover(sol.cp, random, CP)  # Crossover operation
                 print("crossover execution !")
                 show_solution(offspring)
                 if offspring.verifyConstraints(problem.getConstraints()):
@@ -81,8 +80,8 @@ def simABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
                     print(f"old_fitness = {sol.fitness}")
                     if new_fitness > sol.fitness:  # checking if offspring fitness is better than parent fitness
                         sol.cp = offspring
-                        sol.fitness = new_fitness 
-                        sol.probability = 0 
+                        sol.fitness = new_fitness
+                        sol.probability = 0
                         sol.limit = 0
                         print("replaced !")
                     else:
@@ -106,7 +105,7 @@ def simABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
         b = max(probabilityList)
         for sol in exploited:
             print(f"solution {sol.number} chosen ... ")
-            r = uniform(a,b)
+            r = uniform(a, b)
             print(f"probability = {sol.probability} vs random = {r}")
             if sol.probability > r:
                 "selected by probability !"
@@ -114,7 +113,7 @@ def simABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
                 print("crossover with best_cp")
                 show_solution(best_solution.cp)
                 while 1:
-                    offspring = crossover(sol.cp, best_solution.cp,CP)  # Crossover operation
+                    offspring = crossover(sol.cp, best_solution.cp, CP)  # Crossover operation
                     print("crossover execution !")
                     show_solution(offspring)
                     if offspring.verifyConstraints(problem.getConstraints()):
@@ -123,11 +122,11 @@ def simABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
                         print(f"old_fitness = {sol.fitness}")
                         if new_fitness > sol.fitness:  # checking if offspring fitness is better than parent fitness
                             sol.cp = offspring
-                            sol.fitness = new_fitness 
-                            sol.probability = 0 
+                            sol.fitness = new_fitness
+                            sol.probability = 0
                             sol.limit = 0
                             print("replaced !")
-                            updateBest(solutionsList, best_solution  , sol)
+                            updateBest(solutionsList, best_solution, sol)
                         else:
                             sol.limit += 1
                             print("not replaced !")
@@ -171,7 +170,7 @@ def simABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
                             sol.limit = 0
                             break
         # end of scout bees phase
-        updateMinMax(solutionsList, minQos, maxQos , problem.getWeights() , best_solution)
+        updateMinMax(solutionsList, minQos, maxQos, problem.getWeights(), best_solution)
         updateBest(solutionsList, best_solution)
         print("end of iteration")
         show_solutions()
