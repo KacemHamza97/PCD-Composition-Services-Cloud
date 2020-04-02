@@ -47,8 +47,8 @@ def ABC(problem, SN, SQ, MCN, N):
                     neighborsList = problem.getCandidates()[service.getActivity()]
                     neighbor = service.getNeighbor(neighborsList)
                     # mutation operation
-                    new = mutate(sol, neighbor)
-                    if new.cp.verifyConstraints(problem.getConstraints()):
+                    new = mutate(sol.cp, neighbor)
+                    if new.verifyConstraints(problem.getConstraints()):
                         new_fitness = fit(new, minQos, maxQos, problem.getWeights())
                         # checking if new fitness is better than parent fitness
                         if new_fitness > sol.fitness:
