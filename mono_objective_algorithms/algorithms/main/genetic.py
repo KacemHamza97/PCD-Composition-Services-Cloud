@@ -8,6 +8,8 @@ from mono_objective_algorithms.algorithms.operations.fitness import fit
 from mono_objective_algorithms.algorithms.operations.update import updateBest , updateMinMax
 
 
+#+----------------------------------------------------------------------------------------------+#
+
 
 # G : n of generations  , N : size of population
 # CP : crossover probability , CM : mutation probability
@@ -30,9 +32,6 @@ def genetic(problem, N, G, CP, CM):
     # minQos maxQos and fitness initializing
     updateMinMax(population , minQos, maxQos , problem.getWeights())
 
-
-    # initializing best_solution
-    best_solution = max(population , key = lambda sol:sol.fitness)
 
     #+----------------------------------------------------------------------------------------------+#
 
@@ -64,12 +63,13 @@ def genetic(problem, N, G, CP, CM):
             while 1:
                 offspring = crossover(parent1.cp, parent2.cp, CP)  # Recombining
                 if random() < CM : # Mutation
-                    service = offspring.cp.randomService()
+                    service = offspring.randomService()
                     random_service = choice(problem.getCandidates()[service.getActivity()])
-                    offspring = mutate(offspring.cp, random_service)
+                    offspring = mutate(offspring, random_service)
                 if offspring.verifyConstraints(problem.getConstraints()):
-                    new_fitness = fit(offspring, minQos, maxQos, problem.getWeights())
-                    offsprings.append(Solution(cp = offspring , fitness = new_fitness , probability = 0))
+                    offspring = Solution(cp = offspring , fitness = 0 , probability = 0)
+                    offspring.fitness = fit(offspring, minQos, maxQos, problem.getWeights())
+                    offsprings.append()
                     break
         
         # Adding offsprings
@@ -78,9 +78,8 @@ def genetic(problem, N, G, CP, CM):
         # Keeping best individuals
         population = sorted(population, key = lambda indiv : indiv.fitness , reverse=True)[:N]
 
-        updateMinMax(population, minQos, maxQos , problem.getWeights() , best_solution)
-        updateBest(population, best_solution)
+        updateMinMax(population , minQos, maxQos , problem.getWeights())
     
     # end of algorithm
     print("")
-    return best_solution.cp , minQos , maxQos
+    return population[0].cp , minQos , maxQos

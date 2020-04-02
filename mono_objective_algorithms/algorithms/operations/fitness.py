@@ -1,7 +1,10 @@
 from numpy import dot, array
 
+#+----------------------------------------------------------------------------------------------+#
 
-# Objective function
+
+# fitness evaluation
+
 def fit(cp, minQos, maxQos, weights):
     qos = cp.cpQos()
     rt = (maxQos['responseTime'] - qos['responseTime']) / (maxQos['responseTime'] - minQos['responseTime'])

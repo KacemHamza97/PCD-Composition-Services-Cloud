@@ -6,4 +6,3 @@ class Solution:
         self.__dict__.update(kwargs)
 
 
-    

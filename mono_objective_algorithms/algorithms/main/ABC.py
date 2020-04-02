@@ -47,13 +47,19 @@ def ABC(problem, SN, SQ, MCN, N):
                     neighborsList = problem.getCandidates()[service.getActivity()]
                     neighbor = service.getNeighbor(neighborsList)
                     # mutation operation
-                    new = mutate(sol.cp, neighbor)
-                    if new.verifyConstraints(problem.getConstraints()):
-                        sol.cp = new
-                        sol.fitness = fit(new, minQos, maxQos, problem.getWeights())
-                        sol.probability = 0
-                        sol.limit = 0
+                    new = mutate(sol, neighbor)
+                    if new.cp.verifyConstraints(problem.getConstraints()):
+                        new_fitness = fit(new, minQos, maxQos, problem.getWeights())
+                        # checking if new fitness is better than parent fitness
+                        if new_fitness > sol.fitness:
+                            sol.cp = new
+                            sol.fitness = new_fitness 
+                            sol.probability = 0 
+                            sol.limit = 0
+                        else:
+                            sol.limit += 1
                         break
+
         # end of employed bees phase
 
         updateBest(solutionsList, best_solution)
@@ -77,10 +83,15 @@ def ABC(problem, SN, SQ, MCN, N):
                     # mutation operation
                     new = mutate(sol.cp, neighbor)
                     if new.verifyConstraints(problem.getConstraints()):
-                        sol.cp = new
-                        sol.fitness = fit(new, minQos, maxQos, problem.getWeights())
-                        sol.probability = 0
-                        sol.limit = 0
+                        new_fitness = fit(new, minQos, maxQos, problem.getWeights())
+                        # checking if new fitness is better than parent fitness
+                        if new_fitness > sol.fitness:
+                            sol.cp = new
+                            sol.fitness = new_fitness 
+                            sol.probability = 0 
+                            sol.limit = 0
+                        else:
+                            sol.limit += 1
                         break
         # end of onlooker bees phase
 
@@ -92,7 +103,7 @@ def ABC(problem, SN, SQ, MCN, N):
                     random = CompositionPlan(problem.getActGraph(), problem.getCandidates())
                     if random.verifyConstraints(problem.getConstraints()):
                         sol.cp = random
-                        sol.fitness = fit(cp, minQos, maxQos, problem.getWeights())
+                        sol.fitness = fit(sol, minQos, maxQos, problem.getWeights())
                         sol.probability = 0
                         sol.limit = 0
                         break

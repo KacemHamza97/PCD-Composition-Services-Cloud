@@ -1,5 +1,5 @@
 
-from mono_objective_algorithms.algorithms.operations.fitness import fit 
+from mono_objective_algorithms.algorithms.operations.fitness import fit
 
 #+----------------------------------------------------------------------------------------------+#
 

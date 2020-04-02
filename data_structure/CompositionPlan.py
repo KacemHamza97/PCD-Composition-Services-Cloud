@@ -24,12 +24,18 @@ class CompositionPlan:
         for act, services in enumerate(candidates):  # Generating random services from candidates
             self.G.nodes[act]["service"] = choice(services)
             self.G.nodes[act]["visited"] = False  # this attribut is used for calculating qos once per node
+        self.__actGraph = actGraph
         self.__n_act = self.G.number_of_nodes()  # number of activities
         self.__qos = None  # not initialized
 
     # get number of activities 
     def getNumberOfActivities(self) : 
         return self.__n_act
+
+    # get actGraph
+
+    def getActGraph(self) :
+        return self.__actGraph
 
     # Quality of Service
 
@@ -105,10 +111,25 @@ class CompositionPlan:
         return qos
 
 
+    # overloading == operator
+
+    def __eq__(self,other) :
+
+        if self.__actGraph != other.__actGraph : 
+            return False
+
+        for act in range(self.__n_act):
+            if self.getService(act) != other.getService(act) :
+                return False
+
+        return True
+
+
     # overloading != operator
 
     def __ne__(self,other) :
-        pass
+        return not ( self == other ) 
+
 
     # cloning composition plan
 
@@ -136,9 +157,9 @@ class CompositionPlan:
         return self.G.nodes[randint(0, self.getNumberOfActivities() - 1)]["service"] 
 
 
-    # return that performs the ith activity
+    # return the service that performs the ith activity
 
-    def getService(self,i) :
-        return self.G.nodes[i]["service"]
+    def getService(self,act) :
+        return self.G.nodes[act]["service"]
 
         
