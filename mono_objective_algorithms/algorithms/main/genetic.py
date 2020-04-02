@@ -69,7 +69,7 @@ def genetic(problem, N, G, CP, CM):
                 if offspring.verifyConstraints(problem.getConstraints()):
                     offspring = Solution(cp = offspring , fitness = 0 , probability = 0)
                     offspring.fitness = fit(offspring, minQos, maxQos, problem.getWeights())
-                    offsprings.append()
+                    offsprings.append(offspring)
                     break
         
         # Adding offsprings
