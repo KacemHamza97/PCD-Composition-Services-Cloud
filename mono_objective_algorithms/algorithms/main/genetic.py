@@ -67,9 +67,9 @@ def genetic(problem, N, G, CP, CM):
                     random_service = choice(problem.getCandidates()[service.getActivity()])
                     offspring = mutate(offspring, random_service)
                 if offspring.verifyConstraints(problem.getConstraints()):
-                    offspring = Solution(cp = offspring , fitness = 0 , probability = 0)
-                    offspring.fitness = fit(offspring, minQos, maxQos, problem.getWeights())
-                    offsprings.append(offspring)
+                    offspring_fitness = fit(offspring, minQos, maxQos, problem.getWeights())
+                    offspring_solution = Solution(cp = offspring , fitness = offspring_fitness , probability = 0)
+                    offsprings.append(offspring_solution)
                     break
         
         # Adding offsprings
