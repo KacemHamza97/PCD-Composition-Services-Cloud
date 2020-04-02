@@ -1,8 +1,6 @@
 import networkx
 import matplotlib.pyplot as plt
-import sys
-path = "/Users/asus/Desktop/pcd/PCD-Composition-Services-Cloud"
-sys.path.append(path)
+
 from data_structure.Problem import Problem
 from mono_objective_algorithms.experimentation.validation_test.hybrid import simABCgenetic
 
