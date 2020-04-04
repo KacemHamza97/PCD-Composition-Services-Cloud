@@ -113,7 +113,7 @@ def ABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
                         random = CompositionPlan(problem.getActGraph(), problem.getCandidates())
                         if random.verifyConstraints(problem.getConstraints()):
                             sol.cp = random
-                            sol.fitness = fit(cp, minQos, maxQos, problem.getWeights())
+                            sol.fitness = fit(sol.cp, minQos, maxQos, problem.getWeights())
                             sol.probability = 0
                             sol.limit = 0
                             break
