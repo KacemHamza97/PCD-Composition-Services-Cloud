@@ -1,4 +1,2 @@
-algorithm,activities,candidates,SN,SQ,MCN,optimality,scalability,deviation,convergence
+algorithm,activities,candidates,SN/N,MCN/G,SQ,optimality,scalability,deviation,convergence
 
-
-ABCgenetic,5,50,1,10,100,nan,0.02362674077351888,nan,[]

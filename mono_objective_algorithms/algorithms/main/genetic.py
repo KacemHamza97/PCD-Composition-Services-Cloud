@@ -35,26 +35,31 @@ def genetic(problem, N, G, CP, CM):
 
     #+----------------------------------------------------------------------------------------------+#
 
-
+    conv_itera = 1
     # Algorithm
     for generation in range(G):
 
         print(f"Completed = {((generation+1)/G)*100:.2f}%" , end = '\r')
+
+        prev_opt = population[0].fitness
+
         # Probability update
         s = sum([indiv.fitness for indiv in population])
         for indiv in population:
             indiv.probability = indiv.fitness / s
 
-        # onlooker bees phase
         probabilityList = [indiv.probability for indiv in population]
         a = min(probabilityList)
         b = max(probabilityList)
         parents = []
         offsprings = []
         # Selecting best individuals
-        for indiv in population:
-            if indiv.probability > uniform(a,b):
-                parents.append(indiv)
+        n_individuals = 0
+        while n_individuals < 2 : 
+            for indiv in population:
+                if indiv.probability >= uniform(a,b):
+                    n_individuals += 1 
+                    parents.append(indiv)
         
         # Mating selection
         for itera in range(len(parents)) :
@@ -62,7 +67,7 @@ def genetic(problem, N, G, CP, CM):
 
             while 1:
                 offspring = crossover(parent1.cp, parent2.cp, CP)  # Recombining
-                if random() < CM : # Mutation
+                if random() <= CM : # Mutation
                     service = offspring.randomService()
                     random_service = choice(problem.getCandidates()[service.getActivity()])
                     offspring = mutate(offspring, random_service)
@@ -78,8 +83,12 @@ def genetic(problem, N, G, CP, CM):
         # Keeping best individuals
         population = sorted(population, key = lambda indiv : indiv.fitness , reverse=True)[:N]
 
+        # this segment is used for calculating conv 
+        if population[0].fitness - prev_opt > 0.001 : 
+            conv_itera = itera+1
+
         updateMinMax(population , minQos, maxQos , problem.getWeights())
     
     # end of algorithm
     print("")
-    return population[0].cp , minQos , maxQos
+    return population[0].cp , minQos , maxQos , conv_itera

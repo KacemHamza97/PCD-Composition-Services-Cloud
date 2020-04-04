@@ -1,5 +1,6 @@
 from math import inf
 from random import sample, uniform
+from numpy.random import choice
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
 from genetic_operations.implementation import mutate
@@ -35,17 +36,18 @@ def ABC(problem, SN, SQ, MCN, N):
     #+----------------------------------------------------------------------------------------------+#
 
 
+    conv_itera = 1
     # Algorithm
     for itera in range(MCN):
         print(f"Completed = {((itera+1)/MCN)*100:.2f}%" , end = '\r')
+        prev_opt = best_solution.fitness
         # employed bees phase
         exploited = sample(solutionsList, N)  # Generating positions list for exploitation
         for sol in exploited:
             while 1:
                     # choose randomly a service to mutate
                     service = sol.cp.randomService()
-                    neighborsList = problem.getCandidates()[service.getActivity()]
-                    neighbor = service.getNeighbor(neighborsList)
+                    neighbor = choice(problem.getCandidates()[service.getActivity()])
                     # mutation operation
                     new = mutate(sol.cp, neighbor)
                     if new.verifyConstraints(problem.getConstraints()):
@@ -74,12 +76,11 @@ def ABC(problem, SN, SQ, MCN, N):
         a = min(probabilityList)
         b = max(probabilityList)
         for sol in exploited:
-            if sol.probability > uniform(a,b):
+            if sol.probability >= uniform(a,b):
                 while 1:
                     # choose randomly a service to mutate
                     service = sol.cp.randomService()
-                    neighborsList = problem.getCandidates()[service.getActivity()]
-                    neighbor = service.getNeighbor(neighborsList)
+                    neighbor = choice(problem.getCandidates()[service.getActivity()])
                     # mutation operation
                     new = mutate(sol.cp, neighbor)
                     if new.verifyConstraints(problem.getConstraints()):
@@ -108,10 +109,21 @@ def ABC(problem, SN, SQ, MCN, N):
                         sol.limit = 0
                         break
 
+        
+    
+            
         # end of scout bees phase
-        updateMinMax(solutionsList, minQos, maxQos , problem.getWeights() , best_solution)
+
         updateBest(solutionsList, best_solution)
+
+        # this segment is used for calculating conv 
+        if best_solution.fitness - prev_opt > 0.001 : 
+            conv_itera = itera+1
+
+        updateMinMax(solutionsList, minQos, maxQos , problem.getWeights() , best_solution)
+        
+        
     
     # end of algorithm
     print("")
-    return best_solution.cp , minQos , maxQos
+    return best_solution.cp , minQos , maxQos , conv_itera

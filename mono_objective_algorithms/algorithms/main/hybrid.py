@@ -13,6 +13,7 @@ from mono_objective_algorithms.algorithms.operations.update import updateBest , 
 
 def ABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
 
+    
     # solutions initializing
     solutionsList = list()
     
@@ -35,10 +36,11 @@ def ABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
 
     #+----------------------------------------------------------------------------------------------+#
 
-
+    conv_itera = 1
     # Algorithm
     for itera in range(MCN):
         print(f"Completed = {((itera+1)/MCN)*100:.2f}%" , end = '\r')
+        prev_opt = best_solution.fitness
         # employed bees phase
         exploited = sample(solutionsList, N)  # Generating positions list for exploitation
         for sol in exploited:
@@ -70,7 +72,7 @@ def ABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
         a = min(probabilityList)
         b = max(probabilityList)
         for sol in exploited:
-            if sol.probability > uniform(a,b):
+            if sol.probability >= uniform(a,b):
                 while 1:
                     offspring = crossover(sol.cp, best_solution.cp, CP)  # Crossover operation
                     if offspring.verifyConstraints(problem.getConstraints()):
@@ -88,6 +90,7 @@ def ABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
         # end of onlooker bees phase
 
         # scout bees phase
+        update = 0
         for sol in exploited:
             if sol.limit >= SQ:  # verifying scouts condition
                 if itera >= SCP:  # change of scouts behaviour condition to mutating
@@ -114,11 +117,20 @@ def ABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
                             sol.probability = 0
                             sol.limit = 0
                             break
+                update = 1
+
 
         # end of scout bees phase
+        if update :
+            updateBest(solutionsList, best_solution)
+
+        # this segment is used for calculating conv 
+        if best_solution.fitness - prev_opt > 0.001 : 
+            conv_itera = itera+1
+
         updateMinMax(solutionsList, minQos, maxQos , problem.getWeights() , best_solution)
-        updateBest(solutionsList, best_solution)
-    
+
+            
     # end of algorithm
     print("")
-    return best_solution.cp , minQos , maxQos
+    return best_solution.cp , minQos , maxQos , conv_itera 
