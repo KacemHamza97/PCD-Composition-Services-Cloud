@@ -1,9 +1,9 @@
 import time
 import csv
-import sys
-from numpy import array
-path = "/Users/asus/Desktop/pcd/PCD-Composition-Services-Cloud"
-sys.path.append(path)
+import numpy as np
+import seaborn as sns
+import pandas as pd
+import matplotlib.pyplot as plt
 
 from data_structure.Problem import Problem
 from mono_objective_algorithms.algorithms.main.hybrid import ABCgenetic
@@ -23,7 +23,6 @@ def evaluate(algorithm , **kwargs) :
         result, minQos, maxQos , conv_itera = algorithm(**kwargs)
         rt = time.time() - start_time
         rt_list.append(rt)
-        print(rt)
         min_list.append(minQos)
         max_list.append(maxQos)
         cp_list.append(result)
@@ -31,21 +30,23 @@ def evaluate(algorithm , **kwargs) :
 
     minQos_avg = {qos : sum([cp_qos[qos] / 30 for cp_qos in min_list]) for qos in opt.cpQos().keys()}
     maxQos_avg = {qos : sum([cp_qos[qos] / 30 for cp_qos in max_list]) for qos in opt.cpQos().keys()}
-    fit_list = [fit(cp , minQos_avg , maxQos_avg , weights) for cp in cp_list ]
+    opt_fit = fit(opt, minQos_avg, maxQos_avg, weights)
+    fit_list = [fit(cp , minQos_avg , maxQos_avg , weights) / opt_fit for cp in cp_list ]
     fit_avg = sum(fit_list) / 30
     rt_avg = sum(rt_list) / 30
-    opt_fit = fit(opt , minQos_avg , maxQos_avg , weights)
+
     div = 0
     conv = sum(conv_list) / 30
     for i in range(len(fit_list)-1) : 
         div += abs( fit_list[i+1] - fit_list[i] ) / 29
 
-    with open('./mono_objective_algorithms/experimentation/evaluation_test/test_results.csv', mode='a') as file:
+    with open('test_results.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         if (algorithm.__name__ == "ABCgenetic" or "ABC") :
-            file_writer.writerow([algorithm.__name__,n_act, n_candidates, sn,mcn ,sq, fit_avg / opt_fit, rt_avg , div , conv])
+            file_writer.writerow([algorithm.__name__,n_act, n_candidates, sn,mcn ,sq, fit_avg , rt_avg , div , conv])
         else :
-            file_writer.writerow([algorithm.__name__,n_act, n_candidates, sn,mcn ,'Nan', fit_avg / opt_fit, rt_avg , div , conv])
+            file_writer.writerow([algorithm.__name__,n_act, n_candidates, sn,mcn ,'Nan', fit_avg, rt_avg , div , conv])
+    return fit_list
 # main
 
 # input
@@ -71,6 +72,15 @@ print("\nDone !")
 
 # test scenarios
 
-evaluate(ABCgenetic , problem = p, SN=sn, SQ=sq, MCN=mcn,SCP=9 * mcn // 10, N=sn // 2 , CP=0.2)
-evaluate(ABC , problem = p, SN=sn, SQ=sq, MCN=mcn , N=sn // 2)
-evaluate(genetic , problem = p, N = sn , G = mcn , CP = 0.75, CM = 0.1)
+fit_list1 = evaluate(ABCgenetic , problem = p, SN=sn, SQ=sq, MCN=mcn,SCP=9 * mcn // 10, N=sn // 2 , CP=0.2)
+fit_list2 = evaluate(ABC , problem = p, SN=sn, SQ=sq, MCN=mcn , N=sn // 2)
+fit_list3 = evaluate(genetic , problem = p, N = sn , G = mcn , CP = 0.75, CM = 0.1)
+fit_list = fit_list1 + fit_list2 + fit_list3
+
+# plots boxplot section
+d = {"fitness": fit_list , f"scenario({n_act},{n_candidates})": [" ABCgenetic"]*30 + [" ABC"]*30 + [" genetic"]*30 }
+df = pd.DataFrame(data=d)
+print(df)
+sns.boxplot(x =f"scenario({n_act},{n_candidates})" ,y ="fitness", data=df)
+plt.show()
+
