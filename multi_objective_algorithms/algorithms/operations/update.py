@@ -84,7 +84,7 @@ def updateSolutions(solutionsList , fronts , method) :
         # selecting solutions from front based on method
         if method == "crowdingSort" :
             selection = crowdingSort(solutionsList , fronts[i])[0:N - len(S)]
-        S += selection
+            S += selection
 
     for sol in S :
         sol.fitness = fit(sol,solutionsList)
