@@ -85,16 +85,15 @@ fit_list3, K3 = evaluate(genetic, problem=p, N=sn, G=mcn, CP=0.75, CM=0.1)
 fit_list = fit_list1 + fit_list2 + fit_list3
 
 
-# plot boxplot section
-# d = {"fitness": fit_list , f"scenario({n_act},{n_candidates})": [" ABCgenetic"]*30 + [" ABC"]*30 + [" genetic"]*30 }
-# df = pd.DataFrame(data=d)
-# print(df)
-# sns_plot = sns.boxplot(x =f"scenario({n_act},{n_candidates})" ,y ="fitness", data=df)
-# sns_plot.figure.savefig(f"boxplots/boxplot({n_act},{n_candidates}).png")
-# plt.show()
+#plot boxplot section
+d = {"fitness": fit_list , f"scenario({n_act},{n_candidates})": [" ABCgenetic"]*30 + [" ABC"]*30 + [" genetic"]*30 }
+df = pd.DataFrame(data=d)
+print(df)
+sns_plot = sns.boxplot(x =f"scenario({n_act},{n_candidates})" ,y ="fitness", data=df)
+sns_plot.figure.savefig(f"boxplots/boxplot({n_act},{n_candidates}).png")
 
 # plot iterations
-
+plt.clf()
 plt.plot([i for i in range(1, mcn + 1)], K1, label='ABCgenetic')
 plt.plot([i for i in range(1, mcn + 1)], K2, label='ABC')
 plt.plot([i for i in range(1, mcn + 1)], K3, label='Genetic')
