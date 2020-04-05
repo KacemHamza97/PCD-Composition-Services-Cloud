@@ -15,6 +15,7 @@ def ABC(problem, SN, SQ, MCN, N):
 
     # solutions initializing
     solutionsList = list()
+    plotx = []
     
     minQos = {'responseTime': inf, 'price': inf, 'availability': inf, 'reliability': inf}
     maxQos = {'responseTime': 0, 'price': 0, 'availability': 0, 'reliability': 0}
@@ -117,13 +118,14 @@ def ABC(problem, SN, SQ, MCN, N):
         updateBest(solutionsList, best_solution)
 
         # this segment is used for calculating conv 
-        if best_solution.fitness - prev_opt > 0.001 : 
+        if best_solution.fitness - prev_opt > 0.000000001 :
             conv_itera = itera+1
 
         updateMinMax(solutionsList, minQos, maxQos , problem.getWeights() , best_solution)
+        plotx.append(best_solution.cp)
         
         
     
     # end of algorithm
     print("")
-    return best_solution.cp , minQos , maxQos , conv_itera
+    return best_solution.cp , minQos , maxQos , conv_itera,plotx

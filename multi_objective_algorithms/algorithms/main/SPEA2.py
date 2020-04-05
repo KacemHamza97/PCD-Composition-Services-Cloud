@@ -69,6 +69,15 @@ def SPEA2(problem):
             non_dominated.append(sol1)
         return non_dominated
 
+    def dominated_individuals(P):
+        dominated_individuals = []
+        for sol1 in P:
+            for sol2 in P:
+                if dominates(sol2, sol1):
+                    dominated_individuals.append(sol1)
+                    break
+        return dominated_individuals
+
     def sort_population_by_fitness(X):
         return sorted(X, key=lambda x: x.fitness)
 
@@ -83,8 +92,8 @@ def SPEA2(problem):
         d.sort(key=lambda x: x[2])  # sort by distance
         L = []
         for elem in d:
-            if len(L) < n and elem[0] not in L and elem[
-                1] not in L:  # the 3rd condition : to avoid deleting some thing had been deleted exemple fig 2 page 9
+            if len(L) < n and elem[0] not in L and elem[1] not in L:
+                # the 3rd condition : to avoid deleting some thing had been deleted exemple fig 2 page 9
                 L.append(elem[1])
         for elem in EA:
             if elem in L:
@@ -98,6 +107,14 @@ def SPEA2(problem):
             # EA = truncation(len(EA) - EN, EA)
             EA = EA[:EN]
         return EA
+
+    def update_P(dominated_individuals, P):
+        if len(P) < N:
+            P.extends(sort_population_by_fitness(dominated_individuals)[N - len(P)])
+        elif len(P) > N:
+            # P = truncation(len(P) - N, P)
+            P = P[:N]
+        return P
 
     def binaryTournement(EA):
         p1, p2 = sample(EA, 2)
@@ -121,35 +138,28 @@ def SPEA2(problem):
     EA = []  # archive
     # Algorithm
     for t in range(T):
-        print(" len( EA ) =",len(EA))
+        print(" len( EA ) = before", len(EA))
         for sol in P:
             sol.fitness = fit(sol, P, EA, k)
         for sol in EA:
             sol.fitness = fit(sol, P, EA, k)
 
         EA.extend(nondominated_individuals(P, EA))
-        dominated_individuals = []
-        for sol1 in P:
-            for sol2 in P:
-                if dominates(sol2, sol1):
-                    dominated_individuals.append(sol1)
-                    break
-
-        EA[:] = update_EA(dominated_individuals, EA)
-        print("la taille de EA = ", len(EA))
+        EA = update_EA(dominated_individuals, EA)
+        P = update_P(dominated_individuals, P)
+        print("la taille de EA = after ", len(EA))
         parent1, parent2 = binaryTournement(EA)
         offspring_list = BSG(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
         for offspring in offspring_list:
             P.append(Solution(cp=offspring, fitness=0, functions=functions(offspring)))
-        print(" len( P ) = ",len(P))
+        print(" len( P ) = ", len(P))
 
     return EA
 
 
 n_act = int(input("NUMBER OF ACTIVITIES : "))
 n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act,
-               'reliability': 0.825 ** n_act}
+constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act, 'reliability': 0.825 ** n_act}
 
 # problem init
 
@@ -157,4 +167,3 @@ p = Problem(n_act, n_candidates, constraints)
 result = SPEA2(p)
 for i in result:
     print(i)
-print(len(result))

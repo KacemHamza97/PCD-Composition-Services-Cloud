@@ -18,6 +18,7 @@ def genetic(problem, N, G, CP, CM):
 
     # population initializing
     population = list()
+    plotx = []
     
     minQos = {'responseTime': inf, 'price': inf, 'availability': inf, 'reliability': inf}
     maxQos = {'responseTime': 0, 'price': 0, 'availability': 0, 'reliability': 0}
@@ -84,11 +85,12 @@ def genetic(problem, N, G, CP, CM):
         population = sorted(population, key = lambda indiv : indiv.fitness , reverse=True)[:N]
 
         # this segment is used for calculating conv 
-        if population[0].fitness - prev_opt > 0.001 : 
+        if population[0].fitness - prev_opt > 0.000000001 :
             conv_itera = itera+1
 
         updateMinMax(population , minQos, maxQos , problem.getWeights())
+        plotx.append(population[0].cp)
     
     # end of algorithm
     print("")
-    return population[0].cp , minQos , maxQos , conv_itera
+    return population[0].cp , minQos , maxQos , conv_itera,plotx
