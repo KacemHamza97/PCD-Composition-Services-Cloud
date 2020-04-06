@@ -25,8 +25,8 @@ def fit(sol , solutionsList):
     dom = 1  # number of solution dominated  by sol
     s = 0
     for sol2 in solutionsList :
+        s += 1
         if dominates(sol , sol2) :
-            s += 1
             dom += 1
     return dom / s
     

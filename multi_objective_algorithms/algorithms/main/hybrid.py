@@ -1,5 +1,4 @@
 from random import uniform, sample
-
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
 from genetic_operations.implementation import BSG
@@ -29,6 +28,7 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
         print(f"completed = {(itera + 1) * 100 / MCN} %", end='\r')
 
         # employed bees phase
+        print("employed bees phase ...")
         exploited = sample(solutionsList, N)  # Generating positions list for exploitation
         U = list()
         U[:] = solutionsList
@@ -36,8 +36,9 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
             cp1 = sol.cp
             cp2 = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
             offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
-            U += offsprings
+            U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0) for cp in offsprings]
         # end of employed bees phase
+
         fronts = nonDominatedSort(U)
         updateSolutions(solutionsList, fronts, method="crowdingSort")
 
@@ -57,11 +58,13 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
                 cp1 = sol.cp
                 cp2 = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
                 offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
-                U += offsprings
-        # end of employed bees phase
+                U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0) for cp in offsprings]
+
+        # end of onlooker bees phase
+
         fronts = nonDominatedSort(U)
         updateSolutions(solutionsList, fronts, "crowdingSort")
-        # end of onlooker bees phase
+        
 
         # scout bees phase
         update = 0
@@ -69,11 +72,11 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
         U[:] = solutionsList
         for sol in exploited:
             if sol.limit >= SQ:
+                sol.limit = 0
                 while 1:
                     cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
                     if cp.verifyConstraints(problem.getConstraints()):
-                        new = Solution(cp=cp, fitness=0, functions=functions(cp), limit=0, probability=0)
-                        U.append(new)
+                        U.append(Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0))
                         break
                 update = 1
         # end of scout bees phase
@@ -83,4 +86,4 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
 
     # end of algorithm
     print("\n")
-    return fronts
+    return fronts[0]

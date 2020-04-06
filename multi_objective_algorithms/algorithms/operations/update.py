@@ -39,11 +39,11 @@ def nonDominatedSort(solutionsList) :
 #+----------------------------------------------------------------------------------------------+#
 
 
-def crowdingSort(front , dimensions) :
+def crowdingSort(front) :
     scoresList = list()
     for sol1 in front :
         score = list() # score of sol1
-        for d in range(dimensions) :
+        for d in range(3) :
             high = []    # solutions with higher value in dimension d
             low =  []    # solutions with lower value in dimension  d
             for sol2 in front :
@@ -53,10 +53,12 @@ def crowdingSort(front , dimensions) :
                     high.append(sol2.functions[d])
             if len(high) == 0 :  # no heigher value found
                 next_high = sol1.functions[d]
+                high.append(next_high)
             else :
                 next_high = min(high)  # smallest heigher value
             if len(low) == 0 :   # no lower value found
                 next_low = sol1.functions[d]
+                low.append(next_low)
             else :
                 next_low = max(low)    # biggest lower value
             score.append((next_high-next_low)/(max(high) - min(low))) # normalized score
@@ -83,12 +85,15 @@ def updateSolutions(solutionsList , fronts , method) :
     if i < len(fronts) : 
         # selecting solutions from front based on method
         if method == "crowdingSort" :
-            selection = crowdingSort(solutionsList , fronts[i])[0:N - len(S)]
+            selection = crowdingSort(fronts[i])[0:N - len(S)]
             S += selection
 
-    for sol in S :
-        sol.fitness = fit(sol,solutionsList)
-        if sol in solutionsList : 
-            sol.limit += 1
+    try : 
+        for sol in S :
+            sol.fitness = fit(sol,solutionsList)
+            if sol in solutionsList : 
+                sol.limit += 1
+    except : 
+        None
         
     return S
