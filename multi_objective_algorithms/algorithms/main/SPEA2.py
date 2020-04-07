@@ -1,7 +1,5 @@
 from numpy import array
 from random import sample
-import sys
-sys.path.append("/users/asus/Desktop/pcd/PCD-COMPOSITION-SERVICES-CLOUD")
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
 from genetic_operations.implementation import BSG
@@ -180,21 +178,3 @@ def spea2(problem , G , N , EN):
         EA = next_EA
     return EA
  
-
- # input
-n_act = int(input("NUMBER OF ACTIVITIES : "))
-n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act, 'reliability': 0.825 ** n_act}
-
-mcn = int(input("ITERATION NUMBER / GENERATIONS NUMBER : "))
-sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
-
-# problem init
-
-p = Problem(n_act, n_candidates, constraints)
-
-while 1 :
-    _ = solutions_spea2 = spea2(problem = p , G = mcn ,N = sn , EN = 10)
-
-for i in _ : 
-    print(i.functions)

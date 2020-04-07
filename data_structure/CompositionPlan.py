@@ -115,9 +115,6 @@ class CompositionPlan:
 
     def __eq__(self,other) :
 
-        if self.__actGraph != other.getActGraph() : 
-            return False
-
         for act in range(self.__n_act):
             if self.getService(act) != other.getService(act) :
                 return False
