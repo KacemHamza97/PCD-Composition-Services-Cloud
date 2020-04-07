@@ -25,14 +25,14 @@ p = Problem(n_act , n_candidates , constraints , weights)
 
 # optimal fitness
 print("optimal fitness search !")
-opt , _ , _ =  ABCgenetic(problem = p ,SQ = 100, SN = 100 , MCN=mcn * 10, SCP=(4*mcn) //5 , N=100, CP=0.8)
+opt , _ , _ , _ , _=  ABCgenetic(problem = p ,SQ = 100, SN = 100 , MCN=mcn * 10, SCP=(4*mcn) //5 , N=100, CP=0.8)
 print("\nDone !")
 
 # executing scenario
 
 print("Executing Algorithm ")
 start_time = time.time()
-result , minQos , maxQos = ABCgenetic(problem = p ,SQ = sq, SN = 100 , MCN=mcn , SCP=(4*mcn) //5 , N=100, CP=0.8)
+result , minQos , maxQos , _ , _= ABCgenetic(problem = p ,SQ = sq, SN = 100 , MCN=mcn , SCP=(4*mcn) //5 , N=100, CP=0.8)
 rt = time.time() - start_time
 
 normalized_fitness = fit(result, minQos , maxQos , weights) / fit(opt, minQos , maxQos , weights)
