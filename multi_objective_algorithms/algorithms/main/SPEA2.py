@@ -1,7 +1,5 @@
 from numpy import array
-from numpy.random import choice
-import sys
-sys.path.append("/users/asus/Desktop/pcd/PCD-COMPOSITION-SERVICES-CLOUD")
+from random import sample
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
 from genetic_operations.implementation import BSG
@@ -90,10 +88,10 @@ def truncation(n, X):
 
         # sorting distances
         distances.sort(key=lambda dist: dist[2])  
-        remove = set()  # list of solutions to remove 
+        remove = list()  # list of solutions to remove 
         for dist in distances:
-            if len(remove) < n :
-                remove.add(dist[1])
+            if len(remove) < n and dist[1] not in remove :
+                remove.append(dist[1])
         for sol in X:
             if sol in remove:
                 X.remove(sol)
@@ -111,25 +109,25 @@ def update(dominated_individuals, X , N):
 
 #+----------------------------------------------------------------------------------------------+#
 
+def notIN(sol1 , X) : 
+    for sol2 in X : 
+        if sol1.cp == sol2.cp :
+            return False
+    return True
+
+#+----------------------------------------------------------------------------------------------+#
+
 def binaryTournement(EA):
     final = []
-    p1 = choice(EA)
-    while 1 : 
-        p2 = choice(EA) 
-        if p2.cp != p1.cp :
-            break
-    while 1 : 
-        p3 = choice(EA) 
-        if p3.cp != p1.cp and p3.cp != p2.cp :
-            break
-    while 1 : 
-        p4 = choice(EA) 
-        if p4.cp != p1.cp and p4.cp != p2.cp and p4.cp != p3.cp :
-            break
-
+    p1 , p2 = sample(EA , 2)
     final.append(p1) if dominates(p1, p2) else final.append(p2)
-    final.append(p3) if dominates(p3, p4) else final.append(p4)
+    while 1 : 
+        p1 , p2 = sample(EA , 2)
+        if notIN(p1,final) and notIN(p2 , final) :
+            break
+    final.append(p1) if dominates(p1, p2) else final.append(p2)
 
+    print(final[0].cp == final[1].cp)
     return final[0] , final[1]
 
 
@@ -176,18 +174,3 @@ def spea2(problem , G , N , EN):
 
     return EA
  
-
-
-# input
-n_act = int(input("NUMBER OF ACTIVITIES : "))
-n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act, 'reliability': 0.825 ** n_act}
-
-mcn = int(input("ITERATION NUMBER / GENERATIONS NUMBER : "))
-sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
-
-# problem init
-
-p = Problem(n_act, n_candidates, constraints)
-X = solutions_spea2 = spea2(problem = p , G = mcn ,N = sn , EN = 10)
-print([x.functions for  x in X])
