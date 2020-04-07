@@ -1,10 +1,13 @@
-from random import sample
 from numpy import array
+from numpy.random import choice
+import sys
+sys.path.append("/users/asus/Desktop/pcd/PCD-COMPOSITION-SERVICES-CLOUD")
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
 from genetic_operations.implementation import BSG
 from multi_objective_algorithms.algorithms.operations.objective_functions import functions
 from multi_objective_algorithms.algorithms.operations.objective_functions import dominates
+from data_structure.Problem import Problem
 
 #+----------------------------------------------------------------------------------------------+#
 
@@ -24,6 +27,7 @@ def strength(indiv1 , population , EA):
         for indiv2 in (population + EA):
             if dominates(indiv1, indiv2):
                 s += 1
+        return s
 
 
 #+----------------------------------------------------------------------------------------------+#
@@ -73,53 +77,61 @@ def sort_population_by_fitness(population):
 
 #+----------------------------------------------------------------------------------------------+#
 
-def truncation(n, EA):
-        d = []
-        e = set()
-        for i, d1 in enumerate(EA):
-            e.add(i)
-            for j, d2 in enumerate(EA):
-                if j not in e:  # astuce pour ne pas calculer la distance (d1 , d2) et (d2,d1)
-                    d.append((d1, d2, distance(d1, d2)))  # tuple (d1,d2,distance)
-        d.sort(key=lambda x: x[2])  # sort by distance
-        L = []
-        for elem in d:
-            if len(L) < n and elem[0] not in L and elem[1] not in L:
-                # the 3rd condition : to avoid deleting some thing had been deleted exemple fig 2 page 9
-                L.append(elem[1])
-        for elem in EA:
-            if elem in L:
-                EA.remove(elem)
-        return EA
+# n : number of elements to remove from X
+def truncation(n, X):
+        # evaluating distances 
+        distances = []      # list of tuples (sol1 , sol2 , distance)
+        e = set()           
+        for i, sol1 in enumerate(X):
+            e.add(i)        # avoid calculating same distance twice
+            for j, sol2 in enumerate(X):
+                if j not in e:  
+                    distances.append((sol1, sol2, distance(sol1, sol2)))  
+
+        # sorting distances
+        distances.sort(key=lambda dist: dist[2])  
+        remove = set()  # list of solutions to remove 
+        for dist in distances:
+            if len(remove) < n :
+                remove.add(dist[1])
+        for sol in X:
+            if sol in remove:
+                X.remove(sol)
+        return X
 
 #+----------------------------------------------------------------------------------------------+#
 
-def update_EA(dominated_individuals, EA , EN):
-        if len(EA) < EN:
-            EA.extends(sort_population_by_fitness(dominated_individuals)[EN - len(EA)])
-        elif len(EA) > EN:
-            EA = truncation(len(EA) - EN, EA)
-            EA = EA[:EN]
-        return EA
-
-#+----------------------------------------------------------------------------------------------+#
-
-def updatePopulation(dominated_individuals, population , N):
-        if len(population) < N:
-            population.extends(sort_population_by_fitness(dominated_individuals)[N - len(population)])
-        elif len(population) > N:
-            # population = truncation(len(population) - N, population)
-            population = population[:N]
-        return population
+def update(dominated_individuals, X , N):
+        if len(X) < N:
+            X.extends(sort_population_by_fitness(dominated_individuals)[N - len(X)])
+        elif len(X) > N:
+            X = truncation(len(X) - N, X)
+            X = X[:N]
+        return X
 
 #+----------------------------------------------------------------------------------------------+#
 
 def binaryTournement(EA):
-        p1, p2 = sample(EA, 2)
-        p1 = p1 if dominates(p1, p2) else p2
-        p3, p4 = sample(EA, 2)
-        p3 = p3 if dominates(p3, p4) else p4
-        return p1, p3
+    final = []
+    p1 = choice(EA)
+    while 1 : 
+        p2 = choice(EA) 
+        if p2.cp != p1.cp :
+            break
+    while 1 : 
+        p3 = choice(EA) 
+        if p3.cp != p1.cp and p3.cp != p2.cp :
+            break
+    while 1 : 
+        p4 = choice(EA) 
+        if p4.cp != p1.cp and p4.cp != p2.cp and p4.cp != p3.cp :
+            break
+
+    final.append(p1) if dominates(p1, p2) else final.append(p2)
+    final.append(p3) if dominates(p3, p4) else final.append(p4)
+
+    return final[0] , final[1]
+
 
 #+----------------------------------------------------------------------------------------------+#
 
@@ -148,17 +160,34 @@ def spea2(problem , G , N , EN):
 
     # Algorithm
     for generation in range(G):
+        print(f"completed = {(generation + 1) * 100 / G} %", end='\r')
         for indiv in population:
             indiv.fitness = fit(indiv, population, EA, k)
         for indiv in EA:
             indiv.fitness = fit(indiv, population, EA, k)
 
         EA.extend(nondominated_individuals(population, EA))
-        EA = update_EA(dominated_individuals, EA , EN)
-        population = updatePopulation(dominated_individuals, population , N)
-        parent1, parent2 = binaryTournement(EA)
+        EA = update(dominated_individuals, EA , EN)
+        population = update(dominated_individuals, population , N)
+        parent1 , parent2 = binaryTournement(EA)
         offspring_list = BSG(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
         for offspring in offspring_list:
             population.append(Solution(cp=offspring, fitness=0, functions=functions(offspring)))
 
     return EA
+ 
+
+
+# input
+n_act = int(input("NUMBER OF ACTIVITIES : "))
+n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
+constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act, 'reliability': 0.825 ** n_act}
+
+mcn = int(input("ITERATION NUMBER / GENERATIONS NUMBER : "))
+sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
+
+# problem init
+
+p = Problem(n_act, n_candidates, constraints)
+X = solutions_spea2 = spea2(problem = p , G = mcn ,N = sn , EN = 10)
+print([x.functions for  x in X])
