@@ -6,6 +6,7 @@ import sys
 sys.path.append("/users/asus/Desktop/pcd/PCD-Composition-Services-Cloud")
 from data_structure.Problem import Problem
 from multi_objective_algorithms.algorithms.main.nsga2 import nsga2
+from multi_objective_algorithms.algorithms.main.nsga2_r import nsga2_r
 from multi_objective_algorithms.algorithms.main.moabc import moabc
 from multi_objective_algorithms.algorithms.main.hybrid import moabc_nsga2
 from multi_objective_algorithms.algorithms.operations.update import nonDominatedSort , updateSolutions
@@ -56,6 +57,10 @@ print("Executing nsga2 Algorithm ")
 solutions_nsga2 = nsga2(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1)
 paretosList.extend(solutions_nsga2)
 
+print("Executing nsga2_r Algorithm ")
+solutions_nsga2_r = nsga2_r(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1 , reference_points=[(1,1,1),(1,1,1),(1,1,1)])
+paretosList.extend(solutions_nsga2)
+
 print("Finding true pareto ...")
 true_pareto = nonDominatedSort(paretosList)[0]
 
@@ -64,6 +69,7 @@ true_pareto = nonDominatedSort(paretosList)[0]
 solutions_hybrid = array([sol.functions for sol in solutions_hybrid])
 solutions_moabc = array([sol.functions for sol in solutions_moabc])
 solutions_nsga2 = array([sol.functions for sol in solutions_nsga2])
+solutions_nsga2_r = array([sol.functions for sol in solutions_nsga2_r])
 
 true_pareto = array([sol.functions for sol in true_pareto])
 
@@ -78,6 +84,9 @@ print(solutions_moabc)
 print("+--------------------------------------+")
 print("solutions_nsga2")
 print(solutions_nsga2)
+print("+--------------------------------------+")
+print("solutions_nsga2_r")
+print(solutions_nsga2_r)
 
 # max objectives in true_pareto
 max = [- inf,- inf,- inf]
@@ -96,6 +105,7 @@ hv = get_performance_indicator("hv", ref_point = r)
 # evaluating algorithms
 
 evaluate(algorithm = "NSGA-II" , gd = gd , igd = igd , hv = hv , solutions = solutions_nsga2)
+evaluate(algorithm = "NSGA-II-R" , gd = gd , igd = igd , hv = hv , solutions = solutions_nsga2_r)
 evaluate(algorithm = "MOABC" , gd = gd , igd = igd , hv = hv , solutions = solutions_moabc)
 evaluate(algorithm = "HYBRID" , gd = gd , igd = igd , hv = hv , solutions = solutions_hybrid)
 

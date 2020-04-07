@@ -72,7 +72,59 @@ def crowdingSort(front) :
 #+----------------------------------------------------------------------------------------------+#
 
 
-def updateSolutions(solutionsList , fronts , method) :
+def normalized_Euclidean_Distance(sol1 , reference_point , min_list , max_list) :
+    S = 0
+    for d in range(3) :
+        S += ((sol1.functions[d] - reference_point[d]) / (max_list[d] - min_list[d])) ** 2
+
+    return S ** 0.5
+
+
+
+#+----------------------------------------------------------------------------------------------+#
+
+
+def referencePoints(front , reference_points) :
+    min_list = []
+    max_list = []
+    for d in range(3) :
+        # Finding f_min and f_max for d-dimension
+        f_min = front[0].functions[d]
+        f_max = front[0].functions[d]
+        for sol2 in front : 
+            if sol2.functions[d] < f_min :
+                f_min = sol2.functions[d]
+            if sol2.functions[d] > f_max :
+                f_max = sol2.functions[d]
+        min_list.append(f_min)
+        max_list.append(f_max)
+
+    ranksList = list()
+    for p in reference_points :
+        ranks = []  # list of solutions ranked based on euclidean distance to p
+        for sol in front : 
+            ranks.append(normalized_Euclidean_Distance(sol , p , min_list , max_list))
+        
+        # Adding ranks to ranksList and evaluating other reference points
+        ranksList.append([x[1] for x in sorted(zip(ranks , front) , key = lambda x:x[0])])
+
+    # dictionary to sum all ranks for each solution
+    d = {sol : 0 for sol in front}
+    for rank_p in ranksList : 
+        for i in range(len(front)) :
+            d[rank_p[i]] += i + 1
+
+    # Returning sorted front
+
+    return sorted(front , key = lambda sol : d[sol])
+        
+
+
+
+#+----------------------------------------------------------------------------------------------+#
+
+
+def updateSolutions(solutionsList , fronts , method , reference_points = None) :
     i = 0   # front number
     S = []  # new solutionsList
     N = len(solutionsList)
@@ -86,6 +138,10 @@ def updateSolutions(solutionsList , fronts , method) :
         # selecting solutions from front based on method
         if method == "crowdingSort" :
             selection = crowdingSort(fronts[i])[0:N - len(S)]
+            S += selection
+
+        elif method == "referencePoints" : 
+            selection = referencePoints(fronts[i] , reference_points)[0:N - len(S)]
             S += selection
 
     try : 

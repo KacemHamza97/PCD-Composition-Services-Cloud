@@ -28,7 +28,6 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
         print(f"completed = {(itera + 1) * 100 / MCN} %", end='\r')
 
         # employed bees phase
-        print("employed bees phase ...")
         exploited = sample(solutionsList, N)  # Generating positions list for exploitation
         U = list()
         U[:] = solutionsList
