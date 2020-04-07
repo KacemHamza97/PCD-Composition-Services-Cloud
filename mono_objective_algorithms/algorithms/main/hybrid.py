@@ -121,7 +121,7 @@ def ABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
             updateBest(solutionsList, best_solution)
 
         # this segment is used for calculating conv 
-        if best_solution.fitness - prev_opt > 0.000000001:
+        if best_solution.fitness - prev_opt > 0.0001:
             conv_itera = itera + 1
 
         updateMinMax(solutionsList, minQos, maxQos, problem.getWeights(), best_solution)

@@ -85,8 +85,8 @@ def genetic(problem, N, G, CP, CM):
         population = sorted(population, key = lambda indiv : indiv.fitness , reverse=True)[:N]
 
         # this segment is used for calculating conv 
-        if population[0].fitness - prev_opt > 0.000000001 :
-            conv_itera = itera+1
+        if population[0].fitness - prev_opt > 0.0001 :
+            conv_itera = generation + 1
 
         updateMinMax(population , minQos, maxQos , problem.getWeights())
         plotx.append(population[0].cp)
