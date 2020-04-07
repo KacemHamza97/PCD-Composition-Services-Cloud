@@ -90,9 +90,11 @@ d = {"fitness": fit_list , f"scenario({n_act},{n_candidates})": [" ABCgenetic"]*
 df = pd.DataFrame(data=d)
 print(df)
 sns_plot = sns.boxplot(x =f"scenario({n_act},{n_candidates})" ,y ="fitness", data=df)
-sns_plot.figure.savefig(f"boxplots/boxplot({n_act},{n_candidates}).png")
+plt.title(f" Scenario: Num_Act:{n_act},Num_candidates{n_candidates}, MCN:{mcn},SN{sn},SQ:{sq}")
+sns_plot.figure.savefig(f"boxplots/boxplot({n_act},{n_candidates},{mcn},{sn},{sq}).png")
 
 # plot iterations
+
 plt.clf()
 plt.plot([i for i in range(1, mcn + 1)], K1, label='ABCgenetic')
 plt.plot([i for i in range(1, mcn + 1)], K2, label='ABC')
@@ -101,4 +103,4 @@ plt.legend()
 plt.xlabel('iterations')
 plt.ylabel('Average fitness')
 plt.title(f" Scenario: Num_Act:{n_act},Num_candidates{n_candidates}, MCN:{mcn},SN{sn},SQ:{sq}")
-plt.savefig(f"convergence_plots/plot_mcn_{mcn}.png")
+plt.savefig(f"convergence_plots/plot({n_act},{n_candidates},{mcn},{sn},{sq}).png")
