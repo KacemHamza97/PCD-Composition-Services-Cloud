@@ -20,7 +20,7 @@ def evaluate(algorithm , gd , igd , hv , solutions) :
 
     with open('test_results.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        file_writer.writerow([algorithm , n_candidates , GD , IGD , HV])
+        file_writer.writerow([algorithm , n_act, n_candidates , GD , IGD , HV])
     
     
 
