@@ -48,10 +48,10 @@ def evaluate(algorithm, **kwargs):
 
     with open('test_results.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        if (algorithm.__name__ == "ABCgenetic" or "ABC"):
+        if (algorithm.__name__ == "ABCgenetic" or algorithm.__name__ == "ABC"):
             file_writer.writerow([algorithm.__name__, n_act, n_candidates, sn, mcn, sq, fit_avg, rt_avg, div, conv])
         else:
-            file_writer.writerow([algorithm.__name__, n_act, n_candidates, sn, mcn, 'Nan', fit_avg, rt_avg, div, conv])
+            file_writer.writerow([algorithm.__name__, n_act, n_candidates, sn, mcn, "__", fit_avg, rt_avg, div, conv])
     return fit_list, k
 
 
