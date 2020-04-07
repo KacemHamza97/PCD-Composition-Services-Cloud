@@ -1,5 +1,7 @@
 from numpy import array
 from random import sample
+import sys
+sys.path.append("/users/asus/Desktop/pcd/PCD-COMPOSITION-SERVICES-CLOUD")
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
 from genetic_operations.implementation import BSG
@@ -20,9 +22,9 @@ def distance(indiv1, indiv2):
 
 #+----------------------------------------------------------------------------------------------+#
 
-def strength(indiv1 , population , EA):
+def strength(indiv1 , U):
         s = 1
-        for indiv2 in (population + EA):
+        for indiv2 in (U):
             if dominates(indiv1, indiv2):
                 s += 1
         return s
@@ -32,26 +34,26 @@ def strength(indiv1 , population , EA):
 
 # rawfitness is to minimize !
 
-def rawFitness(indiv1, population , EA):
-    return sum([strength(indiv2, population , EA) for indiv2 in (population + EA) if dominates(indiv2, indiv1)])
+def rawFitness(indiv1, U):
+    return sum([strength(indiv2, U) for indiv2 in U if dominates(indiv2, indiv1)])
 
 
 #+----------------------------------------------------------------------------------------------+#
 
-def fit(indiv1, population, EA, k):
+def fit(indiv1, U, k):
     dist = []
-    for indiv2 in population + EA:
+    for indiv2 in U:
         dist.append(distance(indiv1, indiv2))
     dist.sort()
     value = dist[k]
-    return 1 / (value + 2) + rawFitness(indiv1, population , EA)  
+    return 1 / (value + 2) + rawFitness(indiv1, U)  
 
 #+----------------------------------------------------------------------------------------------+#
 
-def nondominated_individuals(population, EA):
+def nondominated_individuals(U):
         non_dominated = []
-        for indiv1 in (population + EA):
-            for indiv2 in (population + EA):
+        for indiv1 in (U):
+            for indiv2 in (U):
                 if dominates(indiv2, indiv1):
                     break
             non_dominated.append(indiv1)
@@ -105,7 +107,6 @@ def update(dominated_individuals, X , N):
         elif len(X) > N:
             X = truncation(len(X) - N, X)
             X = X[:N]
-        return X
 
 #+----------------------------------------------------------------------------------------------+#
 
@@ -117,17 +118,15 @@ def notIN(sol1 , X) :
 
 #+----------------------------------------------------------------------------------------------+#
 
-def binaryTournement(EA):
+def binaryTournement(mating_pool):
     final = []
-    p1 , p2 = sample(EA , 2)
-    final.append(p1) if dominates(p1, p2) else final.append(p2)
-    while 1 : 
-        p1 , p2 = sample(EA , 2)
-        if notIN(p1,final) and notIN(p2 , final) :
+    p1 , p2 = sample(mating_pool , 2)
+    final.append(p1) if p1.fitness > p2.fitness else final.append(p2)
+    while 1 :
+        p3 , p4 = sample(mating_pool , 2)
+        if p3.cp != final[0].cp and p4.cp != final[0].cp : 
             break
-    final.append(p1) if dominates(p1, p2) else final.append(p2)
-
-    print(final[0].cp == final[1].cp)
+    final.append(p3) if p3.fitness > p4.fitness else final.append(p4)
     return final[0] , final[1]
 
 
@@ -159,18 +158,43 @@ def spea2(problem , G , N , EN):
     # Algorithm
     for generation in range(G):
         print(f"completed = {(generation + 1) * 100 / G} %", end='\r')
-        for indiv in population:
-            indiv.fitness = fit(indiv, population, EA, k)
-        for indiv in EA:
-            indiv.fitness = fit(indiv, population, EA, k)
 
-        EA.extend(nondominated_individuals(population, EA))
-        EA = update(dominated_individuals, EA , EN)
-        population = update(dominated_individuals, population , N)
-        parent1 , parent2 = binaryTournement(EA)
-        offspring_list = BSG(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
-        for offspring in offspring_list:
-            population.append(Solution(cp=offspring, fitness=0, functions=functions(offspring)))
+        U = set(population + EA)
 
+        for indiv in U:
+            indiv.fitness = fit(indiv, U, k)
+
+        next_EA = nondominated_individuals(U)
+        update(dominated_individuals(U), next_EA , EN)
+        
+        mating_pool = sample(next_EA , EN // 2)
+        
+        next_generation = []
+        for itera in range(EN // 4) :
+            parent1 , parent2 = binaryTournement(mating_pool)
+            offspring_list = BSG(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
+            for offspring in offspring_list:
+                next_generation.append(Solution(cp=offspring, fitness=0, functions=functions(offspring)))
+
+        population = next_generation 
+        EA = next_EA
     return EA
  
+
+ # input
+n_act = int(input("NUMBER OF ACTIVITIES : "))
+n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
+constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act, 'reliability': 0.825 ** n_act}
+
+mcn = int(input("ITERATION NUMBER / GENERATIONS NUMBER : "))
+sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
+
+# problem init
+
+p = Problem(n_act, n_candidates, constraints)
+
+while 1 :
+    _ = solutions_spea2 = spea2(problem = p , G = mcn ,N = sn , EN = 10)
+
+for i in _ : 
+    print(i.functions)
