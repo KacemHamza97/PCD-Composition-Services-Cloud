@@ -2,8 +2,6 @@ import csv
 from numpy import array
 from math import inf
 from pymoo.factory import get_performance_indicator
-import sys 
-sys.path.append("/users/asus/Desktop/pcd/PCD-Composition-Services-Cloud")
 from data_structure.Problem import Problem
 from multi_objective_algorithms.algorithms.main.nsga2 import nsga2
 from multi_objective_algorithms.algorithms.main.nsga2_r import nsga2_r
