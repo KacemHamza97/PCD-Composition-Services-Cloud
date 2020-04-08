@@ -18,7 +18,7 @@ def evaluate(algorithm , gd , igd , hv , solutions) :
     IGD = igd.calc(solutions)
     HV = hv.calc(solutions)
 
-    with open('test_results.csv', mode='a') as file:
+    with open('multi_ojective_algorithms/experimentation/evaluation_test/test_results.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         file_writer.writerow([algorithm , n_candidates , GD , IGD , HV])
     
@@ -47,26 +47,32 @@ paretosList = list()
 
 print("Executing moabc Algorithm ")
 solutions_moabc = moabc(problem = p , SQ = sq , MCN=mcn ,SN = sn , N = sn // 2)
-paretosList.extend(solutions_moabc)
+
 
 
 print("Executing hybrid Algorithm ")
 solutions_hybrid = moabc_nsga2(problem = p , SQ = sq , MCN=mcn ,SN = sn , N = sn // 2)
-paretosList.extend(solutions_hybrid)
+
 
 print("Executing nsga2 Algorithm ")
 solutions_nsga2 = nsga2(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1)
-paretosList.extend(solutions_nsga2)
+
 
 print("Executing nsga2_r Algorithm ")
 solutions_nsga2_r = nsga2_r(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1 , reference_points=[(1,1,1),(1,1,1),(1,1,1)])
-paretosList.extend(solutions_nsga2)
 
 print("Executing spea2 Algorithm ")
 solutions_spea2 = spea2(problem = p , G = mcn ,N = sn , EN = 10)
-paretosList.extend(solutions_spea2)
 
 print("Finding true pareto ...")
+for itera in range(10) : 
+    print(f"completed = {(itera + 1) * 100 / 10} %", end='\r')
+    paretosList.extend(moabc(problem = p , SQ = sq , MCN=mcn ,SN = sn , N = sn // 2))
+    paretosList.extend(nsga2(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1))
+    paretosList.extend(nsga2_r(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1 , reference_points=[(1,1,1),(1,1,1),(1,1,1)]))
+    paretosList.extend(spea2(problem = p , G = mcn ,N = sn , EN = 10))
+    paretosList.extend(moabc(problem = p , SQ = sq , MCN=mcn ,SN = sn , N = sn // 2))
+
 true_pareto = nonDominatedSort(paretosList)[0]
 
 # showing results

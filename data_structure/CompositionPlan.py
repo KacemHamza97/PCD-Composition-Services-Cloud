@@ -115,6 +115,9 @@ class CompositionPlan:
 
     def __eq__(self,other) :
 
+        if self.__actGraph != other.getActGraph() : 
+            return False
+            
         for act in range(self.__n_act):
             if self.getService(act) != other.getService(act) :
                 return False
@@ -131,7 +134,7 @@ class CompositionPlan:
     # cloning composition plan
 
     def clone(self):
-        actGraph = list(self.G.edges.data("weight"))  # getting graph arcs
+        actGraph = self.__actGraph  # getting actGraph
         services = [[act[1]] for act in list(self.G.nodes.data("service"))]  # getting services
         clone = CompositionPlan(actGraph, services)
         return clone

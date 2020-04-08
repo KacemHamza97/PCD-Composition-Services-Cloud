@@ -155,8 +155,7 @@ def spea2(problem , G , N , EN):
 
     # Algorithm
     for generation in range(G):
-        print(f"completed = {(generation + 1) * 100 / G} %", end='\r')
-
+        
         U = set(population + EA)
 
         for indiv in U:

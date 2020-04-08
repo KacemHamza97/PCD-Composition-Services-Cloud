@@ -27,8 +27,6 @@ def moabc(problem, SQ, MCN, SN, N):
     # Algorithm
     for itera in range(MCN):
 
-        print(f"completed = {(itera + 1) * 100 / MCN} %", end='\r')
-
         # employed bees phase
         exploited = sample(solutionsList, N)  # Generating positions list for exploitation
         U = list()
@@ -97,5 +95,4 @@ def moabc(problem, SQ, MCN, SN, N):
             updateSolutions(solutionsList, fronts, "crowdingSort")
 
     # end of algorithm
-    print("\n")
     return fronts[0]

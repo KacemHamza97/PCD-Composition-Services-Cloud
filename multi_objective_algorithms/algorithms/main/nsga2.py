@@ -34,8 +34,6 @@ def nsga2(problem, G, N , CP , CM):
     # Algorithm
     for itera in range(G):
 
-        print(f"completed = {(itera + 1) * 100 / G} %", end='\r')
-
         # Probability update
         s = sum([indiv.fitness for indiv in population])
         for indiv in population:
@@ -80,5 +78,4 @@ def nsga2(problem, G, N , CP , CM):
         updateSolutions(population, fronts, "crowdingSort")
 
     # end of algorithm
-    print("\n")
     return fronts[0]
