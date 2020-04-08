@@ -114,9 +114,10 @@ def referencePoints(front , reference_points) :
             if f_max == f_min :
                 min_list.append(0)
                 max_list.append(1)
-
-            min_list.append(f_min)
-            max_list.append(f_max)
+            
+            else :
+                min_list.append(f_min)
+                max_list.append(f_max)
 
         ranksList = list()
         for p in reference_points :

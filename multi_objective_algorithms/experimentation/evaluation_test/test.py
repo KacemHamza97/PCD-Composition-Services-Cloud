@@ -18,9 +18,9 @@ def evaluate(algorithm , gd , igd , hv , solutions) :
     IGD = igd.calc(solutions)
     HV = hv.calc(solutions)
 
-    with open('multi_ojective_algorithms/experimentation/evaluation_test/test_results.csv', mode='a') as file:
+    with open('multi_objective_algorithms/experimentation/evaluation_test/test_results.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        file_writer.writerow([algorithm , n_candidates , GD , IGD , HV])
+        file_writer.writerow([algorithm , n_act, n_candidates , GD , IGD , HV])
     
     
 
