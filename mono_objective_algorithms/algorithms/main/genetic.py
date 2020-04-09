@@ -53,7 +53,6 @@ def genetic(problem, N, G, CP, CM):
         a = min(probabilityList)
         b = max(probabilityList)
         parents = []
-        offsprings = []
         # Selecting best individuals
         n_individuals = 0
         while n_individuals < 2 : 
@@ -63,23 +62,21 @@ def genetic(problem, N, G, CP, CM):
                     parents.append(indiv)
         
         # Mating selection
-        for itera in range(len(parents)) :
-            parent1 , parent2 =  sample(parents , 2)
+        parent1 , parent2 =  sample(parents , 2)
 
-            while 1:
-                offspring = crossover(parent1.cp, parent2.cp, CP)  # Recombining
-                if random() <= CM : # Mutation
-                    service = offspring.randomService()
-                    random_service = choice(problem.getCandidates()[service.getActivity()])
-                    offspring = mutate(offspring, random_service)
-                if offspring.verifyConstraints(problem.getConstraints()):
-                    offspring_fitness = fit(offspring, minQos, maxQos, problem.getWeights())
-                    offspring_solution = Solution(cp = offspring , fitness = offspring_fitness , probability = 0)
-                    offsprings.append(offspring_solution)
-                    break
+        while 1:
+            offspring = crossover(parent1.cp, parent2.cp, CP)  # Recombining
+            if random() <= CM : # Mutation
+                service = offspring.randomService()
+                random_service = choice(problem.getCandidates()[service.getActivity()])
+                offspring = mutate(offspring, random_service)
+            if offspring.verifyConstraints(problem.getConstraints()):
+                offspring_fitness = fit(offspring, minQos, maxQos, problem.getWeights())
+                offspring_solution = Solution(cp = offspring , fitness = offspring_fitness , probability = 0)
+                break
         
         # Adding offsprings
-        population.extend(offsprings)
+        population.append(offspring_solution)
 
         # Keeping best individuals
         population = sorted(population, key = lambda indiv : indiv.fitness , reverse=True)[:N]

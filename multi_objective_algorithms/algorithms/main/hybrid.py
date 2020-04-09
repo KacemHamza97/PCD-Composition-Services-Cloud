@@ -81,5 +81,6 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
             fronts = nonDominatedSort(U)
             updateSolutions(solutionsList, fronts, "crowdingSort")
 
+
     # end of algorithm
     return fronts[0]

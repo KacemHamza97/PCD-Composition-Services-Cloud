@@ -32,18 +32,20 @@ def BSG(cp1, cp2, constraints, candidates):  # constraints are added to avoid cr
 
     def crossover(cp1 , cp2 ) :
 
-        offspring = cp1.clone()
+        offspring1 = cp1.clone()
+        offspring2 = cp2.clone()
 
         while 1:
-            x1 = randint(0, cp2.getNumberOfActivities() - 2)
-            x2 = randint(x1 + 1, cp2.getNumberOfActivities() - 1)
+            x1 = randint(0, cp1.getNumberOfActivities() - 2)
+            x2 = randint(x1 + 1, cp1.getNumberOfActivities() - 1)
             for act in range(x1, x2 + 1):  # Selecting service to replace
                 # replacing with service from second parent
-                offspring.G.nodes[act]["service"] = cp2.G.nodes[act]["service"]
-            if offspring.verifyConstraints(constraints)  :
+                offspring1.G.nodes[act]["service"] = cp2.G.nodes[act]["service"]
+                offspring2.G.nodes[act]["service"] = cp1.G.nodes[act]["service"]
+            if offspring1.verifyConstraints(constraints)  and offspring2.verifyConstraints(constraints):
                 break
 
-        return offspring
+        return [offspring1 , offspring2]
 
     def mutate(cp) : 
 
@@ -65,22 +67,13 @@ def BSG(cp1, cp2, constraints, candidates):  # constraints are added to avoid cr
 
     # Crossover
 
-    # First offspring
+    # First and second offsprings 
 
-    offspringsList.append(crossover(cp1 , cp2))
-
-    # Second offspring
-
-    while 1 : 
-        offspring = crossover(cp2 , cp1)
-        if offspring not in offspringsList : 
-            break
-
-    offspringsList.append(offspring)
+    offspringsList.extend(crossover(cp1 , cp2))
 
     # Mutation
 
-    # First offspring
+    # third offspring
 
     while 1 : 
         offspring = mutate(cp1)
@@ -89,7 +82,7 @@ def BSG(cp1, cp2, constraints, candidates):  # constraints are added to avoid cr
         
     offspringsList.append(offspring)
 
-    # Second offspring
+    # fourth offspring
 
     while 1 : 
         offspring = mutate(cp2)

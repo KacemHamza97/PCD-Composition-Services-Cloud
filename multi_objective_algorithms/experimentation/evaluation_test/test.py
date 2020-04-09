@@ -1,9 +1,11 @@
 import csv
-from numpy import array
+from numpy import array , mean , sqrt , amin
 from math import inf
-from pymoo.factory import get_performance_indicator
+from time import time
+
 import sys
 sys.path.append("/users/asus/Desktop/pcd/PCD-COMPOSITION-SERVICES-CLOUD")
+
 from data_structure.Problem import Problem
 from multi_objective_algorithms.algorithms.main.nsga2 import nsga2
 from multi_objective_algorithms.algorithms.main.spea2 import spea2
@@ -11,18 +13,21 @@ from multi_objective_algorithms.algorithms.main.nsga2_r import nsga2_r
 from multi_objective_algorithms.algorithms.main.moabc import moabc
 from multi_objective_algorithms.algorithms.main.hybrid import moabc_nsga2
 from multi_objective_algorithms.algorithms.operations.update import nonDominatedSort , updateSolutions
+from multi_objective_algorithms.experimentation.performance_indicators.performance_indicators import gd , hv , igd
 
+# evaluate and write to CSV file
 
-def evaluate(algorithm , gd , igd , hv , solutions) :
-    GD = gd.calc(solutions)
-    IGD = igd.calc(solutions)
-    HV = hv.calc(solutions)
+def evaluate(algorithm , solutions , pf ,  rt) :
+    GD = gd(solutions , pf)
+    IGD = igd(solutions , pf)
+    HV = hv(solutions , pf)
 
     with open('multi_objective_algorithms/experimentation/evaluation_test/test_results.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        file_writer.writerow([algorithm , n_act, n_candidates , GD , IGD , HV])
+        file_writer.writerow([algorithm , n_act, n_candidates ,mcn , sn , GD ,  IGD , HV , rt])
     
-    
+
+#+----------------------------------------------------------------------------------------------+#    
 
 # main
 
@@ -46,27 +51,34 @@ paretosList = list()
 
 
 print("Executing moabc Algorithm ")
+start_time = time()
 solutions_moabc = moabc(problem = p , SQ = sq , MCN=mcn ,SN = sn , N = sn // 2)
-
+rt_moabc = time() - start_time
 
 
 print("Executing hybrid Algorithm ")
+start_time = time()
 solutions_hybrid = moabc_nsga2(problem = p , SQ = sq , MCN=mcn ,SN = sn , N = sn // 2)
-
+rt_hybrid = time() - start_time
 
 print("Executing nsga2 Algorithm ")
+start_time = time()
 solutions_nsga2 = nsga2(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1)
-
+rt_nsga2 = time() - start_time
 
 print("Executing nsga2_r Algorithm ")
+start_time = time()
 solutions_nsga2_r = nsga2_r(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1 , reference_points=[(1,1,1),(1,1,1),(1,1,1)])
+rt_nsga2_r = time() - start_time
 
 print("Executing spea2 Algorithm ")
+start_time = time()
 solutions_spea2 = spea2(problem = p , G = mcn ,N = sn , EN = 10)
+rt_spea2 = time() - start_time
 
 print("Finding true pareto ...")
-for itera in range(10) : 
-    print(f"completed = {(itera + 1) * 100 / 10} %", end='\r')
+for itera in range(20) : 
+    print(f"completed = {(itera + 1) * 100 / 20} %", end='\r')
     paretosList.extend(moabc(problem = p , SQ = sq , MCN=mcn ,SN = sn , N = sn // 2))
     paretosList.extend(nsga2(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1))
     paretosList.extend(nsga2_r(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1 , reference_points=[(1,1,1),(1,1,1),(1,1,1)]))
@@ -75,54 +87,13 @@ for itera in range(10) :
 
 true_pareto = nonDominatedSort(paretosList)[0]
 
-# showing results
-
-solutions_hybrid = array([sol.functions for sol in solutions_hybrid])
-solutions_moabc = array([sol.functions for sol in solutions_moabc])
-solutions_nsga2 = array([sol.functions for sol in solutions_nsga2])
-solutions_nsga2_r = array([sol.functions for sol in solutions_nsga2_r])
-solutions_spea2 = array([sol.functions for sol in solutions_spea2])
-
-true_pareto = array([sol.functions for sol in true_pareto])
-
-print("true_pareto")
-print(true_pareto)
-print("+--------------------------------------+")
-print("solutions_hybrid")
-print(solutions_hybrid)
-print("+--------------------------------------+")
-print("solutions_moabc")
-print(solutions_moabc)
-print("+--------------------------------------+")
-print("solutions_nsga2")
-print(solutions_nsga2)
-print("+--------------------------------------+")
-print("solutions_nsga2_r")
-print(solutions_nsga2_r)
-print("+--------------------------------------+")
-print("solutions_spea2")
-print(solutions_spea2)
-
-# max objectives in true_pareto
-max = [- inf,- inf,- inf]
-for i in range(3) :
-    for x in true_pareto :
-        if max[i] < x[i] :
-            max[i] = x[i]
-
-r = array([max[0] * 0.9 , max[1] * 0.9 , max[2] * 1.1])
-
-# evaluating performance
-gd = get_performance_indicator("gd", true_pareto)
-igd = get_performance_indicator("igd", true_pareto)
-hv = get_performance_indicator("hv", ref_point = r)
 
 # evaluating algorithms
 
-evaluate(algorithm = "NSGA-II" , gd = gd , igd = igd , hv = hv , solutions = solutions_nsga2)
-evaluate(algorithm = "NSGA-II-R" , gd = gd , igd = igd , hv = hv , solutions = solutions_nsga2_r)
-evaluate(algorithm = "SPEA2" , gd = gd , igd = igd , hv = hv , solutions = solutions_spea2)
-evaluate(algorithm = "MOABC" , gd = gd , igd = igd , hv = hv , solutions = solutions_moabc)
-evaluate(algorithm = "HYBRID" , gd = gd , igd = igd , hv = hv , solutions = solutions_hybrid)
+print("Evaluating solutions ...")
 
-    
+evaluate(algorithm = "NSGA-II" , solutions = solutions_nsga2 , pf = true_pareto , rt = rt_nsga2)
+evaluate(algorithm = "NSGA-II-R" , solutions = solutions_nsga2_r , pf = true_pareto , rt = rt_nsga2_r)
+evaluate(algorithm = "SPEA2" , solutions = solutions_spea2 , pf = true_pareto , rt = rt_spea2)
+evaluate(algorithm = "MOABC" , solutions = solutions_moabc , pf = true_pareto , rt = rt_moabc)
+evaluate(algorithm = "HYBRID" , solutions = solutions_hybrid , pf = true_pareto , rt = rt_hybrid) 
