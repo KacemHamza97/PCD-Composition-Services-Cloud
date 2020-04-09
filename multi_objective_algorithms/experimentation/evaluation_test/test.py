@@ -63,12 +63,12 @@ rt_hybrid = time() - start_time
 
 print("Executing nsga2 Algorithm ")
 start_time = time()
-solutions_nsga2 = nsga2(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1)
+solutions_nsga2 = nsga2(problem = p , G = mcn ,N = sn)
 rt_nsga2 = time() - start_time
 
 print("Executing nsga2_r Algorithm ")
 start_time = time()
-solutions_nsga2_r = nsga2_r(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1 , reference_points=[(1,1,1),(1,1,1),(1,1,1)])
+solutions_nsga2_r = nsga2_r(problem = p , G = mcn ,N = sn , reference_points=[(1,1,1),(1,1,1),(1,1,1)] , epsilon = 0.001)
 rt_nsga2_r = time() - start_time
 
 print("Executing spea2 Algorithm ")
@@ -80,8 +80,8 @@ print("Finding true pareto ...")
 for itera in range(20) : 
     print(f"completed = {(itera + 1) * 100 / 20} %", end='\r')
     paretosList.extend(moabc(problem = p , SQ = sq , MCN=mcn ,SN = sn , N = sn // 2))
-    paretosList.extend(nsga2(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1))
-    paretosList.extend(nsga2_r(problem = p , G = mcn ,N = sn , CP = 0.2 , CM = 0.1 , reference_points=[(1,1,1),(1,1,1),(1,1,1)]))
+    paretosList.extend(nsga2(problem = p , G = mcn ,N = sn ))
+    paretosList.extend(nsga2_r(problem = p , G = mcn ,N = sn , reference_points=[(1,1,1),(1,1,1),(1,1,1)] , epsilon = 0.001))
     paretosList.extend(spea2(problem = p , G = mcn ,N = sn , EN = 10))
     paretosList.extend(moabc(problem = p , SQ = sq , MCN=mcn ,SN = sn , N = sn // 2))
 

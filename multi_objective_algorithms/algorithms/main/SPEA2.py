@@ -174,9 +174,10 @@ def spea2(problem, G, N, EN):
         next_generation = []
         for itera in range(EN // 4):
             parent1, parent2 = binaryTournement(mating_pool)
-            offspring_list = BSG(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
-            for offspring in offspring_list:
-                next_generation.append(Solution(cp=offspring, fitness=0, functions=functions(offspring)))
+            # Applying BSG
+            offsprings = BSG(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
+            # Adding offsprings
+            next_generation += [Solution(cp = cp , fitness = 0 , functions = functions(cp)) for cp in offsprings]
 
         population = next_generation
         EA = next_EA

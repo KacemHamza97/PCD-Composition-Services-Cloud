@@ -2,7 +2,7 @@ from random import uniform, sample , random
 from numpy.random import choice
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
-from genetic_operations.implementation import mutate , crossover
+from genetic_operations.implementation import BSG
 from multi_objective_algorithms.algorithms.operations.objective_functions import functions , fit
 from multi_objective_algorithms.algorithms.operations.update import updateSolutions, nonDominatedSort
 
@@ -13,7 +13,7 @@ from multi_objective_algorithms.algorithms.operations.update import updateSoluti
 # G : n of generations  , N : size of population
 # CP : crossover probability , CM : mutation probability
 
-def nsga2(problem, G, N , CP , CM):
+def nsga2(problem, G, N):
 
     # population  initializing
     population = list()
@@ -59,20 +59,15 @@ def nsga2(problem, G, N , CP , CM):
         for itera in range(len(parents)) :
             parent1 , parent2 =  sample(parents , 2)
 
-            while 1:
-                offspring = crossover(parent1.cp, parent2.cp, CP)  # Recombining
-                if random() <= CM : # Mutation
-                    service = offspring.randomService()
-                    random_service = choice(problem.getCandidates()[service.getActivity()])
-                    offspring = mutate(offspring, random_service)
-                if offspring.verifyConstraints(problem.getConstraints()):
-                    offspring_solution = Solution(cp = offspring , fitness = 0 ,functions = functions(offspring), probability = 0)
-                    offsprings.append(offspring_solution)
-                    break
-        
-        # Adding offsprings
-        U.extend(offsprings)
+            # Applying BSG
+            cp1 = parent1.cp
+            cp2 = parent2.cp
+            offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
 
+            # Adding offsprings
+            U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0) for cp in offsprings]
+        
+        
         # Finalizing generation
         fronts = nonDominatedSort(U)
         updateSolutions(population, fronts, "crowdingSort")
