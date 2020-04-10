@@ -6,7 +6,7 @@ from numpy import array
 def functions(cp) :   # Objective functions
     f1 = - cp.cpQos()["responseTime"]
     f2 = - cp.cpQos()["price"]
-    f3 = cp.cpQos()["availability"] + cp.cpQos()["reliability"]
+    f3 = cp.cpQos()["reliability"]
     return array([f1,f2,f3])
 
 #+----------------------------------------------------------------------------------------------+#
