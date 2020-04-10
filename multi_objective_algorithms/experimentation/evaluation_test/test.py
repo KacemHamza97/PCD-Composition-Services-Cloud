@@ -58,7 +58,7 @@ def evaluate(algorithm, solutions, pf, rt):
     IGD = igd(solutions, pf)
     HV = hv(solutions, pf)
 
-    with open('multi_objective_algorithms/experimentation/evaluation_test/test_results.csv', mode='a') as file:
+    with open('test_results.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         file_writer.writerow([algorithm, n_act, n_candidates, mcn, sn, GD, IGD, HV, rt])
 
