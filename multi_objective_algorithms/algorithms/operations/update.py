@@ -1,8 +1,22 @@
 
 from multi_objective_algorithms.algorithms.operations.objective_functions import functions , fit , dominates
+from random import sample
+from numpy import amin , amax , array 
 
 #+----------------------------------------------------------------------------------------------+#
 
+# transform Solutions list into numpy matrix
+def transform(U) :
+    return array([x.functions for x in U])
+
+#+----------------------------------------------------------------------------------------------+#
+
+
+# return max_pf - min_pf array
+def normalize(pf) :
+    return amax(pf , axis = 0) - amin(pf , axis = 0)
+
+#+----------------------------------------------------------------------------------------------+#
 
 def nonDominatedSort(solutionsList) :
         fronts = [[]]   
@@ -84,10 +98,15 @@ def crowdingSort(front) :
 #+----------------------------------------------------------------------------------------------+#
 
 
-def normalized_Euclidean_Distance(sol1 , reference_point , min_list , max_list) :
+def normalized_Euclidean_Distance(a , b , norm) :
     S = 0
-    for d in range(3) :
-        S += ((sol1.functions[d] - reference_point[d]) / (max_list[d] - min_list[d])) ** 2
+    try : # a , b are numpy array type
+        return (( (a - b) / norm ) ** 2).sum(axis = 0) ** 0.5
+    except : 
+        try : # a , b are Solution type
+            return (( (a.functions - b.functions) / norm ) ** 2).sum(axis = 0) ** 0.5
+        except : # a is Solution type and b is numpy array
+            return (( (a.functions - b) / norm ) ** 2).sum(axis = 0) ** 0.5
 
     return S ** 0.5
 
@@ -96,47 +115,53 @@ def normalized_Euclidean_Distance(sol1 , reference_point , min_list , max_list) 
 #+----------------------------------------------------------------------------------------------+#
 
 
-def referencePoints(front , reference_points) :
+def referencePoints(front , reference_points , epsilon) :
     if len(front) > 1 :
-        min_list = []
-        max_list = []
-        for d in range(3) :
-            # Finding f_min and f_max for d-dimension
-            f_min = front[0].functions[d]
-            f_max = front[0].functions[d]
-            for sol2 in front : 
-                if sol2.functions[d] < f_min :
-                    f_min = sol2.functions[d]
-                if sol2.functions[d] > f_max :
-                    f_max = sol2.functions[d]
-            
-            # Making sure f_max != f_min
-            if f_max == f_min :
-                min_list.append(0)
-                max_list.append(1)
-            
-            else :
-                min_list.append(f_min)
-                max_list.append(f_max)
+        norm = normalize(transform(front))
+        # verifying that norm != 0
+        for i in range(len(norm)) :
+            if norm[i] == 0 :
+                norm[i] = 1
 
-        ranksList = list()
+        groups = list()
         for p in reference_points :
             ranks = []  # list of solutions ranked based on euclidean distance to p
             for sol in front : 
-                ranks.append(normalized_Euclidean_Distance(sol , p , min_list , max_list))
+                ranks.append(normalized_Euclidean_Distance(sol , p , norm))
             
             # Adding ranks to ranksList and evaluating other reference points
-            ranksList.append([x[1] for x in sorted(zip(ranks , front) , key = lambda x:x[0])])
+            groups.append([x[1] for x in sorted(zip(ranks , front) , key = lambda x:x[0])])
 
-        # dictionary to sum all ranks for each solution
-        d = {sol : 0 for sol in front}
-        for rank_p in ranksList : 
-            for i in range(len(front)) :
-                d[rank_p[i]] += i + 1
+        # Random order of groups 
+        n_points = len(reference_points)
+        groups = sample(groups , len(reference_points))
 
-        # Returning sorted front
+        # Re arranging groups in a way to verify epsilon condition
+        new_groups = []
+        for g in groups :
+            new_g = [g.pop(0)] 
+            for sol1 in new_g :
+                for sol2 in g :
+                    if normalized_Euclidean_Distance(sol1 , sol2 , norm) <= epsilon :
+                        # Adding sol2 to new_g and removing it from g
+                        new_g.append(sol2)
+                        g.remove(sol2)
 
-        return sorted(front , key = lambda sol : d[sol])
+            # Adding the none selected solutions to the end of the group
+            new_g += g
+            # Adding new group to group list
+            new_groups.append(new_g)
+            
+        
+        new_front = []
+
+        # starting to fill the new sorted front
+        while len(new_front) < len(front) :
+
+            new_front.append(new_groups[len(new_front) % n_points].pop(0))
+
+        return new_front         
+ 
     else : 
         return front
         
@@ -146,7 +171,7 @@ def referencePoints(front , reference_points) :
 #+----------------------------------------------------------------------------------------------+#
 
 
-def updateSolutions(solutionsList , fronts , method , reference_points = None) :
+def updateSolutions(solutionsList , fronts , method , **kwargs) :
     i = 0   # front number
     S = []  # new solutionsList
     N = len(solutionsList)
@@ -163,7 +188,9 @@ def updateSolutions(solutionsList , fronts , method , reference_points = None) :
             S += selection
 
         elif method == "referencePoints" : 
-            selection = referencePoints(fronts[i] , reference_points)[0:N - len(S)]
+            reference_points = kwargs["reference_points"]
+            epsilon = kwargs["epsilon"]
+            selection = referencePoints(fronts[i] , reference_points , epsilon)[0:N - len(S)]
             S += selection
 
     try : 

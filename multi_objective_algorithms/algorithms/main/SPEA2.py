@@ -2,20 +2,9 @@ from random import sample
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
 from genetic_operations.implementation import BSG
-from multi_objective_algorithms.algorithms.operations.objective_functions import functions
+from multi_objective_algorithms.algorithms.operations.objective_functions import functions 
 from multi_objective_algorithms.algorithms.operations.objective_functions import dominates
-
-
-# +----------------------------------------------------------------------------------------------+#
-
-def distance(indiv1, indiv2):
-    QosDict1 = indiv1.cp.cpQos()
-    QosDict2 = indiv2.cp.cpQos()
-
-    f1 = QosDict1["responseTime"] - QosDict2["responseTime"]
-    f2 = QosDict1["price"] - QosDict2["price"]
-    f3 = (QosDict1["availability"] + QosDict1["reliability"]) - (QosDict2["availability"] + QosDict2["reliability"])
-    return (f1 ** 2 + f2 ** 2 + f3 ** 2) ** 0.5  # euclidien distance
+from multi_objective_algorithms.algorithms.operations.update import normalize , normalized_Euclidean_Distance , transform
 
 
 # +----------------------------------------------------------------------------------------------+#
@@ -40,8 +29,9 @@ def rawFitness(indiv1, U):
 
 def fit(indiv1, U, k):
     dist = []
+    norm = normalize(transform(U))
     for indiv2 in U:
-        dist.append(distance(indiv1, indiv2))
+        dist.append(normalized_Euclidean_Distance(indiv1, indiv2 , norm))
     dist.sort()
     value = dist[k]
     return 1 / (value + 2) + rawFitness(indiv1, U)
@@ -84,11 +74,12 @@ def truncation(n, X):
     # evaluating distances
     distances = []  # list of tuples (sol1 , sol2 , distance)
     e = set()
+    norm = normalize(transform(X))
     for i, sol1 in enumerate(X):
         e.add(i)  # avoid calculating same distance twice
         for j, sol2 in enumerate(X):
             if j not in e:
-                distances.append((sol1, sol2, distance(sol1, sol2)))
+                distances.append((sol1, sol2, normalized_Euclidean_Distance(sol1, sol2 ,norm)))
 
                 # sorting distances
     distances.sort(key=lambda dist: dist[2])
@@ -114,21 +105,13 @@ def update(dominated_individuals, X, N):
 
 # +----------------------------------------------------------------------------------------------+#
 
-def notIN(sol1, X):
-    for sol2 in X:
-        if sol1.cp == sol2.cp:
-            return False
-    return True
 
-
-# +----------------------------------------------------------------------------------------------+#
-
-def binaryTournement(mating_pool):
+def binaryTournement(X):
     final = []
-    p1, p2 = sample(mating_pool, 2)
+    p1, p2 = sample(X, 2)
     final.append(p1) if p1.fitness > p2.fitness else final.append(p2)
     while 1:
-        p3, p4 = sample(mating_pool, 2)
+        p3, p4 = sample(X, 2)
         if p3.cp != final[0].cp and p4.cp != final[0].cp:
             break
     final.append(p3) if p3.fitness > p4.fitness else final.append(p4)
@@ -166,19 +149,26 @@ def spea2(problem, G, N, EN):
         for indiv in U:
             indiv.fitness = fit(indiv, U, k)
 
-        next_EA = nondominated_individuals(U)
-        update(dominated_individuals(U), next_EA, EN)
+        EA = nondominated_individuals(U)
+        update(dominated_individuals(U), EA, EN)
 
-        mating_pool = sample(next_EA, EN // 2)
+        # Creating the mating_pool
+        mating_pool = []
+        for itera in range(EN // 4) :
+            mating_pool.extend(binaryTournement(EA))
 
-        next_generation = []
-        for itera in range(EN // 4):
-            parent1, parent2 = binaryTournement(mating_pool)
-            # Applying BSG
-            offsprings = BSG(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
-            # Adding offsprings
-            next_generation += [Solution(cp = cp , fitness = 0 , functions = functions(cp)) for cp in offsprings]
+        # Selecting parents for offsprings generation
+        while 1:
+            parent1, parent2 = sample(mating_pool, 2)
+            if parent1.cp != parent2.cp :
+                break
+
+        next_generation = EA
+        # Applying BSG
+        offsprings = BSG(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
+        # Adding offsprings
+        next_generation += [Solution(cp = cp , fitness = 0 , functions = functions(cp)) for cp in offsprings]
 
         population = next_generation
-        EA = next_EA
+
     return EA

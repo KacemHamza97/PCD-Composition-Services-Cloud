@@ -28,10 +28,9 @@ def moabc(problem, SQ, MCN, SN, N):
     for itera in range(MCN):
 
         # employed bees phase
-        exploited = sample(solutionsList, N)  # Generating positions list for exploitation
         U = list()
         U[:] = solutionsList
-        for sol in exploited:
+        for sol in solutionsList:
             while 1:
                     # choose randomly a service to mutate
                     service = sol.cp.randomService()
@@ -50,7 +49,7 @@ def moabc(problem, SQ, MCN, SN, N):
 
         # Probability update
         s = sum([sol.fitness for sol in solutionsList])
-        for sol in exploited:
+        for sol in solutionsList:
             sol.probability = sol.fitness / s
 
         # onlooker bees phase
@@ -59,7 +58,7 @@ def moabc(problem, SQ, MCN, SN, N):
         b = max(probabilityList)
         U = list()
         U[:] = solutionsList
-        for sol in exploited:
+        for sol in solutionsList:
             if sol.probability > uniform(a, b):
                 while 1:
                     # choose randomly a service to mutate
@@ -81,7 +80,7 @@ def moabc(problem, SQ, MCN, SN, N):
         update = 0
         U = list()
         U[:] = solutionsList
-        for sol in exploited:
+        for sol in solutionsList:
             if sol.limit >= SQ:
                 while 1:
                     cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp

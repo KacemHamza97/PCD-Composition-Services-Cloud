@@ -1,24 +1,11 @@
-from numpy import amin , amax , array 
 from pymoo.factory import get_performance_indicator
-
-#+----------------------------------------------------------------------------------------------+#
-
-# transform Solutions list into numpy matrix
-def transform(U) :
-    return array([x.functions for x in U])
-
-#+----------------------------------------------------------------------------------------------+#
-
-
-# return max_pf - min_pf array
-def normalize(pf) :
-    return amax(pf , axis = 0) - amin(pf , axis = 0)
+from multi_objective_algorithms.algorithms.operations.update import normalize , transform , normalized_Euclidean_Distance
+from numpy import array
 
 #+----------------------------------------------------------------------------------------------+#
 
 def euclidean_distance (a , b , norm) : 
     return (( (a - b) / norm ) ** 2).sum(axis = 0) ** 0.5
-
 
 #+----------------------------------------------------------------------------------------------+#
 

@@ -68,7 +68,7 @@ rt_nsga2 = time() - start_time
 
 print("Executing nsga2_r Algorithm ")
 start_time = time()
-solutions_nsga2_r = nsga2_r(problem = p , G = mcn ,N = sn , reference_points=[(1,1,1),(1,1,1),(1,1,1)] , epsilon = 0.001)
+solutions_nsga2_r = nsga2_r(problem = p , G = mcn ,N = sn , reference_points=array([[-5,-5,3],[-10,-10,1],[-15,-15,2]]) , epsilon = 0.001)
 rt_nsga2_r = time() - start_time
 
 print("Executing spea2 Algorithm ")
