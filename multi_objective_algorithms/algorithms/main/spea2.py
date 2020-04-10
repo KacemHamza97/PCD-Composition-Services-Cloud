@@ -157,17 +157,20 @@ def spea2(problem, G, N, EN):
         for itera in range(EN // 4) :
             mating_pool.extend(binaryTournement(EA))
 
-        # Selecting parents for offsprings generation
-        while 1:
-            parent1, parent2 = sample(mating_pool, 2)
-            if parent1.cp != parent2.cp :
-                break
-
         next_generation = EA
-        # Applying BSG
-        offsprings = BSG(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
-        # Adding offsprings
-        next_generation += [Solution(cp = cp , fitness = 0 , functions = functions(cp)) for cp in offsprings]
+        # Creating new generation
+        for itera in range(EN // 4) : 
+            # Selecting parents for offsprings generation
+            while 1:
+                parent1, parent2 = sample(mating_pool, 2)
+                if parent1.cp != parent2.cp :
+                    break
+
+    
+            # Applying BSG
+            offsprings = BSG(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
+            # Adding offsprings
+            next_generation += [Solution(cp = cp , fitness = 0 , functions = functions(cp)) for cp in offsprings]
 
         population = next_generation
 
