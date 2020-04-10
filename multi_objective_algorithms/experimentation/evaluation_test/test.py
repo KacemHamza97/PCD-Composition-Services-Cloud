@@ -81,7 +81,7 @@ for itera in range(20) :
     print(f"completed = {(itera + 1) * 100 / 20} %", end='\r')
     paretosList.extend(moabc(problem = p , SQ = sq , MCN=mcn ,SN = sn , N = sn // 2))
     paretosList.extend(nsga2(problem = p , G = mcn ,N = sn ))
-    paretosList.extend(nsga2_r(problem = p , G = mcn ,N = sn , reference_points=[(1,1,1),(1,1,1),(1,1,1)] , epsilon = 0.001))
+    paretosList.extend(nsga2_r(problem = p , G = mcn ,N = sn , reference_points=array([[-5,-5,3],[-10,-10,1],[-15,-15,2]]) , epsilon = 0.001))
     paretosList.extend(spea2(problem = p , G = mcn ,N = sn , EN = 10))
     paretosList.extend(moabc(problem = p , SQ = sq , MCN=mcn ,SN = sn , N = sn // 2))
 
