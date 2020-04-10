@@ -147,7 +147,7 @@ def referencePoints(front , reference_points , epsilon) :
                         new_g.append(sol2)
                         g.remove(sol2)
 
-            # Adding the none selected solutions to the end of the group
+            # Adding the non selected solutions to the end of the group
             new_g += g
             # Adding new group to group list
             new_groups.append(new_g)

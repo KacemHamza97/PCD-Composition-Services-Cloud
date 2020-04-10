@@ -4,16 +4,11 @@ from numpy import array
 
 #+----------------------------------------------------------------------------------------------+#
 
-def euclidean_distance (a , b , norm) : 
-    return (( (a - b) / norm ) ** 2).sum(axis = 0) ** 0.5
-
-#+----------------------------------------------------------------------------------------------+#
-
 def gd(solutions , pf) :
 
     norm = normalize(transform(pf))
 
-    D = array([min([euclidean_distance(sol , p , norm) for p in transform(pf)]) for sol in transform(solutions)])
+    D = array([min([normalized_Euclidean_Distance(sol , p , norm) for p in transform(pf)]) for sol in transform(solutions)])
 
     return ((D ** 2).sum(axis = 0) ** 0.5) / len(solutions)
 
