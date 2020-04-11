@@ -157,7 +157,7 @@ def spea2(problem, G, N, EN):
         for itera in range(EN // 4) :
             mating_pool.extend(binaryTournement(EA))
 
-        next_generation = EA
+        next_generation = []
         # Creating new generation
         for itera in range(EN // 4) : 
             # Selecting parents for offsprings generation

@@ -14,7 +14,6 @@ from multi_objective_algorithms.algorithms.main.hybrid import moabc_nsga2
 from multi_objective_algorithms.algorithms.operations.update import nonDominatedSort, transform
 from multi_objective_algorithms.experimentation.performance_indicators.performance_indicators import gd, hv, igd
 import pandas as pd
-import plotly.express as px
 
 
 # +----------------------------------------------------------------------------------------------+#
@@ -50,7 +49,7 @@ def plot_5(true_pareto, sol_hybrid, sol_moabc, sol_spea2, sol_nsga2, sol_nsga2_r
 
     ax.set_xlabel('responseTime')
     ax.set_ylabel('price')
-    ax.set_zlabel('availability + reliability')
+    ax.set_zlabel('reliability')
     ax.legend()
     plt.savefig(f"plots/plot_all({n_act},{n_candidates},{mcn},{sn},{sq}).png")
 
@@ -94,16 +93,22 @@ def evaluate(algorithm, pf, **kwargs):
         IGD += igd(solutions, pf) / 30
         HV = hv(solutions, pf)
         HV_list.append(HV)
-        with open('hv_abstract.csv', mode='a') as file:
-            file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            file_writer.writerow([algorithm.__name__, n_act, HV])
-        with open('hv_concrete.csv', mode='a') as file:
-            file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            file_writer.writerow([algorithm.__name__, n_candidates, HV])
+
+        ##### USED TO GENERATE DATA FOR BOXPLOTS ######################################################
+        #with open('hv_abstract.csv', mode='a') as file:
+        #    file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        #    file_writer.writerow([algorithm.__name__, n_act, HV])
+        #with open('hv_concrete.csv', mode='a') as file:
+        #    file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        #    file_writer.writerow([algorithm.__name__, n_candidates, HV])
+        ###############################################################################################
+
     HV = sum(HV_list) / 30
+    HV_min = min(HV_list)
+    HV_max = max(HV_list)
     with open('test_results.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        file_writer.writerow([algorithm.__name__, n_act, n_candidates, mcn, sn, GD, IGD, HV, rt])
+        file_writer.writerow([algorithm.__name__, n_act, n_candidates, mcn, sn, GD, IGD, HV, HV_min , HV_max, rt])
 
     return solutions
 
@@ -130,7 +135,7 @@ p = Problem(n_act, n_candidates, constraints)
 paretosList = list()
 print("Finding true pareto ...")
 for itera in range(30):
-    print(f"completed = {(itera + 1) * 100 / 20} %", end='\r')
+    print(f"completed = {(itera + 1) * 100 / 30} %", end='\r')
     paretosList.extend(moabc(problem=p, SQ=sq, MCN=mcn, SN=sn, N=sn // 2))
     paretosList.extend(nsga2(problem=p, G=mcn, N=sn))
     paretosList.extend(nsga2_r(problem=p, G=mcn, N=sn, reference_points=reference_points, epsilon=0.001))

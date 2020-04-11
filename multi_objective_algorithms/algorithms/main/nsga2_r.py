@@ -56,7 +56,7 @@ def nsga2_r(problem, G, N , reference_points , epsilon):
                     parents.append(indiv)
         
         # Mating selection
-        for itera in range(len(parents)) :
+        for itera in range(len(parents) // 2) :
             parent1 , parent2 =  sample(parents , 2)
             # Applying BSG
             cp1 = parent1.cp
