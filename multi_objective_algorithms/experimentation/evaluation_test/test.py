@@ -13,7 +13,6 @@ from multi_objective_algorithms.algorithms.main.moabc import moabc
 from multi_objective_algorithms.algorithms.main.hybrid import moabc_nsga2
 from multi_objective_algorithms.algorithms.operations.update import nonDominatedSort, transform
 from multi_objective_algorithms.experimentation.performance_indicators.performance_indicators import gd, hv, igd
-import pandas as pd
 
 
 # +----------------------------------------------------------------------------------------------+#
