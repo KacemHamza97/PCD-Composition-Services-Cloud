@@ -12,9 +12,9 @@ def transform(U) :
 #+----------------------------------------------------------------------------------------------+#
 
 
-# return max_pf - min_pf array
+# return max_pf - min_pf euclidean distance
 def normalize(pf) :
-    return amax(pf , axis = 0) - amin(pf , axis = 0)
+    return euclidean_Distance(amax(pf , axis = 0) , amin(pf , axis = 0))
 
 #+----------------------------------------------------------------------------------------------+#
 
@@ -99,16 +99,20 @@ def crowdingSort(front) :
 
 
 def normalized_Euclidean_Distance(a , b , norm) :
-    S = 0
-    try : # a , b are numpy array type
-        return (( (a - b) / norm ) ** 2).sum(axis = 0) ** 0.5
-    except : 
-        try : # a , b are Solution type
-            return (( (a.functions - b.functions) / norm ) ** 2).sum(axis = 0) ** 0.5
-        except : # a is Solution type and b is numpy array
-            return (( (a.functions - b) / norm ) ** 2).sum(axis = 0) ** 0.5
+    return euclidean_Distance(a,b) / norm
 
-    return S ** 0.5
+
+#+----------------------------------------------------------------------------------------------+#
+
+
+def euclidean_Distance(a , b) :
+    try : # a , b are numpy array type
+        return (( (a - b) ** 2).sum(axis = 0) ** 0.5 )
+    except :
+        try : # a , b are Solution type
+            return (( (a.functions - b.functions) ** 2).sum(axis = 0) ** 0.5 )
+        except : # a is Solution type and b is numpy array
+            return (( (a.functions - b) ** 2).sum(axis = 0) ** 0.5 )
 
 
 
@@ -119,9 +123,8 @@ def referencePoints(front , reference_points , epsilon) :
     if len(front) > 1 :
         norm = normalize(transform(front))
         # verifying that norm != 0
-        for i in range(len(norm)) :
-            if norm[i] == 0 :
-                norm[i] = 1
+        if norm == 0 :
+            norm = 1
 
         groups = list()
         for p in reference_points :
@@ -138,33 +141,44 @@ def referencePoints(front , reference_points , epsilon) :
 
         # Re arranging groups in a way to verify epsilon condition
         new_groups = []
+        neighbors = []
         for g in groups :
             new_g = [g.pop(0)] 
             for sol1 in new_g :
                 for sol2 in g :
-                    if normalized_Euclidean_Distance(sol1 , sol2 , norm) <= epsilon :
+                    d = normalized_Euclidean_Distance(sol1 , sol2 , norm)
+                    if d <= epsilon :
                         # Adding sol2 to new_g and removing it from g
                         new_g.append(sol2)
                         g.remove(sol2)
 
-            
+            # saving neighbor points in neighbors
+            neighbors.extend(new_g[:])
+
             # Adding the non selected solutions to the end of the group
             new_g += g
+
             # Adding new group to group list
             new_groups.append(new_g)
-            
-        
+
+
         new_front = []
 
         # starting to fill the new sorted front
+        i = 0
         while len(new_front) < len(front) :
+            try :
+                sol1 = new_groups[i % n_points].pop(0)
+                if sol1 not in new_front :
+                    new_front.append(sol1)
+            except : # No more solutions in this group
+                pass
+            i += 1
 
-            new_front.append(new_groups[len(new_front) % n_points].pop(0))
-
-        return new_front         
+        return new_front , neighbors
  
     else : 
-        return front
+        return front , None
         
 
 
@@ -191,7 +205,7 @@ def updateSolutions(solutionsList , fronts , method , **kwargs) :
         elif method == "referencePoints" : 
             reference_points = kwargs["reference_points"]
             epsilon = kwargs["epsilon"]
-            selection = referencePoints(fronts[i] , reference_points , epsilon)[0:N - len(S)]
+            selection = referencePoints(fronts[i] , reference_points , epsilon)[0][0:N - len(S)]
             S += selection
 
     try : 

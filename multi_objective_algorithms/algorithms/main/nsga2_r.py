@@ -4,7 +4,8 @@ from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
 from genetic_operations.implementation import BSG
 from multi_objective_algorithms.algorithms.operations.objective_functions import functions , fit
-from multi_objective_algorithms.algorithms.operations.update import updateSolutions, nonDominatedSort
+from multi_objective_algorithms.algorithms.operations.update import updateSolutions, nonDominatedSort , referencePoints
+
 
 
 # +----------------------------------------------------------------------------------------------+#
@@ -64,7 +65,7 @@ def nsga2_r(problem, G, N , reference_points , epsilon):
             offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
 
             # Adding offsprings
-            U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0) for cp in offsprings]
+            U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0) for cp in offsprings]
         
 
         # Finalizing generation
@@ -72,4 +73,4 @@ def nsga2_r(problem, G, N , reference_points , epsilon):
         updateSolutions(population, fronts, "referencePoints" , reference_points = reference_points , epsilon = epsilon)
 
     # end of algorithm
-    return fronts[0]
+    return fronts[0] , referencePoints(fronts[0] , reference_points , epsilon)[1]

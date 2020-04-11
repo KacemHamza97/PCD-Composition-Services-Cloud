@@ -65,7 +65,7 @@ def nsga2(problem, G, N):
             offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
 
             # Adding offsprings
-            U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0) for cp in offsprings]
+            U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0) for cp in offsprings]
         
         
         # Finalizing generation
