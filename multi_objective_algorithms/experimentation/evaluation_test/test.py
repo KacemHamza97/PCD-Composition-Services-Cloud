@@ -94,7 +94,7 @@ def evaluate(algorithm, pf, **kwargs):
     rt = 0
     solutions = []
     for i in range(30):
-        print(f"Executing hybrid {algorithm.__name__} ")
+        print(f"Executing {algorithm.__name__} ")
         start_time = time()
         if algorithm == nsga2_r :
             solutions , neighbors = algorithm(problem=p, **kwargs)
