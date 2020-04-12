@@ -2,9 +2,9 @@ from random import sample
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
 from genetic_operations.implementation import BSG
-from multi_objective_algorithms.algorithms.operations.objective_functions import functions 
+from multi_objective_algorithms.algorithms.operations.objective_functions import functions
 from multi_objective_algorithms.algorithms.operations.objective_functions import dominates
-from multi_objective_algorithms.algorithms.operations.update import normalize , normalized_Euclidean_Distance , transform
+from multi_objective_algorithms.algorithms.operations.update import normalize, normalized_Euclidean_Distance, transform
 
 
 # +----------------------------------------------------------------------------------------------+#
@@ -31,7 +31,7 @@ def fit(indiv1, U, k):
     dist = []
     norm = normalize(transform(U))
     for indiv2 in U:
-        dist.append(normalized_Euclidean_Distance(indiv1, indiv2 , norm))
+        dist.append(normalized_Euclidean_Distance(indiv1, indiv2, norm))
     dist.sort()
     value = dist[k]
     return 1 / (value + 2) + rawFitness(indiv1, U)
@@ -79,7 +79,7 @@ def truncation(n, X):
         e.add(i)  # avoid calculating same distance twice
         for j, sol2 in enumerate(X):
             if j not in e:
-                distances.append((sol1, sol2, normalized_Euclidean_Distance(sol1, sol2 ,norm)))
+                distances.append((sol1, sol2, normalized_Euclidean_Distance(sol1, sol2, norm)))
 
                 # sorting distances
     distances.sort(key=lambda dist: dist[2])
@@ -101,6 +101,7 @@ def update(dominated_individuals, X, N):
     elif len(X) > N:
         X = truncation(len(X) - N, X)[:N]
     return X
+
 
 # +----------------------------------------------------------------------------------------------+#
 
@@ -141,7 +142,7 @@ def spea2(problem, G, N, EN):
     EA = []
 
     # Algorithm
-    for generation in range(G+1):
+    for generation in range(G + 1):
 
         U = set(population + EA)
 
@@ -150,30 +151,29 @@ def spea2(problem, G, N, EN):
 
         EA = nondominated_individuals(U)
 
-        if generation == G+1 :
+        if generation == G + 1:
             break
 
         EA = update(dominated_individuals(U), EA, EN)
 
         # Creating the mating_pool
         mating_pool = []
-        for itera in range(EN // 4) :
+        for itera in range(EN // 4):
             mating_pool.extend(binaryTournement(EA))
 
         next_generation = []
         # Creating new generation
-        for itera in range(EN // 4) : 
+        for itera in range(EN // 4):
             # Selecting parents for offsprings generation
             while 1:
                 parent1, parent2 = sample(mating_pool, 2)
-                if parent1.cp != parent2.cp :
+                if parent1.cp != parent2.cp:
                     break
 
-    
             # Applying BSG
             offsprings = BSG(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
             # Adding offsprings
-            next_generation += [Solution(cp = cp , fitness = 0 , functions = functions(cp)) for cp in offsprings]
+            next_generation += [Solution(cp=cp, fitness=0, functions=functions(cp)) for cp in offsprings]
 
         population = next_generation
 
