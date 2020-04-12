@@ -40,12 +40,12 @@ def plot_5(true_pareto, sol_hybrid, sol_moabc, sol_spea2, sol_nsga2, sol_nsga2_r
     fns1, fns2, fns3 = plot_fx(sol_nsga2)
     fnr1, fnr2, fnr3 = plot_fx(sol_nsga2_r)
 
-    ax.scatter(ftp1, ftp2, ftp3, marker='^', label='True pareto')
-    ax.scatter(fh1, fh2, fh3, marker='o', label='HYBRID')
-    ax.scatter(fm1, fm2, fm3, marker='s', label='MOABC')
-    ax.scatter(fsp1, fsp2, fsp3, marker='*', label='SPEA2')
-    ax.scatter(fns1, fns2, fns3, marker='+', label='NSGA-II')
-    ax.scatter(fnr1, fnr2, fnr3, marker='x', label='NSGA-II-R')
+    ax.scatter(ftp1 * -1 , ftp2 * -1 , ftp3, marker='^', label='True pareto')
+    ax.scatter(fh1 * -1 , fh2 * -1 , fh3, marker='o', label='HYBRID')
+    ax.scatter(fm1 * -1 , fm2 * -1 , fm3, marker='s', label='MOABC')
+    ax.scatter(fsp1 * -1 , fsp2 * -1 , fsp3, marker='*', label='SPEA2')
+    ax.scatter(fns1 * -1 , fns2 * -1 , fns3, marker='+', label='NSGA-II')
+    ax.scatter(fnr1 * -1 , fnr2 * -1 , fnr3, marker='x', label='NSGA-II-R')
 
     ax.set_xlabel('responseTime')
     ax.set_ylabel('price')
@@ -60,11 +60,11 @@ def plot_3(true_pareto, solutions, algorithm, hybrid_sol, reference_points=None 
     ax = Axes3D(fig1)
     ftp1, ftp2, ftp3 = plot_fx(true_pareto)
     fh1, fh2, fh3 = plot_fx(hybrid_sol)
-    ax.scatter(fh1, fh2, fh3, marker='s', label='Hybrid')
-    ax.scatter(ftp1, ftp2, ftp3, marker='^', label='True pareto')
+    ax.scatter(fh1 * -1 , fh2 * -1 , fh3, marker='s', label='Hybrid')
+    ax.scatter(ftp1 * -1 , ftp2 * -1 , ftp3, marker='^', label='True pareto')
     if algorithm != 'NSGA-II-R':
         f1, f2, f3 = plot_fx(solutions)
-        ax.scatter(f1, f2, f3, marker='o', label=algorithm)
+        ax.scatter(f1 * -1 , f2 * -1 , f3, marker='o', label=algorithm)
     else :
         rf1, rf2, rf3 = plot_fx(reference_points)
         rn1, rn2, rn3 = plot_fx(neighbors)
@@ -74,10 +74,10 @@ def plot_3(true_pareto, solutions, algorithm, hybrid_sol, reference_points=None 
                 further_points.append(sol1)
         if len(further_points) != 0 :
             f1, f2, f3 = plot_fx(further_points)
-            ax.scatter(rn1, rn2, rn3, marker='d', label='neighboring points')
-            ax.scatter(f1, f2, f3, marker='o', label='rest of solutions')
+            ax.scatter(rn1 * -1 , rn2 * -1 , rn3, marker='d', label='neighboring points')
+            ax.scatter(f1 * -1 , f2 * -1 , f3, marker='o', label='rest of solutions')
 
-        ax.scatter(rf1, rf2, rf3, marker='s', label='reference points')
+        ax.scatter(rf1 * -1 , rf2 * -1 , rf3, marker='s', label='reference points')
 
     ax.set_xlabel('responseTime')
     ax.set_ylabel('price')

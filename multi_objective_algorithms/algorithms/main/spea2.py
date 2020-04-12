@@ -97,9 +97,10 @@ def truncation(n, X):
 
 def update(dominated_individuals, X, N):
     if len(X) < N:
-        X.extend(sort_population_by_fitness(dominated_individuals)[N - len(X)])
+        K = sort_population_by_fitness(dominated_individuals)
+        X.extend(K[N - len(X)])
     elif len(X) > N:
-        X = truncation(len(X) - N, X)[:N]
+        X = truncation(len(X) - N, X)
     return X
 
 
