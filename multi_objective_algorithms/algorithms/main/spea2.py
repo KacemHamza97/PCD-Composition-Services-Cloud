@@ -100,7 +100,7 @@ def update(dominated_individuals, X, N):
         X.extend(sort_population_by_fitness(dominated_individuals)[N - len(X)])
     elif len(X) > N:
         X = truncation(len(X) - N, X)[:N]
-
+    return X
 
 # +----------------------------------------------------------------------------------------------+#
 
@@ -153,7 +153,7 @@ def spea2(problem, G, N, EN):
         if generation == G+1 :
             break
 
-        update(dominated_individuals(U), EA, EN)
+        EA = update(dominated_individuals(U), EA, EN)
 
         # Creating the mating_pool
         mating_pool = []
