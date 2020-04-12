@@ -74,10 +74,10 @@ def plot_3(true_pareto, solutions, algorithm, hybrid_sol, reference_points=None 
                 further_points.append(sol1)
         if len(further_points) != 0 :
             f1, f2, f3 = plot_fx(further_points)
+            ax.scatter(rn1, rn2, rn3, marker='d', label='neighboring points')
+            ax.scatter(f1, f2, f3, marker='o', label='rest of solutions')
 
         ax.scatter(rf1, rf2, rf3, marker='s', label='reference points')
-        ax.scatter(rn1, rn2, rn3, marker='d', label='neighboring points')
-        ax.scatter(f1, f2, f3, marker='o', label='rest of solutions')
 
     ax.set_xlabel('responseTime')
     ax.set_ylabel('price')
@@ -153,7 +153,7 @@ print("Finding true pareto ...")
 for itera in range(10):
     print(f"completed = {itera + 1}/ 10" )
     print(f"MOABC")
-    paretosList.extend(moabc(problem=p, SQ=sq, MCN=mcn, SN=sn, N=sn // 2))
+    paretosList.extend(moabc(problem=p, SQ=sq, MCN=mcn, SN=sn))
     print(f"NSGA2")
     paretosList.extend(nsga2(problem=p, G=mcn, N=sn))
     print(f"NSGA2-R")
@@ -170,7 +170,7 @@ print("Evaluating solutions ...")
 solutions_nsga2 = evaluate(algorithm=nsga2, pf=true_pareto, G=mcn, N=sn)
 solutions_nsga2_r , neighbors = evaluate(algorithm=nsga2_r, pf=true_pareto, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)
 solutions_spea2 = evaluate(algorithm=spea2, pf=true_pareto, G=mcn, N=sn, EN = en)
-solutions_moabc = evaluate(algorithm=moabc, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=sn // 2)
+solutions_moabc = evaluate(algorithm=moabc, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn)
 solutions_hybrid = evaluate(algorithm=moabc_nsga2, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=sn // 2)
 
 

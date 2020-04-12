@@ -12,7 +12,7 @@ from multi_objective_algorithms.algorithms.operations.update import updateSoluti
 
 # SQ : condition for scouts , MCN : number of iterations , SN : number of ressources , N : n of bees 
 
-def moabc(problem, SQ, MCN, SN, N):
+def moabc(problem, SQ, MCN, SN):
 
     # solutions  initializing
     solutionsList = list()
@@ -38,7 +38,7 @@ def moabc(problem, SQ, MCN, SN, N):
                     # mutation operation
                     new = mutate(sol.cp, neighbor)
                     if new.verifyConstraints(problem.getConstraints()):
-                        U.append(Solution(cp = new , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0))
+                        U.append(Solution(cp = new , fitness = 0 , functions = functions(new) , probability = 0 , limit = 0))
                         break
             
 
@@ -67,7 +67,7 @@ def moabc(problem, SQ, MCN, SN, N):
                     # mutation operation
                     new = mutate(sol.cp, neighbor)
                     if new.verifyConstraints(problem.getConstraints()):
-                        U.append(Solution(cp = new , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0))
+                        U.append(Solution(cp = new , fitness = 0 , functions = functions(new) , probability = 0 , limit = 0))
                         break
 
         # end of onlooker bees phase

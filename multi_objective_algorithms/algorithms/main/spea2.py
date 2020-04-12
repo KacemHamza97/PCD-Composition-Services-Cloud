@@ -149,6 +149,10 @@ def spea2(problem, G, N, EN):
             indiv.fitness = fit(indiv, U, k)
 
         EA = nondominated_individuals(U)
+
+        if generation == G+1 :
+            break
+
         update(dominated_individuals(U), EA, EN)
 
         # Creating the mating_pool

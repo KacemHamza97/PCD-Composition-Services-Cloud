@@ -99,6 +99,9 @@ def crowdingSort(front) :
 
 
 def normalized_Euclidean_Distance(a , b , norm) :
+    # verifying that norm != 0
+    if norm == 0:
+        norm = 1
     return euclidean_Distance(a,b) / norm
 
 
@@ -122,10 +125,6 @@ def euclidean_Distance(a , b) :
 def referencePoints(front , reference_points , epsilon) :
     if len(front) > 1 :
         norm = normalize(transform(front))
-        # verifying that norm != 0
-        if norm == 0 :
-            norm = 1
-
         groups = list()
         for p in reference_points :
             ranks = []  # list of solutions ranked based on euclidean distance to p
