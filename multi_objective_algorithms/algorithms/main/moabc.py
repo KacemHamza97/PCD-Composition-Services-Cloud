@@ -81,7 +81,7 @@ def moabc(problem, SQ, MCN, SN):
         U = list()
         U[:] = solutionsList
         for sol in solutionsList:
-            if sol.limit >= SQ:
+            if sol.limit >= SQ and sol not in fronts[0] :
                 while 1:
                     cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
                     if cp.verifyConstraints(problem.getConstraints()):

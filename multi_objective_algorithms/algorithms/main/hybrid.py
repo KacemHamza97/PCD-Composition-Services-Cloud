@@ -73,7 +73,7 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
         U = list()
         U[:] = solutionsList
         for sol in exploited:
-            if sol.limit >= SQ:
+            if sol.limit >= SQ and sol not in fronts[0] :
                 sol.limit = 0
                 while 1:
                     cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
