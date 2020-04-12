@@ -72,7 +72,8 @@ def plot_3(true_pareto, solutions, algorithm, hybrid_sol, reference_points=None 
         for sol1 in solutions :
             if sol1.cp not in [sol2.cp for sol2 in neighbors] :
                 further_points.append(sol1)
-        f1, f2, f3 = plot_fx(further_points)
+        if len(further_points) != 0 :
+            f1, f2, f3 = plot_fx(further_points)
 
         ax.scatter(rf1, rf2, rf3, marker='s', label='reference points')
         ax.scatter(rn1, rn2, rn3, marker='d', label='neighboring points')

@@ -70,7 +70,7 @@ def nsga2_r(problem, G, N , reference_points , epsilon):
 
         # Finalizing generation
         fronts = nonDominatedSort(U)
-        updateSolutions(population, fronts, "referencePoints" , reference_points = reference_points , epsilon = epsilon)
+        population = updateSolutions(population, fronts, "referencePoints" , reference_points = reference_points , epsilon = epsilon)
 
     # end of algorithm
     return fronts[0] , referencePoints(fronts[0] , reference_points , epsilon)[1]

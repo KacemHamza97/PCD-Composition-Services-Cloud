@@ -45,7 +45,7 @@ def moabc(problem, SQ, MCN, SN, N):
         # end of employed bees phase
 
         fronts = nonDominatedSort(U)
-        updateSolutions(solutionsList, fronts, method="crowdingSort")
+        solutionsList = updateSolutions(solutionsList, fronts, method="crowdingSort")
 
         # Probability update
         s = sum([sol.fitness for sol in solutionsList])
@@ -73,7 +73,7 @@ def moabc(problem, SQ, MCN, SN, N):
         # end of onlooker bees phase
 
         fronts = nonDominatedSort(U)
-        updateSolutions(solutionsList, fronts, "crowdingSort")
+        solutionsList = updateSolutions(solutionsList, fronts, "crowdingSort")
         
 
         # scout bees phase
@@ -91,7 +91,7 @@ def moabc(problem, SQ, MCN, SN, N):
         # end of scout bees phase
         if update:
             fronts = nonDominatedSort(U)
-            updateSolutions(solutionsList, fronts, "crowdingSort")
+            solutionsList = updateSolutions(solutionsList, fronts, "crowdingSort")
 
     # end of algorithm
     return fronts[0]

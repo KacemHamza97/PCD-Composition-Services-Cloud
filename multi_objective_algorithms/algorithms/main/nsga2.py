@@ -70,7 +70,7 @@ def nsga2(problem, G, N):
         
         # Finalizing generation
         fronts = nonDominatedSort(U)
-        updateSolutions(population, fronts, "crowdingSort")
+        population = updateSolutions(population, fronts, "crowdingSort")
 
     # end of algorithm
     return fronts[0]
