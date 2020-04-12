@@ -141,7 +141,7 @@ def spea2(problem, G, N, EN):
     EA = []
 
     # Algorithm
-    for generation in range(G):
+    for generation in range(G+1):
 
         U = set(population + EA)
 

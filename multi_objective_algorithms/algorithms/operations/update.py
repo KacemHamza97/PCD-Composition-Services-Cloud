@@ -210,7 +210,7 @@ def updateSolutions(solutionsList , fronts , method , **kwargs) :
 
     try : 
         for sol in S :
-            sol.fitness = fit(sol,solutionsList)
+            sol.fitness = fit(sol,S)
             if sol in solutionsList : 
                 sol.limit += 1
     except : 

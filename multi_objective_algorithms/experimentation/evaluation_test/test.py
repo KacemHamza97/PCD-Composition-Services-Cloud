@@ -136,11 +136,11 @@ def evaluate(algorithm, pf, **kwargs):
 n_act = int(input("NUMBER OF ACTIVITIES : "))
 n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
 constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act, 'reliability': 0.825 ** n_act}
-reference_points = array([[-5, -5, 3], [-10, -10, 1], [-15, -15, 2]])
+reference_points = array([[-10, -10, 0.7 ** n_act], [-10, -5, 0], [-5, -10, 0]])
 mcn = int(input("ITERATION NUMBER / GENERATIONS NUMBER : "))
 sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
 sq = int(input("SCOUT CONDITION : "))
-
+en = int(input("ARCHIVE SIZE :"))
 # problem init
 
 p = Problem(n_act, n_candidates, constraints)
@@ -158,7 +158,7 @@ for itera in range(10):
     print(f"NSGA2-R")
     paretosList.extend(nsga2_r(problem=p, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)[0])
     print(f"SPEA2")
-    paretosList.extend(spea2(problem=p, G=mcn, N=sn, EN=50))
+    paretosList.extend(spea2(problem=p, G=mcn, N=sn, EN=en))
     print(f"HYBRID")
     paretosList.extend(moabc_nsga2(problem=p, SQ=sq, MCN=mcn, SN=sn, N=sn // 2))
 
@@ -168,9 +168,10 @@ true_pareto = nonDominatedSort(paretosList)[0]
 print("Evaluating solutions ...")
 solutions_nsga2 = evaluate(algorithm=nsga2, pf=true_pareto, G=mcn, N=sn)
 solutions_nsga2_r , neighbors = evaluate(algorithm=nsga2_r, pf=true_pareto, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)
-solutions_spea2 = evaluate(algorithm=spea2, pf=true_pareto, G=mcn, N=sn, EN = 50)
+solutions_spea2 = evaluate(algorithm=spea2, pf=true_pareto, G=mcn, N=sn, EN = en)
 solutions_moabc = evaluate(algorithm=moabc, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=sn // 2)
 solutions_hybrid = evaluate(algorithm=moabc_nsga2, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=sn // 2)
+
 
 plot_3(true_pareto, solutions_moabc, 'MOABC', solutions_hybrid)
 plot_3(true_pareto, solutions_spea2, 'SPEA2', solutions_hybrid)

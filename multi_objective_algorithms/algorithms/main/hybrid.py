@@ -20,53 +20,52 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
         while 1:
             cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
             if cp.verifyConstraints(problem.getConstraints()):
-                solutionsList.append(Solution(cp=cp,functions=functions(cp), limit=0))
+                solutionsList.append(Solution(cp=cp, fitness=0, functions=functions(cp), probability=0, limit=0))
                 break
-
 
     # Algorithm
     for itera in range(MCN):
 
         pf = nonDominatedSort(solutionsList)[0]
-
         # employed bees phase
         exploited = sample(solutionsList, N)  # selecting solutions for exploitation randomly
         U = list()
         U[:] = solutionsList
         for sol in exploited:
-            cp1 = sol.cp  
-            # cp 2 randomly chosen from pf
-            while 1 : 
-                cp2 = choice(pf).cp
-                if cp2 != cp1 :
-                    break
-
+            cp1 = sol.cp
+            cp2 = CompositionPlan(problem.getActGraph(), problem.getCandidates()) # randomly generated
             offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
             # Adding offsprings
-            U += [Solution(cp = cp , functions = functions(cp) , limit = 0) for cp in offsprings]
+            U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0) for cp in offsprings]
         # end of employed bees phase
 
         fronts = nonDominatedSort(U)
-        updateSolutions(solutionsList, fronts, method="crowdingSort")
-        pf = fronts[0]
-        
-        for itera in range(N) :
-            # cp 1 randomly chosen from pf
-            cp1 = choice(pf).cp
-            # cp 2 randomly chosen from pf
-            while 1 : 
-                cp2 = choice(pf).cp
-                if cp2 != cp1 :
-                    break
-            cp2 = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
-            offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
-            # Adding offsprings
-            U += [Solution(cp = cp , functions = functions(cp) , limit = 0) for cp in offsprings]
+        solutionsList = updateSolutions(solutionsList, fronts, method="crowdingSort")
+        pf = nonDominatedSort(U)[0]
+
+        # Probability update
+        s = sum([sol.fitness for sol in solutionsList])
+        for sol in solutionsList:
+            sol.probability = sol.fitness / s
+
+        # onlooker bees phase
+        probabilityList = [sol.probability for sol in solutionsList]
+        a = min(probabilityList)
+        b = max(probabilityList)
+        U = list()
+        U[:] = solutionsList
+        for sol in solutionsList:
+            if sol.probability > uniform(a, b):
+                cp1 = sol.cp
+                cp2 = CompositionPlan(problem.getActGraph(), problem.getCandidates()) # randomly generated
+                offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
+                # Adding offsprings
+                U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0) for cp in offsprings]
 
         # end of onlooker bees phase
 
         fronts = nonDominatedSort(U)
-        updateSolutions(solutionsList, fronts, "crowdingSort")
+        solutionsList = updateSolutions(solutionsList, fronts, "crowdingSort")
         
 
         # scout bees phase
@@ -79,13 +78,13 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
                 while 1:
                     cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
                     if cp.verifyConstraints(problem.getConstraints()):
-                        U.append(Solution(cp = cp , functions = functions(cp) , limit = 0))
+                        U.append(Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0))
                         break
                 update = 1
         # end of scout bees phase
         if update:
             fronts = nonDominatedSort(U)
-            updateSolutions(solutionsList, fronts, "crowdingSort")
+            solutionsList = updateSolutions(solutionsList, fronts, "crowdingSort")
 
 
     # end of algorithm

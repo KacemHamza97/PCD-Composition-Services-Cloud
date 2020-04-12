@@ -21,7 +21,6 @@ def igd(solutions , pf) :
 
 #+----------------------------------------------------------------------------------------------+#
 
-def hv(solutions , pf) : 
+def hv(solutions , pf) :
     indicator = get_performance_indicator("hv" , pf = transform(pf) , normalize = True)
     return indicator.calc(transform(solutions))
-
