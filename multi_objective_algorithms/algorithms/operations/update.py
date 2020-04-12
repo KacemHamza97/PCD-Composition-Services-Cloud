@@ -1,7 +1,7 @@
 
 from multi_objective_algorithms.algorithms.operations.objective_functions import functions , fit , dominates
 from random import sample
-from numpy import amin , amax , array 
+from numpy import amin , amax , array , ones , zeros
 
 #+----------------------------------------------------------------------------------------------+#
 
@@ -14,7 +14,7 @@ def transform(U) :
 
 # return max_pf - min_pf euclidean distance
 def normalize(pf) :
-    return euclidean_Distance(amax(pf , axis = 0) , amin(pf , axis = 0))
+    return array(amax(pf , axis = 0) - amin(pf , axis = 0))
 
 #+----------------------------------------------------------------------------------------------+#
 
@@ -100,22 +100,16 @@ def crowdingSort(front) :
 
 def normalized_Euclidean_Distance(a , b , norm) :
     # verifying that norm != 0
-    if norm == 0:
-        norm = 1
-    return euclidean_Distance(a,b) / norm
-
-
-#+----------------------------------------------------------------------------------------------+#
-
-
-def euclidean_Distance(a , b) :
+    for i in range(len(norm)) :
+        if norm[i] == 0 :
+            norm[i] = 1
     try : # a , b are numpy array type
-        return (( (a - b) ** 2).sum(axis = 0) ** 0.5 )
+        return ( ((a - b) / norm ) ** 2).sum(axis = 0) ** 0.5
     except :
         try : # a , b are Solution type
-            return (( (a.functions - b.functions) ** 2).sum(axis = 0) ** 0.5 )
+            return ( ((a.functions - b.functions) / norm) ** 2).sum(axis = 0) ** 0.5
         except : # a is Solution type and b is numpy array
-            return (( (a.functions - b) ** 2).sum(axis = 0) ** 0.5 )
+            return ( ((a.functions - b) / norm) ** 2).sum(axis = 0) ** 0.5
 
 
 
@@ -141,12 +135,13 @@ def referencePoints(front , reference_points , epsilon) :
         # Re arranging groups in a way to verify epsilon condition
         new_groups = []
         neighbors = []
+        d_max = normalized_Euclidean_Distance(norm , zeros(3,), ones(3,))
         for g in groups :
             new_g = [g.pop(0)] 
             for sol1 in new_g :
                 for sol2 in g :
-                    d = normalized_Euclidean_Distance(sol1 , sol2 , norm)
-                    if d <= epsilon :
+                    d = normalized_Euclidean_Distance(sol1 , sol2 , ones(3,))
+                    if d / d_max <= epsilon :
                         # Adding sol2 to new_g and removing it from g
                         new_g.append(sol2)
                         g.remove(sol2)

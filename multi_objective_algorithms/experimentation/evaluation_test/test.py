@@ -137,7 +137,7 @@ def evaluate(algorithm, pf, **kwargs):
 n_act = int(input("NUMBER OF ACTIVITIES : "))
 n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
 constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act, 'reliability': 0.825 ** n_act}
-reference_points = array([[-10, -10, 0.7 ** n_act], [-10, -5, 0], [-5, -10, 0]])
+reference_points = array([[-10, -10, 0.9], [-3, -5, 0.7], [-5, -3, 0.7]])
 mcn = int(input("ITERATION NUMBER / GENERATIONS NUMBER : "))
 sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
 sq = int(input("SCOUT CONDITION : "))
