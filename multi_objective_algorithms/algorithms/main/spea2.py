@@ -86,14 +86,12 @@ def truncation(n, X):
 
                 # sorting distances
     distances.sort(key=lambda dist: dist[2])
-    remove = list()  # list of solutions to remove
+    to_remove = list()  # list of solutions to remove
     for dist in distances:
-        if len(remove) < n and dist[1] not in remove:
-            remove.append(dist[1])
-    for sol in X:
-        if sol in remove:
-            X.remove(sol)
-    return X
+        if len(to_remove) < n and to_remove.count(dist[1])==0:
+            to_remove.append(dist[1])
+
+    return [sol for sol in X if sol not in to_remove]
 
 
 # +----------------------------------------------------------------------------------------------+#
