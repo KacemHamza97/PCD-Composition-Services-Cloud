@@ -42,10 +42,13 @@ def fit(indiv1, U, k):
 def nondominated_individuals(U):
     non_dominated = []
     for indiv1 in (U):
+        dominated = False
         for indiv2 in (U):
             if dominates(indiv2, indiv1):
+                dominated = True
                 break
-        non_dominated.append(indiv1)
+        if not dominated :
+            non_dominated.append(indiv1)
     return non_dominated
 
 
@@ -97,7 +100,7 @@ def truncation(n, X):
 
 def update(dominated_individuals, X, N):
     if len(X) < N:
-        X.extend(sort_population_by_fitness(dominated_individuals)[N - len(X)])
+        X.extend(sort_population_by_fitness(dominated_individuals)[:N - len(X)])
     elif len(X) > N:
         X = truncation(len(X) - N, X)[:N]
     return X
