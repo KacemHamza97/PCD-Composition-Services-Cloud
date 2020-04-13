@@ -172,7 +172,7 @@ solutions_hybrid = evaluate(algorithm=moabc_nsga2, pf=true_pareto, SQ=sq, MCN=mc
 
 print("solutions_hybrid")
 print(transform(solutions_hybrid))
-print("solutions_hybrid_00")
+print("solutions_ALGORITHM")
 print(transform(solutions_algo))
 if ALGO == "NSGA2-R" :  
     plot_3(true_pareto, solutions_algo, ALGO, solutions_hybrid , reference_points=reference_points,neighbors = neighbors)
