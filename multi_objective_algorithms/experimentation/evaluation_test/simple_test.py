@@ -55,7 +55,7 @@ def plot_3(true_pareto, solutions, algorithm, hybrid_sol, reference_points=None 
     ax.set_ylabel('price')
     ax.set_zlabel('reliability')
     ax.legend()
-    plt.savefig(f"simple_plots/plot_all({n_act},{n_candidates},{mcn},{sn},{sq}).png")
+    plt.savefig(f"simple_plots/plot({n_act},{n_candidates},{mcn},{sn},{sq}).png")
 
 
 # +----------------------------------------------------------------------------------------------+#
