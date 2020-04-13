@@ -34,7 +34,10 @@ def moabc(problem, SQ, MCN, SN):
             while 1:
                     # choose randomly a service to mutate
                     service = sol.cp.randomService()
-                    neighbor = choice(problem.getCandidates()[service.getActivity()])
+                    while 1 :
+                        neighbor = choice(problem.getCandidates()[service.getActivity()])
+                        if new != service:
+                            break
                     # mutation operation
                     new = mutate(sol.cp, neighbor)
                     if new.verifyConstraints(problem.getConstraints()):
@@ -63,7 +66,10 @@ def moabc(problem, SQ, MCN, SN):
                 while 1:
                     # choose randomly a service to mutate
                     service = sol.cp.randomService()
-                    neighbor = choice(problem.getCandidates()[service.getActivity()])
+                    while 1:
+                        neighbor = choice(problem.getCandidates()[service.getActivity()])
+                        if new != service:
+                            break
                     # mutation operation
                     new = mutate(sol.cp, neighbor)
                     if new.verifyConstraints(problem.getConstraints()):

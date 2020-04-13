@@ -54,7 +54,10 @@ def BSG(cp1, cp2, constraints, candidates):  # constraints are added to avoid cr
         # choose randomly a service to mutate
         service = offspring.randomService()
         while 1:
-            new = choice(candidates[service.getActivity()])
+            while 1 :
+                new = choice(candidates[service.getActivity()])
+                if new != service :
+                    break
             # mutation operation
             offspring.G.nodes[new.getActivity()]["service"] = new
             if offspring.verifyConstraints(constraints)  :

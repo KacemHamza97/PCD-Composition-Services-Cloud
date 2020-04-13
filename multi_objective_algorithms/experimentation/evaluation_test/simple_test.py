@@ -106,7 +106,7 @@ def evaluate(algorithm, pf, **kwargs):
 # input
 n_act = int(input("NUMBER OF ACTIVITIES : "))
 n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act, 'reliability': 0.825 ** n_act}
+constraints = {'responseTime': 20, 'price': 20, 'availability': 0.2, 'reliability': 0.2}
 reference_points = array([[-1, -1, 0.9], [-3, -1, 0.7], [-1, -3, 0.7]])
 mcn = int(input("ITERATION NUMBER / GENERATIONS NUMBER : "))
 sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
@@ -170,6 +170,10 @@ elif x == 5 :
 print("HYBRID")
 solutions_hybrid = evaluate(algorithm=moabc_nsga2, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=sn // 2)
 
+print("solutions_hybrid")
+print(transform(solutions_hybrid))
+print("solutions_hybrid_00")
+print(transform(solutions_algo))
 if ALGO == "NSGA2-R" :  
     plot_3(true_pareto, solutions_algo, ALGO, solutions_hybrid , reference_points=reference_points,neighbors = neighbors)
 

@@ -10,8 +10,7 @@ from mono_objective_algorithms.experimentation.validation_test.hybrid import sim
 # input
 n_act = 5
 n_candidates = 50
-constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act,
-               'reliability': 0.825 ** n_act}
+constraints = {'responseTime': 20, 'price': 20, 'availability': 0.2, 'reliability': 0.2}
 weights = [0.25, 0.25, 0.25, 0.25]
 mcn = 10
 sq = 2

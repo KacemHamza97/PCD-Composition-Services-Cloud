@@ -41,6 +41,10 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
 
         fronts = nonDominatedSort(U)
         solutionsList = updateSolutions(solutionsList, fronts, method="crowdingSort")
+
+        # onlooker bees phase
+        U = list()
+        U[:] = solutionsList
         pf = fronts[0]
         if len(pf) < 3 :
             pf += fronts[1]

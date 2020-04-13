@@ -12,7 +12,7 @@ from mono_objective_algorithms.algorithms.operations.fitness import fit
 # input
 n_act = int(input("NUMBER OF ACTIVITIES : "))
 n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act, 'reliability': 0.825 ** n_act}
+constraints = {'responseTime': 20, 'price': 20, 'availability': 0.2, 'reliability': 0.2}
 weights = [0.25, 0.25, 0.25, 0.25]
 mcn = int(input("ITERATION NUMBER : "))
 sq = int(input("SCOUTS CONDITION : "))
