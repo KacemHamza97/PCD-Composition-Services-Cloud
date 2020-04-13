@@ -18,7 +18,19 @@ def normalize(pf) :
 
 #+----------------------------------------------------------------------------------------------+#
 
+
+def remove_redundant(solutionsList) :
+    for sol1 in solutionsList :
+        for sol2 in solutionsList :
+            if sol1 != sol2 and sol1.cp == sol2.cp :
+                solutionsList.remove(sol2)
+
+    return solutionsList
+
+#+----------------------------------------------------------------------------------------------+#
+
 def nonDominatedSort(solutionsList) :
+        solutionsList = remove_redundant(solutionsList)
         fronts = [[]]   
         SList = {}    
         NList = {} 

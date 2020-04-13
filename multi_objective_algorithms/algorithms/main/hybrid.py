@@ -26,7 +26,6 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
     # Algorithm
     for itera in range(MCN):
 
-        pf = nonDominatedSort(solutionsList)[0]
         # employed bees phase
         exploited = sample(solutionsList, N)  # selecting solutions for exploitation randomly
         U = list()
@@ -76,7 +75,7 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
                 while 1:
                     cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
                     if cp.verifyConstraints(problem.getConstraints()):
-                        U.append(Solution(cp = cp , fitness = 0 , functions = functions(cp) ,limit = 0))
+                        U.append(Solution(cp = cp ,functions = functions(cp) ,limit = 0))
                         break
                 update = 1
         # end of scout bees phase

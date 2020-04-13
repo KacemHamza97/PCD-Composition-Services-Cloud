@@ -97,6 +97,9 @@ def evaluate(algorithm, pf, **kwargs):
     print(f"HV = {HV}")
     print(f"HV_max = {HV_max}")
     print(f"HV_min = {HV_min}")
+    if algorithm == nsga2_r:
+        return solutions , neighbors
+
     return solutions
 
 # +----------------------------------------------------------------------------------------------+#
@@ -141,7 +144,7 @@ for itera in range(3):
         print(ALGO)
         paretosList.extend(nsga2(problem=p, G=mcn, N=sn))
     elif x == 5 :
-        ALGO = "MOAB"
+        ALGO = "MOABC"
         print(ALGO)
         paretosList.extend(moabc(problem=p, SQ=sq, MCN=mcn, SN=sn))
     print(f"HYBRID")
@@ -159,7 +162,7 @@ elif x == 2 :
     solutions_algo = evaluate(algorithm=spea2, pf=true_pareto, G=mcn, N=sn, EN=en)
 elif x == 3 :
     print(ALGO)
-    solutions_algo = evaluate(algorithm=nsga2_r, pf=true_pareto, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)
+    solutions_algo , neighbors = evaluate(algorithm=nsga2_r, pf=true_pareto, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)
 elif x == 4 :
     print(ALGO)
     solutions_algo = evaluate(algorithm=nsga2, pf=true_pareto, G=mcn, N=sn)
