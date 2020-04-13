@@ -10,8 +10,7 @@ from multi_objective_algorithms.experimentation.validation_test.hybrid import si
 # input
 n_act = 5
 n_candidates = 50
-constraints = {'responseTime': n_act * 0.3, 'price': n_act * 1.55, 'availability': 0.945 ** n_act,
-               'reliability': 0.825 ** n_act}
+constraints = {'responseTime': n_act * 5 , 'price': n_act * 3, 'availability': 0.9 ** n_act, 'reliability': 0.7 ** n_act}
 mcn = 10
 sq = 2
 sn = 10

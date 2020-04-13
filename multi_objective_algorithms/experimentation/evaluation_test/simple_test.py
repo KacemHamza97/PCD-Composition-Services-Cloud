@@ -106,7 +106,7 @@ def evaluate(algorithm, pf, **kwargs):
 # input
 n_act = int(input("NUMBER OF ACTIVITIES : "))
 n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-constraints = {'responseTime': 20, 'price': 20, 'availability': 0.2, 'reliability': 0.2}
+constraints = {'responseTime': n_act * 5 , 'price': n_act * 3, 'availability': 0.9 ** n_act, 'reliability': 0.7 ** n_act}
 reference_points = array([[-1, -1, 0.9], [-3, -1, 0.7], [-1, -3, 0.7]])
 mcn = int(input("ITERATION NUMBER / GENERATIONS NUMBER : "))
 sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
