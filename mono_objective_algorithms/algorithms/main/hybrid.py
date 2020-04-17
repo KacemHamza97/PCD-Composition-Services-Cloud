@@ -52,6 +52,8 @@ def ABCgenetic(problem, SN, SQ, MCN, SCP, N, CP):
                         sol.fitness = new_fitness
                         sol.probability = 0
                         sol.limit = 0
+
+
                     else:
                         sol.limit += 1
                     break

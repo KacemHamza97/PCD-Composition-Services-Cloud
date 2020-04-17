@@ -48,7 +48,10 @@ def ABC(problem, SN, SQ, MCN, N):
             while 1:
                     # choose randomly a service to mutate
                     service = sol.cp.randomService()
-                    neighbor = choice(problem.getCandidates()[service.getActivity()])
+                    while 1:
+                        neighbor = choice(problem.getCandidates()[service.getActivity()])
+                        if neighbor != service:
+                            break
                     # mutation operation
                     new = mutate(sol.cp, neighbor)
                     if new.verifyConstraints(problem.getConstraints()):
@@ -81,7 +84,10 @@ def ABC(problem, SN, SQ, MCN, N):
                 while 1:
                     # choose randomly a service to mutate
                     service = sol.cp.randomService()
-                    neighbor = choice(problem.getCandidates()[service.getActivity()])
+                    while 1:
+                        neighbor = choice(problem.getCandidates()[service.getActivity()])
+                        if neighbor != service:
+                            break
                     # mutation operation
                     new = mutate(sol.cp, neighbor)
                     if new.verifyConstraints(problem.getConstraints()):

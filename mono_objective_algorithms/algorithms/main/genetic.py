@@ -68,7 +68,10 @@ def genetic(problem, N, G, CP, CM):
             offspring = crossover(parent1.cp, parent2.cp, CP)  # Recombining
             if random() <= CM : # Mutation
                 service = offspring.randomService()
-                random_service = choice(problem.getCandidates()[service.getActivity()])
+                while 1:
+                    random_service = choice(problem.getCandidates()[service.getActivity()])
+                    if random_service != service:
+                        break
                 offspring = mutate(offspring, random_service)
             if offspring.verifyConstraints(problem.getConstraints()):
                 offspring_fitness = fit(offspring, minQos, maxQos, problem.getWeights())

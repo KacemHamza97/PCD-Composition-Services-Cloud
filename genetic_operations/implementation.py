@@ -42,7 +42,7 @@ def BSG(cp1, cp2, constraints, candidates):  # constraints are added to avoid cr
                 # replacing with service from second parent
                 offspring1.G.nodes[act]["service"] = cp2.G.nodes[act]["service"]
                 offspring2.G.nodes[act]["service"] = cp1.G.nodes[act]["service"]
-            if offspring1.verifyConstraints(constraints) and offspring2.verifyConstraints(constraints):
+            if offspring1.verifyConstraints(constraints)  and offspring2.verifyConstraints(constraints):
                 break
 
         return [offspring1 , offspring2]
