@@ -34,8 +34,11 @@ def BSG(cp1, cp2, constraints, candidates):  # constraints are added to avoid cr
 
         offspring1 = cp1.clone()
         offspring2 = cp2.clone()
-
+        attempts = 0
         while 1:
+            attempts += 1
+            if attempts == 10:
+                break
             x1 = randint(0, cp1.getNumberOfActivities() - 2)
             x2 = randint(x1 + 1, cp1.getNumberOfActivities() - 1)
             for act in range(x1, x2 + 1):  # Selecting service to replace
@@ -53,7 +56,11 @@ def BSG(cp1, cp2, constraints, candidates):  # constraints are added to avoid cr
 
         # choose randomly a service to mutate
         service = offspring.randomService()
+        attempts = 0
         while 1:
+            attempts += 1
+            if attempts == 10 :
+                break
             while 1 :
                 new = choice(candidates[service.getActivity()])
                 if new != service :

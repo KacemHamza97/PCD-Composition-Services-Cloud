@@ -24,3 +24,5 @@ def igd(solutions , pf) :
 def hv(solutions , pf) :
     indicator = get_performance_indicator("hv" , pf = transform(pf) * -1 , normalize = True)
     return indicator.calc(transform(solutions) * -1) # Max optimization problem
+    
+

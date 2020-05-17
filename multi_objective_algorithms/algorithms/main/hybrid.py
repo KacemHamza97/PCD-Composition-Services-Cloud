@@ -24,7 +24,7 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
                 break
 
     # Algorithm
-    for itera in range(MCN):
+    for cycle in range(MCN):
 
         # employed bees phase
         exploited = sample(solutionsList, N)  # selecting solutions for exploitation randomly

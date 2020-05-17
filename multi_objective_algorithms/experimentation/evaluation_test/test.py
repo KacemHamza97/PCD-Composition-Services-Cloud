@@ -10,7 +10,7 @@ from multi_objective_algorithms.algorithms.main.nsga2 import nsga2
 from multi_objective_algorithms.algorithms.main.spea2 import spea2
 from multi_objective_algorithms.algorithms.main.nsga2_r import nsga2_r
 from multi_objective_algorithms.algorithms.main.moabc import moabc
-from multi_objective_algorithms.algorithms.main.hybrid import moabc_nsga2
+from multi_objective_algorithms.algorithms.main.hybrid_v0 import moabc_nsga2_v0
 from multi_objective_algorithms.algorithms.operations.update import nonDominatedSort, transform
 from multi_objective_algorithms.experimentation.performance_indicators.performance_indicators import gd, hv, igd
 
@@ -94,16 +94,16 @@ def evaluate(algorithm, pf, **kwargs):
     IGD = 0
     rt = 0
     solutions = []
-    for i in range(30):
+    for i in range(10):
         print(f"Executing {algorithm.__name__} ")
         start_time = time()
         if algorithm == nsga2_r :
             solutions , neighbors = algorithm(problem=p, **kwargs)
         else :
             solutions = algorithm(problem=p, **kwargs)
-        rt += (time() - start_time) / 30
-        GD += gd(solutions, pf) / 30
-        IGD += igd(solutions, pf) / 30
+        rt += (time() - start_time) / 10
+        GD += gd(solutions, pf) / 10
+        IGD += igd(solutions, pf) / 10
         HV = hv(solutions, pf)
         HV_list.append(HV)
 
@@ -116,7 +116,7 @@ def evaluate(algorithm, pf, **kwargs):
         #    file_writer.writerow([algorithm.__name__, n_candidates, HV])
         ###############################################################################################
 
-    HV = sum(HV_list) / 30
+    HV = sum(HV_list) / 10
     HV_min = min(HV_list)
     HV_max = max(HV_list)
     with open('test_results.csv', mode='a') as file:
@@ -136,7 +136,7 @@ def evaluate(algorithm, pf, **kwargs):
 # input
 n_act = int(input("NUMBER OF ACTIVITIES : "))
 n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-constraints = {'responseTime': n_act * 5 , 'price': n_act * 3, 'availability': 0.9 ** n_act, 'reliability': 0.7 ** n_act}
+constraints = {'responseTime': n_act * 2 , 'price': n_act * 3, 'availability': 0.92 ** n_act, 'reliability': 0.75 ** n_act}
 reference_points = array([[-10, -10, 0.9], [-3, -5, 0.7], [-5, -3, 0.7]])
 mcn = int(input("ITERATION NUMBER / GENERATIONS NUMBER : "))
 sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
@@ -153,29 +153,29 @@ print("Finding true pareto ...")
 for itera in range(10):
     print(f"completed = {itera + 1}/ 10" )
     print(f"MOABC")
-    paretosList.extend(moabc(problem=p, SQ=sq, MCN=mcn, SN=sn))
+    paretosList.extend(moabc(problem=p, SQ=sq, MCN=mcn, SN=sn, N= sn // 2))
     print(f"NSGA2")
     paretosList.extend(nsga2(problem=p, G=mcn, N=sn))
-    print(f"NSGA2-R")
-    paretosList.extend(nsga2_r(problem=p, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)[0])
-    print(f"SPEA2")
-    paretosList.extend(spea2(problem=p, G=mcn, N=sn, EN=en))
+    #print(f"NSGA2-R")
+    #paretosList.extend(nsga2_r(problem=p, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)[0])
+    #print(f"SPEA2")
+    #paretosList.extend(spea2(problem=p, G=mcn, N=sn, EN=en))
     print(f"HYBRID")
-    paretosList.extend(moabc_nsga2(problem=p, SQ=sq, MCN=mcn, SN=sn, N=sn // 2))
+    paretosList.extend(moabc_nsga2_v0(problem=p, SQ=sq, MCN=mcn, SN=sn, N= sn // 2))
 
 true_pareto = nonDominatedSort(paretosList)[0]
 
 # evaluating algorithms
 print("Evaluating solutions ...")
 solutions_nsga2 = evaluate(algorithm=nsga2, pf=true_pareto, G=mcn, N=sn)
-solutions_nsga2_r , neighbors = evaluate(algorithm=nsga2_r, pf=true_pareto, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)
-solutions_spea2 = evaluate(algorithm=spea2, pf=true_pareto, G=mcn, N=sn, EN = en)
-solutions_moabc = evaluate(algorithm=moabc, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn)
-solutions_hybrid = evaluate(algorithm=moabc_nsga2, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=sn // 2)
+#solutions_nsga2_r , neighbors = evaluate(algorithm=nsga2_r, pf=true_pareto, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)
+#solutions_spea2 = evaluate(algorithm=spea2, pf=true_pareto, G=mcn, N=sn, EN = en)
+solutions_moabc = evaluate(algorithm=moabc, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N= sn // 2)
+solutions_hybrid = evaluate(algorithm=moabc_nsga2_v0, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N= sn // 2)
 
 
 plot_3(true_pareto, solutions_moabc, 'MOABC', solutions_hybrid)
-plot_3(true_pareto, solutions_spea2, 'SPEA2', solutions_hybrid)
+#plot_3(true_pareto, solutions_spea2, 'SPEA2', solutions_hybrid)
 plot_3(true_pareto, solutions_nsga2, 'NSGA-II', solutions_hybrid)
-plot_3(true_pareto, solutions_nsga2_r,'NSGA-II-R', solutions_hybrid, reference_points=reference_points,neighbors = neighbors)
-plot_5(true_pareto, solutions_hybrid, solutions_moabc, solutions_spea2, solutions_nsga2, solutions_nsga2_r)
+#plot_3(true_pareto, solutions_nsga2_r,'NSGA-II-R', solutions_hybrid, reference_points=reference_points,neighbors = neighbors)
+#plot_5(true_pareto, solutions_hybrid, solutions_moabc, solutions_spea2, solutions_nsga2, solutions_nsga2_r)

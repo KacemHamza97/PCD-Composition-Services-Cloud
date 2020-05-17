@@ -60,8 +60,8 @@ def evaluate(algorithm, **kwargs):
 # input
 n_act = int(input("NUMBER OF ACTIVITIES : "))
 n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-constraints = {'responseTime': n_act * 5 , 'price': n_act * 3, 'availability': 0.9 ** n_act, 'reliability': 0.7 ** n_act}
-weights = [0.25, 0.25, 0.25, 0.25]
+constraints = {'responseTime': n_act * 2 , 'price': n_act * 3, 'availability': 0.92 ** n_act, 'reliability': 0.75 ** n_act}
+weights = [0.5, 0.1, 0.15, 0.25]
 mcn = int(input("ITERATION NUMBER / GENERATION NUMBER : "))
 sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
 sq = int(input("SCOUTS CONDITION : "))
