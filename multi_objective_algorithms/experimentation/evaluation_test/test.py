@@ -12,7 +12,7 @@ from multi_objective_algorithms.algorithms.main.nsga2_r import nsga2_r
 from multi_objective_algorithms.algorithms.main.moabc import moabc
 from multi_objective_algorithms.algorithms.main.hybrid_v0 import moabc_nsga2_v0
 from multi_objective_algorithms.algorithms.operations.update import nonDominatedSort, transform
-from multi_objective_algorithms.experimentation.performance_indicators.performance_indicators import gd, hv, igd
+from multi_objective_algorithms.experimentation.performance_indicators.performance_indicators import gd, hv, igd , spacing , spread
 
 
 
@@ -92,18 +92,23 @@ def evaluate(algorithm, pf, **kwargs):
     HV_list = []
     GD = 0
     IGD = 0
+    spa = 0
+    spr = 0
     rt = 0
     solutions = []
-    for i in range(10):
+    for i in range(30):
         print(f"Executing {algorithm.__name__} ")
         start_time = time()
         if algorithm == nsga2_r :
             solutions , neighbors = algorithm(problem=p, **kwargs)
         else :
             solutions = algorithm(problem=p, **kwargs)
-        rt += (time() - start_time) / 10
-        GD += gd(solutions, pf) / 10
-        IGD += igd(solutions, pf) / 10
+
+        rt += (time() - start_time) / 30
+        GD += gd(solutions, pf) / 30
+        IGD += igd(solutions, pf) / 30
+        spr += spread(solutions, pf) / 30
+        spa += spacing(solutions, pf) / 30
         HV = hv(solutions, pf)
         HV_list.append(HV)
 
@@ -116,12 +121,12 @@ def evaluate(algorithm, pf, **kwargs):
         #    file_writer.writerow([algorithm.__name__, n_candidates, HV])
         ###############################################################################################
 
-    HV = sum(HV_list) / 10
+    HV = sum(HV_list) / 30
     HV_min = min(HV_list)
     HV_max = max(HV_list)
     with open('test_results.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        file_writer.writerow([algorithm.__name__, n_act, n_candidates, mcn, sn, GD, IGD, HV, HV_min , HV_max, rt])
+        file_writer.writerow([algorithm.__name__, n_act, n_candidates, mcn, sn, GD, IGD, HV, HV_min , HV_max, rt,spa,spr])
 
     if algorithm == nsga2_r:
         return solutions , neighbors
@@ -156,10 +161,10 @@ for itera in range(10):
     paretosList.extend(moabc(problem=p, SQ=sq, MCN=mcn, SN=sn, N= sn // 2))
     print(f"NSGA2")
     paretosList.extend(nsga2(problem=p, G=mcn, N=sn))
-    #print(f"NSGA2-R")
-    #paretosList.extend(nsga2_r(problem=p, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)[0])
-    #print(f"SPEA2")
-    #paretosList.extend(spea2(problem=p, G=mcn, N=sn, EN=en))
+    print(f"NSGA2-R")
+    paretosList.extend(nsga2_r(problem=p, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)[0])
+    print(f"SPEA2")
+    paretosList.extend(spea2(problem=p, G=mcn, N=sn, EN=en))
     print(f"HYBRID")
     paretosList.extend(moabc_nsga2_v0(problem=p, SQ=sq, MCN=mcn, SN=sn, N= sn // 2))
 
@@ -168,14 +173,14 @@ true_pareto = nonDominatedSort(paretosList)[0]
 # evaluating algorithms
 print("Evaluating solutions ...")
 solutions_nsga2 = evaluate(algorithm=nsga2, pf=true_pareto, G=mcn, N=sn)
-#solutions_nsga2_r , neighbors = evaluate(algorithm=nsga2_r, pf=true_pareto, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)
-#solutions_spea2 = evaluate(algorithm=spea2, pf=true_pareto, G=mcn, N=sn, EN = en)
+solutions_nsga2_r , neighbors = evaluate(algorithm=nsga2_r, pf=true_pareto, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)
+solutions_spea2 = evaluate(algorithm=spea2, pf=true_pareto, G=mcn, N=sn, EN = en)
 solutions_moabc = evaluate(algorithm=moabc, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N= sn // 2)
 solutions_hybrid = evaluate(algorithm=moabc_nsga2_v0, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N= sn // 2)
 
 
-plot_3(true_pareto, solutions_moabc, 'MOABC', solutions_hybrid)
+#plot_3(true_pareto, solutions_moabc, 'MOABC', solutions_hybrid)
 #plot_3(true_pareto, solutions_spea2, 'SPEA2', solutions_hybrid)
-plot_3(true_pareto, solutions_nsga2, 'NSGA-II', solutions_hybrid)
+#plot_3(true_pareto, solutions_nsga2, 'NSGA-II', solutions_hybrid)
 #plot_3(true_pareto, solutions_nsga2_r,'NSGA-II-R', solutions_hybrid, reference_points=reference_points,neighbors = neighbors)
 #plot_5(true_pareto, solutions_hybrid, solutions_moabc, solutions_spea2, solutions_nsga2, solutions_nsga2_r)
