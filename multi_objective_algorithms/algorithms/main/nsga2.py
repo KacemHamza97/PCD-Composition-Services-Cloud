@@ -19,11 +19,11 @@ def nsga2(problem, G, N):
     population = list()
 
     for i in range(N):
-        while 1:
-            cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
-            if cp.verifyConstraints(problem.getConstraints()):
-                population.append(Solution(cp=cp, fitness=0, functions=functions(cp), probability=0))
-                break
+        #while 1:
+        cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
+        #if cp.verifyConstraints(problem.getConstraints()):
+        population.append(Solution(cp=cp, fitness=0, functions=functions(cp), probability=0))
+                #break
 
     # fitness initializing 
 

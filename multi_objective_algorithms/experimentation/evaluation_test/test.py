@@ -128,12 +128,12 @@ def evaluate(algorithm, solutions, time, pf):
         HV_list.append(HV)
 
         ##### USED TO GENERATE DATA FOR BOXPLOTS ######################################################
-        # with open('hv_abstract.csv', mode='a') as file:
-        #    file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        #    file_writer.writerow([algorithm.__name__, n_act, HV])
-        # with open('hv_concrete.csv', mode='a') as file:
-        #    file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        #    file_writer.writerow([algorithm.__name__, n_candidates, HV])
+        with open('hv_abstract.csv', mode='a') as file:
+            file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            file_writer.writerow([algorithm.__name__, n_act, HV])
+        with open('hv_concrete.csv', mode='a') as file:
+            file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            file_writer.writerow([algorithm.__name__, n_candidates, HV])
         ###############################################################################################
 
     HV = sum(HV_list) / 30
@@ -195,8 +195,8 @@ if __name__ == "__main__":
     L = [ (nsga2 ,{'problem': p ,'G': mcn, 'N': sn}),
            (nsga2_r ,{'problem': p ,'G': mcn, 'N': sn, 'reference_points': reference_points, 'epsilon': 0.2}),
            (spea2,{'problem': p ,'G': mcn, 'N': sn, 'EN': en}),
-           (moabc,{'problem': p ,'SQ': sq,'N': sn, 'MCN': mcn, 'SN': sn}),
-           (moabc_nsga2_v0,{'problem': p ,'SQ': sq, 'MCN': mcn, 'SN': sn, 'N': sn // 2})]
+           (moabc,{'problem': p ,'SQ': sq, 'MCN': mcn, 'SN': sn}),
+           (moabc_nsga2_v0,{'problem': p ,'SQ': sq, 'MCN': mcn, 'SN': sn, 'N': sn // 4})]
     processes = []
     for parameters in L:
         p = multiprocessing.Process(target=execute, args=(parameters[0],solutions,exec_time,neighbors) , kwargs = parameters[1])

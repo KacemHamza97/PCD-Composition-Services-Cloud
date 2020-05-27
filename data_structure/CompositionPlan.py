@@ -143,13 +143,15 @@ class CompositionPlan:
     # verifying that a compositionPlan meets certain constraints
 
     def verifyConstraints(self, constraints):
-        qos = self.cpQos()
-        drt = constraints['responseTime'] >= qos['responseTime']
-        dpr = constraints['price'] >= qos['price']
-        dav = qos['availability'] >= constraints['availability']
-        drel = qos['reliability'] >= constraints['reliability']
+        return True
+        #qos = self.cpQos()
+        #drt = constraints['responseTime'] >= qos['responseTime']
+        #dpr = constraints['price'] >= qos['price']
+        #dav = qos['availability'] >= constraints['availability']
+        #drel = qos['reliability'] >= constraints['reliability']
 
-        return drt and dpr and dav and drel
+        #return drt and dpr and dav and drel
+
 
     # generate random service
 

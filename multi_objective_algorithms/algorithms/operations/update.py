@@ -223,3 +223,62 @@ def updateSolutions(solutionsList , fronts , method , **kwargs) :
         None
         
     return S
+
+def strength(indiv1, U):
+    s = 1
+    for indiv2 in (U):
+        if dominates(indiv1, indiv2):
+            s += 1
+    return s
+
+
+# +----------------------------------------------------------------------------------------------+#
+
+# rawfitness is to minimize !
+
+def rawFitness(indiv1, U):
+    return sum([strength(indiv2, U) for indiv2 in U if dominates(indiv2, indiv1)])
+
+
+# +----------------------------------------------------------------------------------------------+#
+
+def fitSPEA2(indiv1, U, k):
+    dist = []
+    norm = normalize(transform(U))
+    for indiv2 in U:
+        dist.append(normalized_Euclidean_Distance(indiv1, indiv2, norm))
+    dist.sort()
+    value = dist[k]
+    return 1 / (value + 2) + rawFitness(indiv1, U)
+
+def updateSolutionsFitSPEA2(solutionsList, fronts, method, k, **kwargs):
+    i = 0  # front number
+    S = []  # new solutionsList
+    N = len(solutionsList)
+
+    while i < len(fronts) and len(fronts[i]) <= N - len(S):
+        # add fronts to S until space left is lower than front size
+        S += fronts[i]
+        i += 1
+
+    if i < len(fronts):
+        # selecting solutions from front based on method
+        if method == "crowdingSort":
+            selection = crowdingSort(fronts[i])[0:N - len(S)]
+            S += selection
+
+        elif method == "referencePoints":
+            reference_points = kwargs["reference_points"]
+            epsilon = kwargs["epsilon"]
+            selection = referencePoints(fronts[i], reference_points, epsilon)[0][0:N - len(S)]
+            S += selection
+
+    try:
+        for sol in S:
+            sol.fitness = fitSPEA2(sol, S, k)
+            if sol in solutionsList:
+                sol.limit += 1
+    except:
+        None
+
+    return S

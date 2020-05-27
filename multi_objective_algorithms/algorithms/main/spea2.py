@@ -134,11 +134,11 @@ def spea2(problem, G, N, EN):
     population = list()
 
     for i in range(N):
-        while 1:
-            cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
-            if cp.verifyConstraints(problem.getConstraints()):
-                population.append(Solution(cp=cp, fitness=0, functions=functions(cp)))
-                break
+        #while 1:
+       cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
+            #if cp.verifyConstraints(problem.getConstraints()):
+       population.append(Solution(cp=cp, fitness=0, functions=functions(cp)))
+                #break
 
     # Initializing archive
     EA = []
@@ -147,7 +147,6 @@ def spea2(problem, G, N, EN):
     for generation in range(G + 1):
 
         U = set(population + EA)
-
         for indiv in U:
             indiv.fitness = fit(indiv, U, k)
 
@@ -157,11 +156,10 @@ def spea2(problem, G, N, EN):
             break
 
         EA = update(dominated_individuals(U), EA, EN)
-
         # Creating the mating_pool
         mating_pool = []
         for itera in range(EN // 4):
-            mating_pool.extend(binaryTournement(EA))
+           mating_pool.extend(binaryTournement(EA))
 
         next_generation = []
         # Creating new generation
