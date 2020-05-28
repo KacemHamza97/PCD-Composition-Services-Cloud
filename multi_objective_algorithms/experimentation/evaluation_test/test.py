@@ -145,10 +145,25 @@ def evaluate(algorithm, solutions, time, pf):
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         file_writer.writerow([algorithm.__name__, n_act, n_candidates, mcn, sn, GD, IGD, HV, HV_min , HV_max, rt,spa,spr])
 
-
+    return HV_list
 
 # +----------------------------------------------------------------------------------------------+#
 
+def plot_hv(HV1, HV2, HV3, HV4, HV5, HV6):
+    plt.clf()
+    L = [i for i in range(30)]
+    plt.plot(L, HV1, label="NSGA-II")
+    plt.plot(L, HV2, label="NSGA-II-R ")
+    plt.plot(L, HV3, label="SPEA2")
+    plt.plot(L, HV4, label="MOABC")
+    plt.plot(L, HV5, label="Hybrid")
+    plt.xlabel('iteration')
+    plt.ylabel('HV')
+    plt.title('HV evolution')
+    plt.legend()
+    plt.show()
+
+# +----------------------------------------------------------------------------------------------+#
 
 # main
 
@@ -193,11 +208,11 @@ print("Done!")
 
 # evaluating algorithms
 print("Evaluating solutions ...")
-evaluate(algorithm=nsga2, solutions = solutions_nsga2, time = time_nsga2, pf = pf)
-evaluate(algorithm=nsga2_r, solutions = solutions_nsga2_r, time = time_nsga2_r, pf = pf)
-evaluate(algorithm=spea2, solutions = solutions_spea2, time = time_spea2, pf = pf)
-evaluate(algorithm=moabc, solutions = solutions_moabc, time = time_moabc, pf = pf)
-evaluate(algorithm=moabc_nsga2_v0, solutions = solutions_hybrid, time = time_hybrid, pf = pf)
+HV1 = evaluate(algorithm=nsga2, solutions = solutions_nsga2, time = time_nsga2, pf = pf)
+HV2 = evaluate(algorithm=nsga2_r, solutions = solutions_nsga2_r, time = time_nsga2_r, pf = pf)
+HV3 = evaluate(algorithm=spea2, solutions = solutions_spea2, time = time_spea2, pf = pf)
+HV4 = evaluate(algorithm=moabc, solutions = solutions_moabc, time = time_moabc, pf = pf)
+HV5 = evaluate(algorithm=moabc_nsga2_v0, solutions = solutions_hybrid, time = time_hybrid, pf = pf)
 
 
 #plot_3(pf, solutions_moabc, 'MOABC', solutions_hybrid[-1])
@@ -205,3 +220,4 @@ evaluate(algorithm=moabc_nsga2_v0, solutions = solutions_hybrid, time = time_hyb
 #plot_3(pf, solutions_nsga2, 'NSGA-II', solutions_hybrid[-1])
 #plot_3(pf, solutions_nsga2_r,'NSGA-II-R', solutions_hybrid[-1], reference_points=reference_points,neighbors = neighbors[-1])
 #plot_5(pf, solutions_hybrid[-1], solutions_moabc[-1], solutions_spea2[-1], solutions_nsga2[-1], solutions_nsga2_r[-1])
+#plot_hv(HV1, HV2, HV3, HV4, HV5, HV6)
