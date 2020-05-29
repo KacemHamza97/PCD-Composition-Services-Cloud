@@ -12,7 +12,7 @@ from multi_objective_algorithms.algorithms.operations.update import updateSoluti
 
 # SQ : condition for scouts , MCN : number of iterations , SN : number of ressources , N : n of bees 
 
-def moabc(problem, SQ, MCN, SN):
+def moabc(problem, SQ, MCN, SN,N):
     # solutions  initializing
     solutionsList = list()
 
