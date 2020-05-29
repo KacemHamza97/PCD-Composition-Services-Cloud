@@ -1,12 +1,12 @@
-from random import sample
+from random import uniform, sample
 from numpy.random import choice
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
-from genetic_operations.implementation import crossover, mutate
+from genetic_operations.implementation import mutate, generateOffsprings, crossover
 from multi_objective_algorithms.algorithms.operations.objective_functions import functions
 from multi_objective_algorithms.algorithms.operations.objective_functions import dominates
-from multi_objective_algorithms.algorithms.operations.update import normalize, normalized_Euclidean_Distance, transform
-
+from multi_objective_algorithms.algorithms.operations.update import nonDominatedSort, transform, \
+    normalize, normalized_Euclidean_Distance, updateSolutionsFitSPEA2
 
 # +----------------------------------------------------------------------------------------------+#
 
@@ -36,10 +36,7 @@ def fit(indiv1, U, k):
     dist.sort()
     value = dist[k]
     return 1 / (value + 2) + rawFitness(indiv1, U)
-
-
 # +----------------------------------------------------------------------------------------------+#
-
 def nondominated_individuals(U):
     non_dominated = []
     for indiv1 in (U):
@@ -107,8 +104,6 @@ def update(dominated_individuals, X, N):
 
 
 # +----------------------------------------------------------------------------------------------+#
-
-
 def binaryTournement(X):
     final = []
     p1, p2 = sample(X, 2)
@@ -121,53 +116,43 @@ def binaryTournement(X):
     return final[0], final[1]
 
 
-# +----------------------------------------------------------------------------------------------+#
+# SQ : condition for scouts , MCN : number of iterations , SN : number of ressources , N : n of bees
 
-# N : Population size , EN : archive size , G : number of generations
+def moabc_nsga2_spea2(problem, SQ, MCN, SN, N):
 
-def spea2(problem, G, N, EN):
-    # initializing parameters
+    k = int((SN + N) ** 0.5)  # k-th nearest data point number
+    # solutions  initializing
+    solutionsList = list()
 
-    k = int((EN + N) ** 0.5)  # k-th nearest data point number
-
-    # population  initializing
-
-    population = list()
-
-    for i in range(N):
+    for i in range(SN):
         #while 1:
-       cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
-            #if cp.verifyConstraints(problem.getConstraints()):
-       population.append(Solution(cp=cp, fitness=0, functions=functions(cp)))
-                #break
-
-    # Initializing archive
-    EA = []
-
+        cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
+        # if cp.verifyConstraints(problem.getConstraints()):
+        solutionsList.append(Solution(cp=cp, fitness=0, functions=functions(cp)))
+        # break
+    Archive=[]
     # Algorithm
-    for generation in range(G + 1):
+    for itera in range(MCN+1):
 
-        U = set(population + EA)
+        U = set(solutionsList + Archive)
+        # employed bees phase
         for indiv in U:
             indiv.fitness = fit(indiv, U, k)
+        Archive = nondominated_individuals(U)
 
-        EA = nondominated_individuals(U)
-
-        if generation == G + 1:
+        if itera == MCN + 1:
             break
 
-        EA = update(dominated_individuals(U), EA, EN)
-        # Creating the mating_pool
-        mating_pool = []
-        for itera in range(EN // 4):
-           mating_pool.extend(binaryTournement(EA))
+        Archive = update(dominated_individuals(solutionsList), Archive, N)
 
-        next_generation = []
-        # Creating new generation
-        for itera in range(EN // 4):
-            # Selecting parents for offsprings generation
+        exploited = []
+        for itera in range(N // 4):
+            exploited.extend(binaryTournement(Archive))
+        solutionsList=[]
+        #exploited= sample(Archive,len(Archive)//4)
+        for itera in range(N // 4):
             while 1:
-                parent1, parent2 = sample(mating_pool, 2)
+                parent1, parent2 = sample(exploited, 2)
                 if parent1.cp != parent2.cp:
                     break
 
@@ -182,8 +167,39 @@ def spea2(problem, G, N, EN):
                     break
             offsprings.append(mutate(res, neighbor))
             # Adding offsprings
-            next_generation += [Solution(cp=cp, fitness=0, functions=functions(cp)) for cp in offsprings]
+            solutionsList += [Solution(cp=cp, fitness=0, functions=functions(cp)) for cp in offsprings]
+            # end of employed bees phase
 
-        population = next_generation
+        for indiv in solutionsList:
+            indiv.fitness = fit(indiv, solutionsList, k)
 
-    return EA
+        solutionsList=sorted(solutionsList, key=lambda indiv: indiv.fitness, reverse=True)
+        exploited=solutionsList[0:len(solutionsList)//2]
+        #exploited=solutionsList[::2]
+
+        # onlooker bees phase
+        for sol in exploited:
+                service = sol.cp.randomService()
+                while 1:
+                    neighbor = choice(problem.getCandidates()[service.getActivity()])
+                    if neighbor != service:
+                        break
+                # mutation operation
+                new = mutate(sol.cp, neighbor)
+                # Adding offsprings
+                solutionsList.append(Solution(cp=new, fitness=0, functions=functions(cp)))
+
+        # end of onlooker bees phase
+
+        # scout bees phase
+        for itera in range(N//4):
+            #while 1:
+            cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
+                    #if cp.verifyConstraints(problem.getConstraints()):
+            solutionsList.append(Solution(cp=cp, fitness=0, functions=functions(cp)))
+                        #break
+                #nUpdate = 1
+        # end of scout bees phase
+
+    # end of algorithm
+    return Archive
