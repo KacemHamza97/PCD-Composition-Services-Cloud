@@ -89,11 +89,9 @@ def plot_3(true_pareto, solutions, algorithm, hybrid_sol, reference_points=None,
 # +----------------------------------------------------------------------------------------------+#
 
 
-def execute(algorithm,solutions,exec_time, **kwargs):
+def execute(algorithm,solutions,exec_time,neighbors, **kwargs):
     sol = []
     exec = []
-    if algorithm.__name__ == "nsga2_r":
-        neighbors = kwargs.pop('neighbors')
     for itera in range(30):
         print(f"completed {algorithm.__name__} {itera + 1}/ 30")
         if algorithm.__name__ == "nsga2_r":
@@ -195,13 +193,13 @@ if __name__ == "__main__":
     neighbors = manager3.dict()
 
     L = [ (nsga2 ,{'problem': p ,'G': mcn, 'N': sn}),
-           (nsga2_r ,{'problem': p ,'G': mcn, 'N': sn, 'reference_points': reference_points, 'epsilon': 0.2, 'neighbors' : neighbors}),
+           (nsga2_r ,{'problem': p ,'G': mcn, 'N': sn, 'reference_points': reference_points, 'epsilon': 0.2}),
            (spea2,{'problem': p ,'G': mcn, 'N': sn, 'EN': en}),
            (moabc,{'problem': p ,'SQ': sq,'N': sn, 'MCN': mcn, 'SN': sn}),
            (moabc_nsga2_v0,{'problem': p ,'SQ': sq, 'MCN': mcn, 'SN': sn, 'N': sn // 2})]
     processes = []
     for parameters in L:
-        p = multiprocessing.Process(target=execute, args=(parameters[0],solutions,exec_time) , kwargs = parameters[1])
+        p = multiprocessing.Process(target=execute, args=(parameters[0],solutions,exec_time,neighbors) , kwargs = parameters[1])
         processes.append(p)
         p.start()
 
