@@ -1,5 +1,6 @@
 import time
 import csv
+import multiprocessing
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -12,7 +13,7 @@ from mono_objective_algorithms.algorithms.operations.fitness import fit
 from numpy import zeros, array
 
 
-def evaluate(algorithm, **kwargs):
+def evaluate(algorithm,opt,weights,n_act, n_candidates, sn, mcn, sq,F,K, **kwargs):
     rt_list = []
     cp_list = []
     min_list = []
@@ -52,54 +53,72 @@ def evaluate(algorithm, **kwargs):
             file_writer.writerow([algorithm.__name__, n_act, n_candidates, sn, mcn, sq, fit_avg, rt_avg, div, conv])
         else:
             file_writer.writerow([algorithm.__name__, n_act, n_candidates, sn, mcn, "__", fit_avg, rt_avg, div, conv])
-    return fit_list, k
+
+    F[algorithm.__name__] = fit_list
+    K[algorithm.__name__] = k
 
 
 # main
+if __name__ == "__main__":
+    # input
+    n_act = int(input("NUMBER OF ACTIVITIES : "))
+    n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
+    constraints = {'responseTime': n_act * 2 , 'price': n_act * 3, 'availability': 0.92 ** n_act, 'reliability': 0.75 ** n_act}
+    weights = [0.5, 0.1, 0.15, 0.25]
+    mcn = int(input("ITERATION NUMBER / GENERATION NUMBER : "))
+    sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
+    sq = int(input("SCOUTS CONDITION : "))
 
-# input
-n_act = int(input("NUMBER OF ACTIVITIES : "))
-n_candidates = int(input("NUMBER OF CANDIDATE SERVICES : "))
-constraints = {'responseTime': n_act * 2 , 'price': n_act * 3, 'availability': 0.92 ** n_act, 'reliability': 0.75 ** n_act}
-weights = [0.5, 0.1, 0.15, 0.25]
-mcn = int(input("ITERATION NUMBER / GENERATION NUMBER : "))
-sn = int(input("RESSOURCES NUMBER / POPULATION SIZE : "))
-sq = int(input("SCOUTS CONDITION : "))
+    # problem init
 
-# problem init
+    p = Problem(n_act, n_candidates, constraints, weights)
 
-p = Problem(n_act, n_candidates, constraints, weights)
+    # optimal fitness
 
-# optimal fitness
+    print("optimal fitness search !")
+    opt, _, _, _, _ = ABCgenetic(problem=p, SN=sn, SQ=100, MCN=mcn * 10, SCP=9 * mcn // 10, N=sn // 2, CP=0.2)
+    print("\nDone !")
 
-print("optimal fitness search !")
-opt, _, _, _, _ = ABCgenetic(problem=p, SN=sn, SQ=100, MCN=mcn * 10, SCP=9 * mcn // 10, N=sn // 2, CP=0.2)
-print("\nDone !")
+    # test scenarios
 
-# test scenarios
+    manager1 = multiprocessing.Manager()
+    F = manager1.dict()
+    manager2 = multiprocessing.Manager()
+    K = manager2.dict()
 
-fit_list1, K1 = evaluate(ABCgenetic, problem=p, SN=sn, SQ=sq, MCN=mcn, SCP=9 * mcn // 10, N=sn // 2, CP=0.2)
-fit_list2, K2 = evaluate(ABC, problem=p, SN=sn, SQ=sq, MCN=mcn, N=sn // 2)
-fit_list3, K3 = evaluate(genetic, problem=p, N=sn, G=mcn, CP=0.75, CM=0.1)
-fit_list = fit_list1 + fit_list2 + fit_list3
+    L = [ (ABCgenetic ,{'problem': p, 'SN': sn, 'SQ': sq, 'MCN': mcn, 'SCP': 9 * mcn // 10, 'N': sn // 2, 'CP': 0.2}),
+           (ABC ,{'problem': p, 'SN': sn, 'SQ': sq, 'MCN': mcn, 'N': sn // 2}),
+           (genetic, {'problem': p, 'N': sn, 'G': mcn, 'CP': 0.75, 'CM': 0.1})]
 
+    processes = []
+    for parameters in L:
+        p = multiprocessing.Process(target=evaluate, args=(parameters[0],opt,weights,n_act, n_candidates, sn, mcn, sq,F,K) , kwargs = parameters[1])
+        processes.append(p)
+        p.start()
 
-#plot boxplot section
-d = {"fitness": fit_list , f"scenario({n_act},{n_candidates})": [" ABCgenetic"]*30 + [" ABC"]*30 + [" genetic"]*30 }
-df = pd.DataFrame(data=d)
-print(df)
-sns_plot = sns.boxplot(x =f"scenario({n_act},{n_candidates})" ,y ="fitness", data=df)
-plt.title(f" Scenario: Num_Act:{n_act},Num_candidates{n_candidates}, MCN:{mcn},SN{sn},SQ:{sq}")
-sns_plot.figure.savefig(f"boxplots/boxplot({n_act},{n_candidates},{mcn},{sn},{sq}).png")
+    for p in processes:
+       p.join()
 
-# plot iterations
+    K1 = K['ABCgenetic']
+    K2 = K['ABC']
+    K3 = K['genetic']
+    fit_list = F['ABCgenetic'] + F['ABC'] + F['genetic']
 
-plt.clf()
-plt.plot([i for i in range(1, mcn + 1)], K1, label='ABCgenetic')
-plt.plot([i for i in range(1, mcn + 1)], K2, label='ABC')
-plt.plot([i for i in range(1, mcn + 1)], K3, label='Genetic')
-plt.legend()
-plt.xlabel('iterations')
-plt.ylabel('Average fitness')
-plt.title(f" Scenario: Num_Act:{n_act},Num_candidates{n_candidates}, MCN:{mcn},SN{sn},SQ:{sq}")
-plt.savefig(f"convergence_plots/plot({n_act},{n_candidates},{mcn},{sn},{sq}).png")
+    #plot boxplot section
+    d = {"fitness": fit_list , f"scenario({n_act},{n_candidates})": [" ABCgenetic"]*30 + [" ABC"]*30 + [" genetic"]*30 }
+    df = pd.DataFrame(data=d)
+    sns_plot = sns.boxplot(x =f"scenario({n_act},{n_candidates})" ,y ="fitness", data=df)
+    plt.title(f" Scenario: Num_Act:{n_act},Num_candidates{n_candidates}, MCN:{mcn},SN{sn},SQ:{sq}")
+    sns_plot.figure.savefig(f"boxplots/boxplot({n_act},{n_candidates},{mcn},{sn},{sq}).png")
+
+    # plot iterations
+
+    plt.clf()
+    plt.plot([i for i in range(1, mcn + 1)], K1, label='ABCgenetic')
+    plt.plot([i for i in range(1, mcn + 1)], K2, label='ABC')
+    plt.plot([i for i in range(1, mcn + 1)], K3, label='Genetic')
+    plt.legend()
+    plt.xlabel('iterations')
+    plt.ylabel('Average fitness')
+    plt.title(f" Scenario: Num_Act:{n_act},Num_candidates{n_candidates}, MCN:{mcn},SN{sn},SQ:{sq}")
+    plt.savefig(f"convergence_plots/plot({n_act},{n_candidates},{mcn},{sn},{sq}).png")

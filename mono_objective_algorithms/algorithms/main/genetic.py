@@ -40,8 +40,6 @@ def genetic(problem, N, G, CP, CM):
     # Algorithm
     for generation in range(G):
 
-        print(f"Completed = {((generation+1)/G)*100:.2f}%" , end = '\r')
-
         prev_opt = population[0].fitness
 
         # Probability update
@@ -92,5 +90,4 @@ def genetic(problem, N, G, CP, CM):
         plotx.append(population[0].cp)
     
     # end of algorithm
-    print("")
     return population[0].cp , minQos , maxQos , conv_itera,plotx
