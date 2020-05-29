@@ -7,7 +7,7 @@ from time import time
 import matplotlib.pyplot as plt
 from data_structure.Problem import Problem
 from multi_objective_algorithms.algorithms.main.HybridFitSpea2 import moabc_nsga2_spea2
-from multi_objective_algorithms.algorithms.main.nsga2 import nsga2
+from multi_objective_algorithms.algorithms.main.HybridFitSpea2_AvecProba import moabc_nsga2_spea2_proba
 from multi_objective_algorithms.algorithms.main.spea2 import spea2
 from multi_objective_algorithms.algorithms.main.nsga2_r import nsga2_r
 from multi_objective_algorithms.algorithms.main.moabc import moabc
@@ -96,16 +96,16 @@ def evaluate(algorithm, pf, **kwargs):
     IGD = 0
     rt = 0
     solutions = []
-    for i in range(5):
+    for i in range(30):
         print(f"Executing {algorithm.__name__} ")
         start_time = time()
         if algorithm == nsga2_r:
             solutions, neighbors = algorithm(problem=p, **kwargs)
         else:
             solutions = algorithm(problem=p, **kwargs)
-        rt += (time() - start_time)/5
-        GD += gd(solutions, pf)/5
-        IGD += igd(solutions, pf)/5
+        rt += (time() - start_time)/2
+        GD += gd(solutions, pf)/2
+        IGD += igd(solutions, pf)/2
         HV = hv(solutions, pf)
         HV_list.append(HV)
 
@@ -153,19 +153,19 @@ paretosList = list()
 
 print("Finding true pareto ...")
 
-for itera in range(4):
-    print(f"MOABC")
-    paretosList.extend(moabc(problem=p, SQ=sq, MCN=mcn, SN=sn))
+for itera in range(10):
+    #print(f"MOABC")
+    #paretosList.extend(moabc(problem=p, SQ=sq, MCN=mcn, SN=sn))
     #print(f"NSGA2")
     #paretosList.extend(nsga2(problem=p, G=mcn, N=sn))
     #print(f"NSGA2-R")
     #paretosList.extend(nsga2_r(problem=p, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)[0])
-    print(f"SPEA2")
-    paretosList.extend(spea2(problem=p, G=mcn, N=sn, EN=en))
-    print(f"HYBRID-SPEA2")
-    paretosList.extend(moabc_nsga2_spea2(problem=p, SQ=sq, MCN=mcn, SN=sn, N=sn // 2))
-    print(f"HYBRID_V0")
-    paretosList.extend(moabc_nsga2_v0(problem=p, SQ=sq, MCN=mcn, SN=sn, N=sn // 2))
+    #print(f"SPEA2")
+    #paretosList.extend(spea2(problem=p, G=mcn, N=sn, EN=en))
+    #print(f"HYBRID-SPEA2")
+    #paretosList.extend(moabc_nsga2_spea2(problem=p, SQ=sq, MCN=mcn, SN=sn, N=en))
+    print(f"HYBRID_SPEA2_Proba")
+    paretosList.extend(moabc_nsga2_spea2_proba(problem=p, SQ=sq, MCN=mcn, SN=sn, N=en))
 
 true_pareto = nonDominatedSort(paretosList)[0]
 
@@ -174,9 +174,9 @@ print("Evaluating solutions ...")
 #solutions_nsga2 = evaluate(algorithm=nsga2, pf=true_pareto, G=mcn, N=sn)
 #solutions_nsga2_r , neighbors = evaluate(algorithm=nsga2_r, pf=true_pareto, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)
 solutions_spea2 = evaluate(algorithm=spea2, pf=true_pareto, G=mcn, N=sn, EN = en)
-solutions_moabc = evaluate(algorithm=moabc, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn)
-solutions_hybrid_SPEA2 = evaluate(algorithm=moabc_nsga2_spea2, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=sn // 4)
-solutions_hybridv0 = evaluate(algorithm=moabc_nsga2_v0, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=sn // 4)
+#solutions_moabc = evaluate(algorithm=moabc, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn)
+solutions_hybrid_SPEA2 = evaluate(algorithm=moabc_nsga2_spea2, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=en)
+solutions_hybrid_SPEA2_Proba = evaluate(algorithm=moabc_nsga2_spea2_proba, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=en)
 
 #print("Solutions True PF...")
 #print(transform(true_pareto))
@@ -193,9 +193,9 @@ solutions_hybridv0 = evaluate(algorithm=moabc_nsga2_v0, pf=true_pareto, SQ=sq, M
 #print("Solutions Hybride V0...")
 #print(transform(solutions_hybridv0))
 
-plot_3(true_pareto, solutions_hybrid_SPEA2, 'MOABC_NSGAII_SPEA2', solutions_hybridv0)
-plot_3(true_pareto, solutions_hybridv0, 'Hybrid V0', solutions_hybridv0)
-plot_3(true_pareto, solutions_spea2, 'SPEA2', solutions_hybridv0)
+#plot_3(true_pareto, solutions_hybrid_SPEA2, 'MOABC_NSGAII_SPEA2', solutions_hybrid_SPEA2)
+#plot_3(true_pareto, solutions_hybridv0, 'Hybrid V0', solutions_hybrid_SPEA2)
+plot_3(true_pareto, solutions_spea2, 'SPEA2', solutions_hybrid_SPEA2)
 #plot_3(true_pareto, solutions_nsga2, 'NSGA-II', solutions_hybrid)
 #plot_3(true_pareto, solutions_nsga2_r,'NSGA-II-R', solutions_hybrid, reference_points=reference_points,neighbors = neighbors)
 #plot_5(true_pareto, solutions_hybrid, solutions_moabc, solutions_spea2, solutions_nsga2, solutions_nsga2_r)
