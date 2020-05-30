@@ -22,7 +22,8 @@ def boxplot(algorithm):
     plt.title(algorithm)
     sns_plot.figure.savefig(f"boxplots/boxplot(activities_20_{algorithm}).png")
 
-boxplot("moabc_nsga2")
+
+boxplot("moabc_spea2")
 boxplot("nsga2")
 boxplot("nsga2_r")
 boxplot("moabc")
