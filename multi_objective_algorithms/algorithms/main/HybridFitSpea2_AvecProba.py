@@ -9,7 +9,6 @@ from multi_objective_algorithms.algorithms.operations.update import nonDominated
     normalize, normalized_Euclidean_Distance, updateSolutionsFitSPEA2
 
 # +----------------------------------------------------------------------------------------------+#
-
 def strength(indiv1, U):
     s = 1
     for indiv2 in (U):
@@ -153,8 +152,8 @@ def moabc_spea2(problem, SQ, MCN, SN, N):
             offsprings = generateOffsprings(cp1, cp2, problem.getConstraints(), problem.getCandidates())
             solutionsList += [Solution(cp=cp, fitness=0, functions=functions(cp), probability=0) for cp in offsprings]
 
-        print("longueur de solution list=", len(solutionsList))
-        print("k de solution list=", int(len(solutionsList) ** 0.5))
+        # print("longueur de solution list=", len(solutionsList))
+        # print("k de solution list=", int(len(solutionsList) ** 0.5))
 
         for indiv in solutionsList:
             indiv.fitness = fit(indiv, solutionsList, int(len(solutionsList)**0.5))
@@ -174,7 +173,7 @@ def moabc_spea2(problem, SQ, MCN, SN, N):
         b = max(probabilityList)
         exploited = [sol for sol in Archive if sol.probability>uniform(a,b)]
         solutionsList = []
-        print("longueur d'exploited dans le onlooker bees phase:", len(exploited), "ietra=", itera)
+        # print("longueur d'exploited dans le onlooker bees phase:", len(exploited), "ietra=", itera)
         for sol in exploited:
             cp1 = sol.cp
             cp2 = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
