@@ -17,11 +17,11 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
     solutionsList = list()
 
     for i in range(SN):
-        #while 1:
-        cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
-            #if cp.verifyConstraints(problem.getConstraints()):
-        solutionsList.append(Solution(cp=cp, functions=functions(cp), probability=0, limit=0))
-                #break
+        while 1:
+            cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
+            if cp.verifyConstraints(problem.getConstraints()):
+                solutionsList.append(Solution(cp=cp, functions=functions(cp), probability=0, limit=0))
+                break
 
     # Algorithm
     for cycle in range(MCN):
@@ -51,12 +51,13 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
             # cp 1 randomly chosen from pf
             cp1 = choice(pf).cp
             # cp 2 randomly chosen from pf
-            cp2 = choice(pf).cp
-            while cp2 != cp1:
+            while 1:
                 cp2 = choice(pf).cp
-            offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
-            # Adding offsprings
-            U += [Solution(cp = cp , functions = functions(cp) ,limit = 0) for cp in offsprings]
+                if cp2 != cp1:
+                    break
+                offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
+                # Adding offsprings
+                U += [Solution(cp = cp , functions = functions(cp) ,limit = 0) for cp in offsprings]
 
         # end of onlooker bees phase
 
@@ -71,16 +72,16 @@ def moabc_nsga2(problem, SQ, MCN, SN, N):
         for sol in exploited:
             if sol.limit >= SQ and sol not in fronts[0] :
                 sol.limit = 0
-                #while 1:
-                cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
-                    #if cp.verifyConstraints(problem.getConstraints()):
-                U.append(Solution(cp = cp ,functions = functions(cp) ,limit = 0))
-                        #break
-                #update = 1
+                while 1:
+                    cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
+                    if cp.verifyConstraints(problem.getConstraints()):
+                        U.append(Solution(cp = cp ,functions = functions(cp) ,limit = 0))
+                        break
+                update = 1
         # end of scout bees phase
-        #if update:
-        fronts = nonDominatedSort(U)
-        solutionsList = updateSolutions(solutionsList, fronts, "crowdingSort")
+        if update:
+            fronts = nonDominatedSort(U)
+            solutionsList = updateSolutions(solutionsList, fronts, "crowdingSort")
 
 
     # end of algorithm

@@ -135,11 +135,11 @@ def spea2(problem, G, N, EN):
     population = list()
 
     for i in range(N):
-        #while 1:
-       cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
-            #if cp.verifyConstraints(problem.getConstraints()):
-       population.append(Solution(cp=cp, fitness=0, functions=functions(cp)))
-                #break
+        while 1:
+            cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
+            if cp.verifyConstraints(problem.getConstraints()):
+                population.append(Solution(cp=cp, fitness=0, functions=functions(cp)))
+                break
 
     # Initializing archive
     EA = []
