@@ -114,19 +114,20 @@ def generateOffsprings (cp1, cp2, constraints, candidates):  # constraints are a
 
     # Mutation
     def mutate(cp):
-
+        abandon = 0              # ADDED ABANDON CRITERIA
         offspring = cp.clone()
 
         # choose randomly a service to mutate
         service = offspring.randomService()
         while 1:
+            abandon += 1
             while 1:
                 new = choice(candidates[service.getActivity()])
                 if new != service:
                     break
             # mutation operation
             offspring.G.nodes[new.getActivity()]["service"] = new
-            if offspring.verifyConstraints(constraints):
+            if offspring.verifyConstraints(constraints) or abandon > 10 :
                 break
 
         return offspring

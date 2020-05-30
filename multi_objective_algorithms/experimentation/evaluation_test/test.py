@@ -213,7 +213,7 @@ if __name__ == "__main__":
         paretosList.extend(solutions["spea2"][i])
         paretosList.extend(solutions["nsga2_r"][i])
         paretosList.extend(solutions["spea2"][i])
-        paretosList.extend(solutions["moabc_nsga2_v0"][i])
+        paretosList.extend(solutions["moabc_spea2"][i])
 
     print("Finding true pareto ...")
     pf = nonDominatedSort(paretosList)[0]
@@ -225,11 +225,11 @@ if __name__ == "__main__":
     HV2 = evaluate(algorithm=nsga2_r, solutions=solutions["nsga2_r"], time=exec_time["nsga2_r"], pf=pf)
     HV3 = evaluate(algorithm=spea2, solutions=solutions["spea2"], time=exec_time["spea2"], pf=pf)
     HV4 = evaluate(algorithm=moabc, solutions=solutions["moabc"], time=exec_time["moabc"], pf=pf)
-    HV5 = evaluate(algorithm=moabc_spea2, solutions=solutions["moabc_nsga2_v0"], time=exec_time["moabc_nsga2_v0"], pf=pf)
+    HV5 = evaluate(algorithm=moabc_spea2, solutions=solutions["moabc_spea2"], time=exec_time["moabc_spea2"], pf=pf)
 
-    plot_3(pf, solutions['moabc'][-1], 'MOABC', solutions["moabc_nsga2_v0"][-1])
-    plot_3(pf, solutions['spea2'][-1], 'SPEA2', solutions["moabc_nsga2_v0"][-1])
-    plot_3(pf, solutions['nsga2'][-1], 'NSGA-II', solutions["moabc_nsga2_v0"][-1])
-    plot_3(pf, solutions['nsga2_r'][-1],'NSGA-II-R', solutions["moabc_nsga2_v0"][-1], reference_points=reference_points,neighbors = neighbors['nsga2_r'])
-    plot_5(pf, solutions["moabc_nsga2_v0"][-1], solutions['moabc'][-1], solutions['spea2'][-1], solutions['nsga2'][-1], solutions['nsga2_r'][-1])
+    plot_3(pf, solutions['moabc'][-1], 'MOABC', solutions["moabc_spea2"][-1])
+    plot_3(pf, solutions['spea2'][-1], 'SPEA2', solutions["moabc_spea2"][-1])
+    plot_3(pf, solutions['nsga2'][-1], 'NSGA-II', solutions["moabc_spea2"][-1])
+    plot_3(pf, solutions['nsga2_r'][-1],'NSGA-II-R', solutions["moabc_spea2"][-1], reference_points=reference_points,neighbors = neighbors['nsga2_r'])
+    plot_5(pf, solutions["moabc_spea2"][-1], solutions['moabc'][-1], solutions['spea2'][-1], solutions['nsga2'][-1], solutions['nsga2_r'][-1])
     plot_hv(HV1, HV2, HV3, HV4, HV5)
