@@ -23,18 +23,18 @@ def boxplot(algorithm):
     plt.title(algorithm)
     sns_plot.figure.savefig(f"boxplots/boxplot(activities_20_{algorithm}).png")
 
+
 boxplot("moabc_spea2")
 boxplot("nsga2")
 boxplot("nsga2_r")
 boxplot("moabc")
 boxplot("spea2")
 
-
-#cleaning csv files
+# cleaning csv files
 with open('hv_abstract.csv', mode='w') as file:
     file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    file_writer.writerow(["algorithm","n_act","HV"])
+    file_writer.writerow(["algorithm", "n_act", "HV"])
 
 with open('hv_concrete.csv', mode='w') as file:
     file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    file_writer.writerow(["algorithm","n_candidates","HV"])
+    file_writer.writerow(["algorithm", "n_candidates", "HV"])
