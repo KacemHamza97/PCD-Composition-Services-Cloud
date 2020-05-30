@@ -118,7 +118,7 @@ def binaryTournement(X):
 
 # SQ : condition for scouts , MCN : number of iterations , SN : number of ressources , N : n of bees
 
-def moabc_nsga2_spea2(problem, SQ, MCN, SN, N):
+def moabc_nsga2_spea2_ancienneVersion(problem, SQ, MCN, SN, N):
 
     k = int((SN + N) ** 0.5)  # k-th nearest data point number
     # solutions  initializing

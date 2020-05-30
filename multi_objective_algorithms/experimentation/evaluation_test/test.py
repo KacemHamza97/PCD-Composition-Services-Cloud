@@ -11,7 +11,7 @@ from multi_objective_algorithms.algorithms.main.nsga2 import nsga2
 from multi_objective_algorithms.algorithms.main.spea2 import spea2
 from multi_objective_algorithms.algorithms.main.nsga2_r import nsga2_r
 from multi_objective_algorithms.algorithms.main.moabc import moabc
-from multi_objective_algorithms.algorithms.main.hybrid_v0 import moabc_nsga2_v0
+from multi_objective_algorithms.algorithms.main.HybridFitSpea2_AvecProba import moabc_spea2
 from multi_objective_algorithms.algorithms.operations.update import nonDominatedSort, transform
 from multi_objective_algorithms.experimentation.performance_indicators.performance_indicators import gd, hv, igd, spacing, spread
 
@@ -128,12 +128,12 @@ def evaluate(algorithm, solutions, time, pf):
         HV_list.append(HV)
 
         ##### USED TO GENERATE DATA FOR BOXPLOTS ######################################################
-        # with open('hv_abstract.csv', mode='a') as file:
-        #    file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        #    file_writer.writerow([algorithm.__name__, n_act, HV])
-        # with open('hv_concrete.csv', mode='a') as file:
-        #    file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        #    file_writer.writerow([algorithm.__name__, n_candidates, HV])
+        with open('hv_abstract.csv', mode='a') as file:
+           file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+           file_writer.writerow([algorithm.__name__, n_act, HV])
+        with open('hv_concrete.csv', mode='a') as file:
+           file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+           file_writer.writerow([algorithm.__name__, n_candidates, HV])
         ###############################################################################################
 
     HV = sum(HV_list) / 30
@@ -195,8 +195,8 @@ if __name__ == "__main__":
     L = [ (nsga2 ,{'problem': p ,'G': mcn, 'N': sn}),
            (nsga2_r ,{'problem': p ,'G': mcn, 'N': sn, 'reference_points': reference_points, 'epsilon': 0.2}),
            (spea2,{'problem': p ,'G': mcn, 'N': sn, 'EN': en}),
-           (moabc,{'problem': p ,'SQ': sq,'N': sn, 'MCN': mcn, 'SN': sn}),
-           (moabc_nsga2_v0,{'problem': p ,'SQ': sq, 'MCN': mcn, 'SN': sn, 'N': sn // 2})]
+           (moabc,{'problem': p ,'SQ': sq, 'MCN': mcn, 'SN': sn}),
+           (moabc_spea2,{'problem': p ,'SQ': sq, 'MCN': mcn, 'SN': sn, 'N': en})]
     processes = []
     for parameters in L:
         p = multiprocessing.Process(target=execute, args=(parameters[0],solutions,exec_time,neighbors) , kwargs = parameters[1])
@@ -225,7 +225,7 @@ if __name__ == "__main__":
     HV2 = evaluate(algorithm=nsga2_r, solutions=solutions["nsga2_r"], time=exec_time["nsga2_r"], pf=pf)
     HV3 = evaluate(algorithm=spea2, solutions=solutions["spea2"], time=exec_time["spea2"], pf=pf)
     HV4 = evaluate(algorithm=moabc, solutions=solutions["moabc"], time=exec_time["moabc"], pf=pf)
-    HV5 = evaluate(algorithm=moabc_nsga2_v0, solutions=solutions["moabc_nsga2_v0"], time=exec_time["moabc_nsga2_v0"], pf=pf)
+    HV5 = evaluate(algorithm=moabc_spea2, solutions=solutions["moabc_nsga2_v0"], time=exec_time["moabc_nsga2_v0"], pf=pf)
 
     plot_3(pf, solutions['moabc'][-1], 'MOABC', solutions["moabc_nsga2_v0"][-1])
     plot_3(pf, solutions['spea2'][-1], 'SPEA2', solutions["moabc_nsga2_v0"][-1])
