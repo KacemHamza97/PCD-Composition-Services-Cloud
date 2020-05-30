@@ -96,7 +96,7 @@ def evaluate(algorithm, pf, **kwargs):
     IGD = 0
     rt = 0
     solutions = []
-    for i in range(30):
+    for i in range(10):
         print(f"Executing {algorithm.__name__} ")
         start_time = time()
         if algorithm == nsga2_r:
@@ -108,17 +108,6 @@ def evaluate(algorithm, pf, **kwargs):
         IGD += igd(solutions, pf)/2
         HV = hv(solutions, pf)
         HV_list.append(HV)
-
-
-            ##### USED TO GENERATE DATA FOR BOXPLOTS ######################################################
-        with open('hv_abstract.csv', mode='a') as file:
-            file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            file_writer.writerow([algorithm.__name__, n_act, HV])
-        with open('hv_concrete.csv', mode='a') as file:
-            file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            file_writer.writerow([algorithm.__name__, n_candidates, HV])
-        ###############################################################################################
-
 
     with open('test_results.csv', mode='a') as file:
         file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -151,17 +140,17 @@ p = Problem(n_act, n_candidates, constraints)
 
 paretosList = list()
 
-print("Finding true pareto ...")
+#print("Finding true pareto ...")
 
-for itera in range(10):
+for itera in range(1):
     #print(f"MOABC")
     #paretosList.extend(moabc(problem=p, SQ=sq, MCN=mcn, SN=sn))
     #print(f"NSGA2")
     #paretosList.extend(nsga2(problem=p, G=mcn, N=sn))
     #print(f"NSGA2-R")
     #paretosList.extend(nsga2_r(problem=p, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)[0])
-    #print(f"SPEA2")
-    #paretosList.extend(spea2(problem=p, G=mcn, N=sn, EN=en))
+    print(f"SPEA2")
+    paretosList.extend(spea2(problem=p, G=mcn, N=sn, EN=en))
     #print(f"HYBRID-SPEA2")
     #paretosList.extend(moabc_nsga2_spea2(problem=p, SQ=sq, MCN=mcn, SN=sn, N=en))
     print(f"HYBRID_SPEA2_Proba")
@@ -174,8 +163,8 @@ print("Evaluating solutions ...")
 #solutions_nsga2 = evaluate(algorithm=nsga2, pf=true_pareto, G=mcn, N=sn)
 #solutions_nsga2_r , neighbors = evaluate(algorithm=nsga2_r, pf=true_pareto, G=mcn, N=sn, reference_points=reference_points, epsilon=0.2)
 solutions_spea2 = evaluate(algorithm=spea2, pf=true_pareto, G=mcn, N=sn, EN = en)
-#solutions_moabc = evaluate(algorithm=moabc, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn)
-solutions_hybrid_SPEA2 = evaluate(algorithm=moabc_nsga2_spea2, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=en)
+solutions_moabc = evaluate(algorithm=moabc, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn)
+#solutions_hybrid_SPEA2 = evaluate(algorithm=moabc_nsga2_spea2, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=en)
 solutions_hybrid_SPEA2_Proba = evaluate(algorithm=moabc_nsga2_spea2_proba, pf=true_pareto, SQ=sq, MCN=mcn, SN=sn, N=en)
 
 #print("Solutions True PF...")
@@ -195,7 +184,7 @@ solutions_hybrid_SPEA2_Proba = evaluate(algorithm=moabc_nsga2_spea2_proba, pf=tr
 
 #plot_3(true_pareto, solutions_hybrid_SPEA2, 'MOABC_NSGAII_SPEA2', solutions_hybrid_SPEA2)
 #plot_3(true_pareto, solutions_hybridv0, 'Hybrid V0', solutions_hybrid_SPEA2)
-plot_3(true_pareto, solutions_spea2, 'SPEA2', solutions_hybrid_SPEA2)
+#plot_3(true_pareto, solutions_spea2, 'SPEA2', solutions_hybrid_SPEA2)
 #plot_3(true_pareto, solutions_nsga2, 'NSGA-II', solutions_hybrid)
 #plot_3(true_pareto, solutions_nsga2_r,'NSGA-II-R', solutions_hybrid, reference_points=reference_points,neighbors = neighbors)
 #plot_5(true_pareto, solutions_hybrid, solutions_moabc, solutions_spea2, solutions_nsga2, solutions_nsga2_r)

@@ -2,7 +2,7 @@ from random import uniform, sample
 from numpy.random import choice
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
-from genetic_operations.implementation import mutate, BSG, crossover
+from genetic_operations.implementation import mutate, BSG, crossover, generateOffsprings
 from multi_objective_algorithms.algorithms.operations.objective_functions import functions
 from multi_objective_algorithms.algorithms.operations.objective_functions import dominates
 from multi_objective_algorithms.algorithms.operations.update import nonDominatedSort, transform, \
@@ -125,18 +125,17 @@ def moabc_nsga2_spea2_proba(problem, SQ, MCN, SN, N):
     solutionsList = list()
 
     for i in range(SN):
-        #while 1:
-        cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
-        # if cp.verifyConstraints(problem.getConstraints()):
-        solutionsList.append(Solution(cp=cp , fitness=0 , functions = functions(cp)))
-
-        # break
+        while 1:
+            cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())
+            if cp.verifyConstraints(problem.getConstraints()):
+                solutionsList.append(Solution(cp=cp , fitness=0 , functions = functions(cp)))
+                break
     Archive=[]
     # Algorithm
     for itera in range(MCN+1):
 
         U = set(solutionsList + Archive)
-        # employed bees phase
+
 
         Archive = nondominated_individuals(U)
         if itera == MCN + 1:
@@ -145,26 +144,23 @@ def moabc_nsga2_spea2_proba(problem, SQ, MCN, SN, N):
             indiv.fitness = fit(indiv, U, k)
 
         Archive = update(dominated_individuals(solutionsList), Archive, N)
+        # employed bees phase
         solutionsList=list()
         exploited = sample(Archive, N//4)
         for sol in exploited:
             cp1= sol.cp
             cp2= CompositionPlan(problem.getActGraph(), problem.getCandidates())
-            offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())
-            print("offsprings:")
-            print(offsprings)
+            offsprings = generateOffsprings(cp1, cp2, problem.getConstraints(), problem.getCandidates())
             solutionsList += [Solution(cp=cp, fitness=0, functions=functions(cp), probability=0) for cp in offsprings]
-        print("exploited:", len(exploited))
-        print("solution list", int(len(solutionsList) ** 0.5))
-        print(transform(solutionsList))
-        print(len(solutionsList))
+
+        print("longueur de solution list=", len(solutionsList))
+        print("k de solution list=", int(len(solutionsList) ** 0.5))
+
         for indiv in solutionsList:
             indiv.fitness = fit(indiv, solutionsList, int(len(solutionsList)**0.5))
-
+        #Update the Archive
         U = set(solutionsList + Archive)
         Archive = nondominated_individuals(U)
-        X=list()
-        X[:]=Archive
         Archive = update(dominated_individuals(solutionsList), Archive, N)
 
         # Probability update
@@ -178,12 +174,11 @@ def moabc_nsga2_spea2_proba(problem, SQ, MCN, SN, N):
         b = max(probabilityList)
         exploited = [sol for sol in Archive if sol.probability>uniform(a,b)]
         solutionsList = []
+        print("longueur d'exploited dans le onlooker bees phase:", len(exploited), "ietra=", itera)
         for sol in exploited:
             cp1 = sol.cp
             cp2 = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
-            offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
-                # Adding offsprings
-                # if new.verifyConstraints(problem.getConstraints()):
+            offsprings = generateOffsprings(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
             solutionsList+=[Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0) for cp in offsprings]
                 # break
         for indiv in solutionsList:
