@@ -3,13 +3,13 @@ from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
 from genetic_operations.implementation import BSG
 from multi_objective_algorithms.algorithms.operations.objective_functions import functions
-from multi_objective_algorithms.algorithms.operations.update import updateSolutions, nonDominatedSort , transform
+from multi_objective_algorithms.algorithms.operations.update import updateSolutions, nonDominatedSort, transform
 
 
 # +----------------------------------------------------------------------------------------------+#
 
 
-# SQ : condition for scouts , MCN : number of iterations , SN : number of ressources , N : n of bees 
+# SQ : condition for scouts , MCN : number of iterations , SN : number of ressources , N : n of bees
 
 def moabc_nsga2_v0(problem, SQ, MCN, SN, N):
     # solutions  initializing
@@ -34,7 +34,7 @@ def moabc_nsga2_v0(problem, SQ, MCN, SN, N):
             cp2 = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
             offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
             # Adding offsprings
-            U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0) for cp in offsprings]
+            U += [Solution(cp=cp, fitness=0, functions=functions(cp), probability=0, limit=0) for cp in offsprings]
         # end of employed bees phase
 
         fronts = nonDominatedSort(U)
@@ -58,13 +58,12 @@ def moabc_nsga2_v0(problem, SQ, MCN, SN, N):
                 cp2 = choice(fronts[0]).cp  # pareto front chosen cp
                 offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
                 # Adding offsprings
-                U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0) for cp in offsprings]
+                U += [Solution(cp=cp, fitness=0, functions=functions(cp), probability=0, limit=0) for cp in offsprings]
 
         # end of onlooker bees phase
 
         fronts = nonDominatedSort(U)
         solutionsList = updateSolutions(solutionsList, fronts, "crowdingSort")
-        
 
         # scout bees phase
         exploited = sample(solutionsList, N)  # selecting solutions for exploitation randomly
@@ -77,7 +76,7 @@ def moabc_nsga2_v0(problem, SQ, MCN, SN, N):
                 while 1:
                     cp = CompositionPlan(problem.getActGraph(), problem.getCandidates())  # randomly generated cp
                     if cp.verifyConstraints(problem.getConstraints()):
-                        U.append(Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0 , limit = 0))
+                        U.append(Solution(cp=cp, fitness=0, functions=functions(cp), probability=0, limit=0))
                         break
                 update = 1
         # end of scout bees phase

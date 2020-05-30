@@ -14,7 +14,6 @@ from multi_objective_algorithms.algorithms.operations.update import updateSoluti
 # CP : crossover probability , CM : mutation probability
 
 def nsga2(problem, G, N):
-
     # population  initializing
     population = list()
 
@@ -25,11 +24,10 @@ def nsga2(problem, G, N):
                 population.append(Solution(cp=cp, fitness=0, functions=functions(cp), probability=0))
                 break
 
-    # fitness initializing 
+    # fitness initializing
 
-    for indiv in population :
-        indiv.fitness = fit(indiv , population)
-
+    for indiv in population:
+        indiv.fitness = fit(indiv, population)
 
     # Algorithm
     for itera in range(G):
@@ -49,15 +47,15 @@ def nsga2(problem, G, N):
         offsprings = []
         # Selecting best individuals
         n_individuals = 0
-        while n_individuals < 2 : 
+        while n_individuals < 2:
             for indiv in population:
-                if indiv.probability >= uniform(a,b):
-                    n_individuals += 1 
+                if indiv.probability >= uniform(a, b):
+                    n_individuals += 1
                     parents.append(indiv)
-        
+
         # Mating selection
-        for itera in range(len(parents) // 2) :
-            parent1 , parent2 =  sample(parents , 2)
+        for itera in range(len(parents) // 2):
+            parent1, parent2 = sample(parents, 2)
 
             # Applying BSG
             cp1 = parent1.cp
@@ -65,9 +63,8 @@ def nsga2(problem, G, N):
             offsprings = BSG(cp1, cp2, problem.getConstraints(), problem.getCandidates())  # BSG
 
             # Adding offsprings
-            U += [Solution(cp = cp , fitness = 0 , functions = functions(cp) , probability = 0) for cp in offsprings]
-        
-        
+            U += [Solution(cp=cp, fitness=0, functions=functions(cp), probability=0) for cp in offsprings]
+
         # Finalizing generation
         fronts = nonDominatedSort(U)
         population = updateSolutions(population, fronts, "crowdingSort")
