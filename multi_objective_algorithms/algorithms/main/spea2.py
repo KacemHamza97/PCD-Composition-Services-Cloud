@@ -2,7 +2,7 @@ from random import sample
 from numpy.random import choice
 from data_structure.CompositionPlan import CompositionPlan
 from data_structure.Solution import Solution
-from genetic_operations.implementation import crossover, mutate
+from genetic_operations.implementation import crossover, mutate, generateOffsprings
 from multi_objective_algorithms.algorithms.operations.objective_functions import functions
 from multi_objective_algorithms.algorithms.operations.objective_functions import dominates
 from multi_objective_algorithms.algorithms.operations.update import normalize, normalized_Euclidean_Distance, transform
@@ -172,15 +172,7 @@ def spea2(problem, G, N, EN):
                     break
 
             # Applying crossover and mutation
-            offsprings=[]
-            res=crossover(parent1.cp, parent2.cp, 0.5)
-            offsprings.append(res)
-            service = res.randomService()
-            while 1:
-                neighbor = choice(problem.getCandidates()[service.getActivity()])
-                if neighbor != service:
-                    break
-            offsprings.append(mutate(res, neighbor))
+            offsprings = generateOffsprings(parent1.cp, parent2.cp, problem.getConstraints(), problem.getCandidates())
             # Adding offsprings
             next_generation += [Solution(cp=cp, fitness=0, functions=functions(cp)) for cp in offsprings]
 
