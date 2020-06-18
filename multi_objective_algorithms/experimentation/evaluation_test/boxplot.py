@@ -25,10 +25,10 @@ boxplot_fixed_activities()
 # boxplot_fixed_candidates()
 
 #cleaning csv files
-with open('hv_abstract.csv', mode='w') as file:
-    file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    file_writer.writerow(["algorithm", "n_act", "HV"])
-
-with open('hv_concrete.csv', mode='w') as file:
-    file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    file_writer.writerow(["algorithm", "n_candidates", "HV"])
+# with open('hv_abstract.csv', mode='w') as file:
+#     file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+#     file_writer.writerow(["algorithm", "n_act", "HV"])
+#
+# with open('hv_concrete.csv', mode='w') as file:
+#     file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+#     file_writer.writerow(["algorithm", "n_candidates", "HV"])

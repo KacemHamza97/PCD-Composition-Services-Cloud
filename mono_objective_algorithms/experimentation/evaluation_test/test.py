@@ -107,6 +107,7 @@ if __name__ == "__main__":
     #plot boxplot section
     d = {"fitness": fit_list , f"scenario({n_act},{n_candidates})": [" ABCgenetic"]*30 + [" ABC"]*30 + [" genetic"]*30 }
     df = pd.DataFrame(data=d)
+    print(df)
     sns_plot = sns.boxplot(x =f"scenario({n_act},{n_candidates})" ,y ="fitness", data=df)
     plt.title(f" Scenario: Num_Act:{n_act},Num_candidates{n_candidates}, MCN:{mcn},SN{sn},SQ:{sq}")
     sns_plot.figure.savefig(f"boxplots/boxplot({n_act},{n_candidates},{mcn},{sn},{sq}).png")
