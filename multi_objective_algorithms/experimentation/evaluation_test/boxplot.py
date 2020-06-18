@@ -4,33 +4,25 @@ import matplotlib.pyplot as plt
 import csv
 
 
+def boxplot_fixed_activities():
+    plt.clf()
+    df2 = pd.read_csv("hv_concrete.csv")
+    n_act = df2.iloc[0]['n_act']
+    sns_plot = sns.boxplot(x="n_candidates", y="HV", data=df2, hue="algorithm")
+    # plt.title("any title ")
+    sns_plot.figure.savefig(f"boxplots/boxplot(activities fixed {n_act}).png")
 
-def boxplot(algorithm):
+def boxplot_fixed_candidates():
     plt.clf()
     df1 = pd.read_csv("hv_abstract.csv")
-    df = pd.read_csv("hv_concrete.csv")
-    n_candidates = df.iloc[0]['n_candidates']
-    df1 = df1.loc[df1['algorithm'] == algorithm]
-    #print(df1)
-    sns_plot = sns.boxplot(x="n_act", y="HV", data=df1)
-    plt.title(algorithm)
-    sns_plot.figure.savefig(f"boxplots/boxplot({n_candidates}_{algorithm}).png")
-
-    plt.clf()
-    n_act = df1.iloc[0]['n_act']
-    df2 = df[['algorithm', 'n_candidates', 'HV']]
-    df2 = df2.loc[df['algorithm'] == algorithm]
-    #print(df2)
-    sns_plot = sns.boxplot(x="n_candidates", y="HV", data=df2)
-    plt.title(algorithm)
-    sns_plot.figure.savefig(f"boxplots/boxplot({n_act}_{algorithm}).png")
+    n_candidates = df1.iloc[0]['n_candidates']
+    sns_plot = sns.boxplot(x="n_act", y="HV", data=df1, hue="algorithm")
+    plt.title(f"candidates number : {n_candidates} ")
+    sns_plot.figure.savefig(f"boxplots/boxplot(candidates fixed {n_candidates}).png")
 
 
-boxplot("moabc_spea2")
-boxplot("nsga2")
-boxplot("nsga2_r")
-boxplot("moabc")
-boxplot("spea2")
+boxplot_fixed_activities()
+# boxplot_fixed_candidates()
 
 #cleaning csv files
 with open('hv_abstract.csv', mode='w') as file:
