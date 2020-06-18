@@ -128,12 +128,12 @@ def evaluate(algorithm, solutions, time, pf):
         HV_list.append(HV)
 
         ##### USED TO GENERATE DATA FOR BOXPLOTS ######################################################
-        with open('hv_abstract.csv', mode='a') as file:
-           file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-           file_writer.writerow([algorithm.__name__, n_act, HV])
+#         with open('hv_abstract.csv', mode='a') as file:
+#            file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+#            file_writer.writerow([algorithm.__name__, n_act,n_candidates, HV])
         with open('hv_concrete.csv', mode='a') as file:
            file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-           file_writer.writerow([algorithm.__name__, n_candidates, HV])
+           file_writer.writerow([algorithm.__name__, n_candidates, n_act, HV])
         ###############################################################################################
 
     HV = sum(HV_list) / 30
